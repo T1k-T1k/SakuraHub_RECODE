@@ -3304,13 +3304,13 @@ HomeTab.newToggle("Super JumpPower","",getgenv().JumpPowerBypass or false,functi
     getgenv().SuperJump();
 end)
 
-HomeTab.newButton("Reset Character (Gets rid of Combat Mark)","",function()
+HomeTab.newButton("Reset Character (Dialogue Method)","",function()
     task.spawn(function()local ReturnAfterDeath = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame game:GetService("Players").LocalPlayer.CharacterAdded:Wait() repeat task.wait(1) until game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart") game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = ReturnAfterDeath end)
     local args = {[1] = "kill"};
     game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("SukunaDialogue"):FireServer(unpack(args));
 end)
 
-HomeTab.newButton("Insta Respawn Character (Gets rid of Combat Mark)","",function()
+HomeTab.newButton("Respawn Character (Clan method)","",function()
     getgenv().GuildName = "Szechuan";
     getgenv().Password = "pepper";
 
@@ -3514,17 +3514,17 @@ HomeTab.newButton('Use Code: "'..Code8..'"','',function()
 end)
 
 HomeTab.newLabel("Server Hop Scripts   🌐");
-HomeTab.newButton("Auto find The Arbiter   🌟  (Copied to Clipboard)","",function()
+HomeTab.newButton("Auto Find The Arbiter   🌟  (SCRIPT LOST)","",function()
     setclipboard("https://github.com/Lvl9999/TheArbiter/tree/main");
     BoredLibrary.prompt("Sakura Hub  🌸","Copied to clipboard",0.5);
 end)
 
-HomeTab.newButton("Auto find Space Curse   ☄️  (Copied to Clipboard)","",function()
+HomeTab.newButton("Auto Find Space Curse   ☄️  (SCRIPT LOST)","",function()
     setclipboard("https://github.com/Lvl9999/SpaceCurse/tree/main");
     BoredLibrary.prompt("Sakura Hub  🌸","Copied to clipboard",0.5);
 end)
 
-HomeTab.newButton("Auto One For All Finder   🦸  (PATCHED)","",function()
+HomeTab.newButton("Auto One For All Finder   🦸  (PATCHED + SCRIPT LOST)","",function()
     --setclipboard("https://github.com/Lvl9999/OneForAll/tree/main");
     BoredLibrary.prompt("Sakura Hub  🌸","Patched, Wait for fix",0.5);
 end)
