@@ -4,7 +4,7 @@
     This script updates a lot, Use this loadstring to be in the latest version:
 
     getgenv().ToggleUI = "J" -- //  Key Toggle "J" set by default however you can change it.
-    getgenv().SakuraHub = "https://raw.githubusercontent.com/Kaa4801/SakuraStand/main/Sakura%20stand%20.txt";
+    getgenv().SakuraHub = "https://raw.githubusercontent.com/T1k-T1k/SakuraHub_RECODE/refs/heads/main/Main.lua";
 
     pcall(function()
         loadstring(game:HttpGet(getgenv().SakuraHub))();
