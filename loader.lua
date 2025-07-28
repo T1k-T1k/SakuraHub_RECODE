@@ -3561,7 +3561,7 @@ HomeTab.newToggle("Sakura Hub, Go Rainbow Please","",getgenv().AutoGoingRainbow 
     getgenv().UsingRainbowUI();
 end)
 
-HomeTab.newButton("Sakura Hub Changelogs GUI","",function()
+HomeTab.newButton("Sakura Hub / [Recode] Changelogs GUI (Lost / Not Done)","",function()
     task.spawn(function()BoredLibrary.prompt("Sakura Hub  🌸","Loading Changelogs...",0.75);end)
 
     loadstring(game:HttpGet("https://raw.githubusercontent.com/Lvl9999/SakuraStand/main/Changelogs"))();
