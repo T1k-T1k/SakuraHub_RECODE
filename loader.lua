@@ -185,8 +185,8 @@ for i,v in ipairs(game:GetService("Lighting"):GetChildren()) do
 end
 
 -----------------------------------[[ Main Ui Libs ]]------------------------------------------------------------------
-local DrRayLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/Kaa4801/SakuraStand/main/DrayUI.txt"))();
-local BoredLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/Kaa4801/SakuraStand/main/BoredUI.txt"))();
+local DrRayLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/T1k-T1k/SakuraHub_RECODE/refs/heads/main/UILibs/DrayLib.lua"))();
+local BoredLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/T1k-T1k/SakuraHub_RECODE/refs/heads/main/UILibs/BoredLib.lua"))();
 -----------------------------------[[ Main Ui Libs ]]------------------------------------------------------------------
 
 getgenv().StartLoading = function(z)
@@ -3531,7 +3531,7 @@ end)
 
 HomeTab.newLabel("Quick Scripts   🚀");
 HomeTab.newButton("Animation Grabber","",function()
-    loadstring(game:HttpGet("https://github.com/Kaa4801/SakuraStand/blob/main/Grabber"))();
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/T1k-T1k/SakuraHub_RECODE/refs/heads/main/utils/AnimGrabber"))();
 end)
 
 HomeTab.newButton("Infinite Yield","",function()
