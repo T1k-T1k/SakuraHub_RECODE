@@ -4425,7 +4425,7 @@ end)
 
 AreasTab.newButton("Ruined City","",function()
     pcall(function()
-        getgenv().PlaySound();game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-7150, -32, 1295);
+        getgenv().PlaySound();game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-168, 791, -8038);
     end)
 end)
 
