@@ -409,7 +409,7 @@ getgenv().CreateCloseButton = function()
         TextTransparency = 0
     }):Play()
 
-    -- пододвинуть Holders
+    -- пододвигаем Holders
     local holders = gui:FindFirstChild("Holders")
     if holders then
         holders.Visible = true
@@ -418,14 +418,15 @@ getgenv().CreateCloseButton = function()
         }):Play()
     end
 
-    -- обработка нажатия на кнопку
+    -- обработка нажатия
     btn.MouseButton1Click:Connect(function()
+        local holders = gui:FindFirstChild("Holders")
         if not holders then return end
 
-        local toHide = holders.Visible
+        local hiding = holders.Visible
 
-        if toHide then
-            -- Анимация исчезновения содержимого
+        if hiding then
+            -- АНИМАЦИЯ СКРЫТИЯ
             for _, v in ipairs(holders:GetDescendants()) do
                 if v:IsA("GuiObject") then
                     tweenService:Create(v, TweenInfo.new(0.2), {
@@ -437,13 +438,13 @@ getgenv().CreateCloseButton = function()
 
             task.delay(0.2, function()
                 holders.Visible = false
+                btn.Text = "OPEN"
             end)
-
-            btn.Text = "OPEN"
         else
+            -- Сначала Visible = true
             holders.Visible = true
 
-            -- Сначала сделать прозрачным
+            -- Прозрачные изначально
             for _, v in ipairs(holders:GetDescendants()) do
                 if v:IsA("GuiObject") then
                     v.BackgroundTransparency = 1
