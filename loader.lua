@@ -361,12 +361,12 @@ getgenv().CreateCloseButton = function()
     local gui = player:WaitForChild("PlayerGui"):WaitForChild("TopbarStandard")
     local tweenService = game:GetService("TweenService")
 
-    -- удалить старую кнопку
+    -- удалить старую кнопку если она есть
     if gui:FindFirstChild("CustomCloseButton") then
         gui.CustomCloseButton:Destroy()
     end
 
-    -- создаём фрейм
+    -- создать фрейм
     local frame = Instance.new("Frame")
     frame.Name = "CustomCloseButton"
     frame.Size = UDim2.new(0, 50, 0, 50)
@@ -375,13 +375,13 @@ getgenv().CreateCloseButton = function()
     frame.ZIndex = 10
     frame.Parent = gui
 
-    -- ListLayout внизу
+    -- добавить UIListLayout снизу
     local layout = Instance.new("UIListLayout")
     layout.SortOrder = Enum.SortOrder.LayoutOrder
     layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
     layout.Parent = frame
 
-    -- Кнопка
+    -- создать кнопку
     local btn = Instance.new("TextButton")
     btn.Name = "CloseButton"
     btn.Size = UDim2.new(1, 0, 1, 0)
@@ -409,6 +409,7 @@ getgenv().CreateCloseButton = function()
         TextTransparency = 0
     }):Play()
 
+    -- пододвинуть Holders
     local holders = gui:FindFirstChild("Holders")
     if holders then
         holders.Visible = true
@@ -417,40 +418,44 @@ getgenv().CreateCloseButton = function()
         }):Play()
     end
 
-    -- Клик по кнопке (показывать/скрывать Holders)
+    -- обработка нажатия на кнопку
     btn.MouseButton1Click:Connect(function()
         if not holders then return end
+
         local toHide = holders.Visible
 
-        -- если показываем: сразу Visible = true
-        if not holders.Visible then
-            holders.Visible = true
-        end
-
-        -- анимируем все потомки
-        for _, v in ipairs(holders:GetDescendants()) do
-            if v:IsA("GuiObject") then
-                v.Visible = true
-                local goal = {
-                    BackgroundTransparency = toHide and 1 or 0,
-                    TextTransparency = toHide and 1 or 0
-                }
-                tweenService:Create(v, TweenInfo.new(0.2), goal):Play()
-            end
-        end
-
-        btn.Text = toHide and "OPEN" or "CLOSE"
-
-        -- если скрываем — ждем анимацию, потом делаем невидимым
         if toHide then
+            -- Анимация исчезновения содержимого
+            for _, v in ipairs(holders:GetDescendants()) do
+                if v:IsA("GuiObject") then
+                    tweenService:Create(v, TweenInfo.new(0.2), {
+                        BackgroundTransparency = 1,
+                        TextTransparency = 1
+                    }):Play()
+                end
+            end
+
             task.delay(0.2, function()
                 holders.Visible = false
-                for _, v in ipairs(holders:GetDescendants()) do
-                    if v:IsA("GuiObject") then
-                        v.Visible = false
-                    end
-                end
             end)
+
+            btn.Text = "OPEN"
+        else
+            holders.Visible = true
+
+            -- Сначала сделать прозрачным
+            for _, v in ipairs(holders:GetDescendants()) do
+                if v:IsA("GuiObject") then
+                    v.BackgroundTransparency = 1
+                    v.TextTransparency = 1
+                    tweenService:Create(v, TweenInfo.new(0.2), {
+                        BackgroundTransparency = 0,
+                        TextTransparency = 0
+                    }):Play()
+                end
+            end
+
+            btn.Text = "CLOSE"
         end
     end)
 end
