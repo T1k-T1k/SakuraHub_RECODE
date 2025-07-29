@@ -166,6 +166,9 @@ getgenv().Configurations = function()
         getgenv().EspNpcs = false;
         getgenv().EspItems = false;
 
+        -- [Game UI Scripts]
+        getgenv().CloseAnnoyingButtons = false;
+        
         -- [Sakura Hub UI Scripts]
         getgenv().AutoGoingRainbow = false;
         game:GetService("CoreGui").StatisticsGUI.Enabled = false;
@@ -311,6 +314,7 @@ getgenv().LoadConfigurations = function()
         task.spawn(getgenv().StartLoading("AutoDyingDamage")("QuestDeathDamage"));
         task.spawn(getgenv().StartLoading("AutoTakingDamage")("QuestTakeDamage"));
         task.spawn(getgenv().StartLoading("AutoDealingDamage")("QuestDealDamage"));
+        task.spawn(getgenv().StartLoading("CloseAnnoyingButtons")("CloseAnnoyingButtons"));
     else
         BoredLibrary.prompt("Sakura Hub 🌸","Configurations Not Found...",1.5);
     end
@@ -348,6 +352,46 @@ getgenv().SuperJump = function()
                 end
             end)
             task.wait(0.0015);
+        end
+    end)
+end
+
+getgenv().CloseAnnoyingButtons = function()
+    task.spawn(function()
+        local gui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("TopbarStandard")
+        if not gui:FindFirstChild("CustomCloseButton") then
+            local frame = Instance.new("Frame")
+            frame.Name = "CustomCloseButton"
+            frame.BackgroundTransparency = 1
+            frame.Size = UDim2.new(0, 50, 1, 0)
+            frame.Position = UDim2.new(0, 0, 0, 0)
+            frame.ZIndex = 10
+            frame.Parent = gui
+
+            local btn = Instance.new("TextButton")
+            btn.Name = "CloseButton"
+            btn.Parent = frame
+            btn.Size = UDim2.new(1, 0, 1, 0)
+            btn.Position = UDim2.new(0, 0, 0, 0)
+            btn.Text = "CLOSE"
+            btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            btn.TextColor3 = Color3.new(1, 1, 1)
+            btn.Font = Enum.Font.GothamBold
+            btn.TextScaled = true
+            btn.BorderSizePixel = 0
+            btn.ClipsDescendants = true
+            btn.AutoButtonColor = true
+            btn.ZIndex = 11
+            btn.BackgroundTransparency = 0.2
+            btn.TextWrapped = true
+            btn.AnchorPoint = Vector2.new(0, 0)
+
+            btn.MouseButton1Click:Connect(function()
+                local holders = gui:FindFirstChild("Holders")
+                if holders then
+                    holders.Visible = not holders.Visible
+                end
+            end)
         end
     end)
 end
@@ -3302,6 +3346,19 @@ end)
 HomeTab.newToggle("Super JumpPower","",getgenv().JumpPowerBypass or false,function(Value)
     getgenv().JumpPowerBypass = Value
     getgenv().SuperJump();
+end)
+
+-- // Toggle Configuration Function \\ --
+HomeTab.newToggle("Close Annoying Buttons Button", "", getgenv().CloseAnnoyingButtons or false, function(Value)
+    getgenv().CloseAnnoyingButtons = Value
+    if Value then
+        getgenv().CloseAnnoyingButtons()
+    else
+        local gui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui"):FindFirstChild("TopbarStandard")
+        if gui and gui:FindFirstChild("CustomCloseButton") then
+            gui.CustomCloseButton:Destroy()
+        end
+    end
 end)
 
 HomeTab.newButton("Reset Character (Dialogue Method)","",function()
