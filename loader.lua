@@ -375,6 +375,12 @@ getgenv().CreateCloseButton = function()
         frame.ZIndex = 10
         frame.Parent = gui
 
+        -- добавляем UIListLayout
+        local layout = Instance.new("UIListLayout")
+        layout.SortOrder = Enum.SortOrder.LayoutOrder
+        layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+        layout.Parent = frame
+
         local btn = Instance.new("TextButton")
         btn.Name = "CloseButton"
         btn.Parent = frame
@@ -386,7 +392,6 @@ getgenv().CreateCloseButton = function()
         btn.Font = Enum.Font.GothamBold
         btn.TextScaled = true
         btn.BorderSizePixel = 0
-        btn.ClipsDescendants = true
         btn.AutoButtonColor = true
         btn.ZIndex = 11
         btn.BackgroundTransparency = 1
@@ -403,33 +408,36 @@ getgenv().CreateCloseButton = function()
             TextTransparency = 0
         }):Play()
 
-        -- Сдвигаем Holders.Handle вправо на 65px
+        -- Позиция Holders → {0, 55}, {0, 0}
         local holders = gui:FindFirstChild("Holders")
-        local handle = holders and holders:FindFirstChild("Handle")
-        if handle then
-            tweenService:Create(handle, TweenInfo.new(0.4), {
-                Position = handle.Position + UDim2.new(0, 65, 0, 0)
+        if holders then
+            tweenService:Create(holders, TweenInfo.new(0.4), {
+                Position = UDim2.new(0, 55, 0, 0)
             }):Play()
         end
 
-        -- Клик по кнопке → открытие/закрытие Holders с анимацией
+        -- Клик по кнопке: показывать / скрывать Holders с анимацией
         btn.MouseButton1Click:Connect(function()
             if not holders then return end
-            holders.Visible = not holders.Visible
-            btn.Text = holders.Visible and "CLOSE" or "OPEN"
+            local showing = not holders.Visible
+            holders.Visible = true -- обязательно true, чтобы анимировать
+            btn.Text = showing and "CLOSE" or "OPEN"
 
             for _, v in ipairs(holders:GetDescendants()) do
                 if v:IsA("GuiObject") then
                     v.Visible = true
-                    local goal = {}
-                    goal.BackgroundTransparency = holders.Visible and 0 or 1
-                    goal.TextTransparency = holders.Visible and 0 or 1
+                    local goal = {
+                        BackgroundTransparency = showing and 0 or 1,
+                        TextTransparency = showing and 0 or 1
+                    }
                     tweenService:Create(v, TweenInfo.new(0.2), goal):Play()
                 end
             end
 
-            if not holders.Visible then
+            if not showing then
+                -- скрытие только после анимации
                 task.delay(0.2, function()
+                    holders.Visible = false
                     for _, v in ipairs(holders:GetDescendants()) do
                         if v:IsA("GuiObject") then
                             v.Visible = false
@@ -440,7 +448,6 @@ getgenv().CreateCloseButton = function()
         end)
     end)
 end
-
 
 getgenv().EspOnPlayers = function()
     local Folder = workspace.Living
@@ -3405,31 +3412,30 @@ HomeTab.newToggle("Close Annoying Buttons", "Toggle Close Button in Topbar", get
     if Value then
         getgenv().CreateCloseButton()
 
-        -- Пододвинуть Holders вправо на 65 пикселей
         if holders then
-            tweenService:Create(holders, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                Position = holders.Position + UDim2.new(0, 65, 0, 0)
+            -- установить жёсткую позицию {0,55},{0,0}
+            tweenService:Create(holders, TweenInfo.new(0.4), {
+                Position = UDim2.new(0, 55, 0, 0)
             }):Play()
         end
     else
-        -- Анимация скрытия кнопки
+        -- Анимация исчезновения кнопки
         local frame = topbar:FindFirstChild("CustomCloseButton")
         if frame and frame:FindFirstChild("CloseButton") then
             local btn = frame.CloseButton
-            tweenService:Create(btn, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+            tweenService:Create(btn, TweenInfo.new(0.4), {
                 BackgroundTransparency = 1,
                 TextTransparency = 1
             }):Play()
-
             task.delay(0.4, function()
                 frame:Destroy()
             end)
         end
 
-        -- Вернуть Holders на место (влево)
+        -- Возвращаем Holders на позицию {0, 0}
         if holders then
-            tweenService:Create(holders, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                Position = holders.Position - UDim2.new(0, 65, 0, 0)
+            tweenService:Create(holders, TweenInfo.new(0.4), {
+                Position = UDim2.new(0, 0, 0, 0)
             }):Play()
         end
     end
