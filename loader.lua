@@ -3401,16 +3401,22 @@ HomeTab.newToggle("Close Annoying Buttons", "Toggle Close Button in Topbar", get
     local gui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
     local topbar = gui and gui:FindFirstChild("TopbarStandard")
     local holders = topbar and topbar:FindFirstChild("Holders")
-    local handle = holders and holders:FindFirstChild("Handle")
 
     if Value then
         getgenv().CreateCloseButton()
+
+        -- Пододвинуть Holders вправо на 65 пикселей
+        if holders then
+            tweenService:Create(holders, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                Position = holders.Position + UDim2.new(0, 65, 0, 0)
+            }):Play()
+        end
     else
-        -- анимация скрытия кнопки
+        -- Анимация скрытия кнопки
         local frame = topbar:FindFirstChild("CustomCloseButton")
         if frame and frame:FindFirstChild("CloseButton") then
             local btn = frame.CloseButton
-            tweenService:Create(btn, TweenInfo.new(0.4), {
+            tweenService:Create(btn, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
                 BackgroundTransparency = 1,
                 TextTransparency = 1
             }):Play()
@@ -3420,10 +3426,10 @@ HomeTab.newToggle("Close Annoying Buttons", "Toggle Close Button in Topbar", get
             end)
         end
 
-        -- возвращаем Holders.Handle на место
-        if handle then
-            tweenService:Create(handle, TweenInfo.new(0.4), {
-                Position = handle.Position - UDim2.new(0, 65, 0, 0)
+        -- Вернуть Holders на место (влево)
+        if holders then
+            tweenService:Create(holders, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                Position = holders.Position - UDim2.new(0, 65, 0, 0)
             }):Play()
         end
     end
