@@ -366,7 +366,7 @@ getgenv().CreateCloseButton = function()
         gui.CustomCloseButton:Destroy()
     end
 
-    -- контейнер для кнопки
+    -- контейнер
     local frame = Instance.new("Frame")
     frame.Name = "CustomCloseButton"
     frame.Size = UDim2.new(0, 50, 0, 50)
@@ -381,9 +381,10 @@ getgenv().CreateCloseButton = function()
     layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
     layout.Parent = frame
 
-    -- сама кнопка
+    -- кнопка
     local btn = Instance.new("TextButton")
     btn.Name = "CloseButton"
+    btn.Text = "OPEN"
     btn.Size = UDim2.new(1, 0, 1, 0)
     btn.Position = UDim2.new(0, 0, 0, 0)
     btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
@@ -417,7 +418,7 @@ getgenv().CreateCloseButton = function()
         }):Play()
     end
 
-    -- Обновление текста
+    -- Обновить текст
     local function updateText()
         if holders and holders.Visible then
             btn.Text = "CLOSE"
@@ -427,66 +428,19 @@ getgenv().CreateCloseButton = function()
     end
     updateText()
 
-    -- Обработка нажатия
+    -- Логика при нажатии на кнопку
     btn.MouseButton1Click:Connect(function()
         holders = gui:FindFirstChild("Holders")
         if not holders then return end
 
         if holders.Visible then
-            -- Скрытие с анимацией
-            for _, v in ipairs(holders:GetDescendants()) do
-                if v:IsA("GuiObject") then
-                    local goal = {}
-                    if v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("TextBox") then
-                        goal.TextTransparency = 1
-                    end
-                    if v.BackgroundTransparency ~= nil then
-                        goal.BackgroundTransparency = 1
-                    end
-                    if next(goal) then
-                        tweenService:Create(v, TweenInfo.new(0.2), goal):Play()
-                    end
-                end
-            end
-
-            -- После анимации — скрыть Holders
-            task.delay(0.2, function()
-                holders.Visible = false
-                updateText()
-            end)
+            -- скрытие
+            holders.Visible = false
         else
             holders.Visible = true
-
-            -- Сначала делаем прозрачными
-            for _, v in ipairs(holders:GetDescendants()) do
-                if v:IsA("GuiObject") then
-                    if v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("TextBox") then
-                        v.TextTransparency = 1
-                    end
-                    if v.BackgroundTransparency ~= nil then
-                        v.BackgroundTransparency = 1
-                    end
-                end
-            end
-
-            -- Потом анимируем проявление
-            for _, v in ipairs(holders:GetDescendants()) do
-                if v:IsA("GuiObject") then
-                    local goal = {}
-                    if v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("TextBox") then
-                        goal.TextTransparency = 0
-                    end
-                    if v.BackgroundTransparency ~= nil then
-                        goal.BackgroundTransparency = 0
-                    end
-                    if next(goal) then
-                        tweenService:Create(v, TweenInfo.new(0.2), goal):Play()
-                    end
-                end
-            end
-
-            updateText()
         end
+
+        updateText()
     end)
 end
 
