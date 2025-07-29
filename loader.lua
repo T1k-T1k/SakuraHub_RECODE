@@ -358,15 +358,17 @@ end
 
 getgenv().CreateCloseButton = function()
     task.spawn(function()
-        local gui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("TopbarStandard")
+        local player = game:GetService("Players").LocalPlayer
+        local gui = player:WaitForChild("PlayerGui"):WaitForChild("TopbarStandard")
 
+        -- если уже существует — не создавать заново
         if gui:FindFirstChild("CustomCloseButton") then return end
 
         local frame = Instance.new("Frame")
         frame.Name = "CustomCloseButton"
         frame.BackgroundTransparency = 1
-        frame.Size = UDim2.new(0, 50, 1, 0)
-        frame.Position = UDim2.new(0, 0, 0, 0)
+        frame.Size = UDim2.new(0, 50, 0, 50)
+        frame.Position = UDim2.new(0, 5, 0, 5)
         frame.ZIndex = 10
         frame.Parent = gui
 
@@ -388,11 +390,32 @@ getgenv().CreateCloseButton = function()
         btn.TextWrapped = true
         btn.AnchorPoint = Vector2.new(0, 0)
 
+        -- делаем круглую кнопку
+        local uicorner = Instance.new("UICorner")
+        uicorner.CornerRadius = UDim.new(1, 0)
+        uicorner.Parent = btn
+
+        -- Плавное перемещение Holders и смена текста
+        local tweenService = game:GetService("TweenService")
+        local holders = gui:FindFirstChild("Holders")
+
         btn.MouseButton1Click:Connect(function()
-            local holders = gui:FindFirstChild("Holders")
-            if holders then
-                holders.Visible = not holders.Visible
+            if not holders then return end
+
+            -- Переключение видимости
+            holders.Visible = not holders.Visible
+            btn.Text = holders.Visible and "CLOSE" or "OPEN"
+
+            -- Анимация перемещения
+            local goal = {}
+            if holders.Visible then
+                goal.Position = holders.Position - UDim2.new(0, 65, 0, 0)
+            else
+                goal.Position = holders.Position + UDim2.new(0, 65, 0, 0)
             end
+
+            local tween = tweenService:Create(holders, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), goal)
+            tween:Play()
         end)
     end)
 end
