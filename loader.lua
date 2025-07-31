@@ -1,7 +1,6 @@
 -- // Sakura Hub 🌸 \\ -- | ( Legacy Version: 1.31 | Recode Version: 1.02 ) [ Made by Mommy Flames :3 / Recoded by T1k ^^ ]
 
 --[[---------------------------------------------------------------------------------------------------
-
 -- This script updates a lot, Use this loadstring to be in the latest version:
 
 getgenv().ToggleUI = "J" -- //  Key Toggle "J" set by default however you can change it.
@@ -10,7 +9,6 @@ getgenv().SakuraHub = "https://raw.githubusercontent.com/T1k-T1k/SakuraHub_RECOD
 pcall(function()
     loadstring(game:HttpGet(getgenv().SakuraHub))();
 end)
-
 ]]-----------------------------------------------------------------------------------------------------
 getgenv().CurrentVersion = "1.31";
 
