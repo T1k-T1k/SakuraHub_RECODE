@@ -361,12 +361,10 @@ getgenv().CreateCloseButton = function()
     local gui = player:WaitForChild("PlayerGui"):WaitForChild("TopbarStandard")
     local tweenService = game:GetService("TweenService")
 
-    -- удалить старую кнопку
     if gui:FindFirstChild("CustomCloseButton") then
         gui.CustomCloseButton:Destroy()
     end
 
-    -- контейнер
     local frame = Instance.new("Frame")
     frame.Name = "CustomCloseButton"
     frame.Size = UDim2.new(0, 50, 0, 50)
@@ -375,13 +373,11 @@ getgenv().CreateCloseButton = function()
     frame.ZIndex = 10
     frame.Parent = gui
 
-    -- layout
     local layout = Instance.new("UIListLayout")
     layout.SortOrder = Enum.SortOrder.LayoutOrder
     layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
     layout.Parent = frame
 
-    -- кнопка
     local btn = Instance.new("TextButton")
     btn.Name = "CloseButton"
     btn.Text = "OPEN"
@@ -390,8 +386,8 @@ getgenv().CreateCloseButton = function()
     btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Font = Enum.Font.GothamBold
-    btn.TextScaled = false    -- отключаем масштабирование
-    btn.TextSize = 12         -- устанавливаем размер текста 12
+    btn.TextScaled = false
+    btn.TextSize = 12
     btn.BorderSizePixel = 0
     btn.AutoButtonColor = true
     btn.ZIndex = 11
@@ -404,13 +400,11 @@ getgenv().CreateCloseButton = function()
     corner.CornerRadius = UDim.new(1, 0)
     corner.Parent = btn
 
-    -- Анимация появления кнопки
     tweenService:Create(btn, TweenInfo.new(0.4), {
         BackgroundTransparency = 0.2,
         TextTransparency = 0
     }):Play()
 
-    -- Пододвигаем Holders
     local holders = gui:FindFirstChild("Holders")
     if holders then
         holders.Visible = true
@@ -419,7 +413,6 @@ getgenv().CreateCloseButton = function()
         }):Play()
     end
 
-    -- Обновить текст
     local function updateText()
         if holders and holders.Visible then
             btn.Text = "CLOSE"
@@ -429,7 +422,6 @@ getgenv().CreateCloseButton = function()
     end
     updateText()
 
-    -- Логика при нажатии на кнопку
     btn.MouseButton1Click:Connect(function()
         holders = gui:FindFirstChild("Holders")
         if not holders then return end
@@ -4387,7 +4379,6 @@ getgenv().PlaySound = function()
 end
 
 AreasTab.newLabel("Teleports   🗺️  (You can Teleport people with you, Just grab them first)");
-AreasTab.newLabel("Teleports 🗺️ (You can Teleport people with you, Just grab them first)")
 
 AreasTab.newButton("Shop","",function()
     pcall(function()
