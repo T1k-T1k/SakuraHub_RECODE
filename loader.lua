@@ -3580,61 +3580,53 @@ HomeTab.newToggle("Auto Bug Players / Mobs (Requires Grab Moves)","",getgenv().A
 end)
 
 HomeTab.newLabel("Available Working Codes (Report to me if stopped working)");
-local Code1 = "Kafk-ISTHATTHEREDMIST";
-local Code2 = "SFCOpen4Business";
-local Code3 = "freeRedMistPercent";
-local Code4 = "GiftFromSFC";
-local Code5 = "RolandAndFriends";
-local Code6 = "Kaiju-8";
-local Code7 = "KuzmaToldMeToAddThisCode";
-local Code8 = "3b5tsM79-^#>^<&(@!'~";
+local Code1 = "HeroHunterFromGumball"; local Desc1 = "500 Tokens"
+local Code2 = "6Coins"; local Desc2 = "500 Tokens"
+local Code3 = "UltraService"; local Desc3 = "$10000 Cash"
+local Code4 = "RoaringEngine"; local Desc4 = "6000 Secs of 2x Xp"
+local Code5 = "DeathStep"; local Desc5 = "$2500 Cash"
+local Code6 = "RogueBloxIsAJob"; local Desc6 = "500 Tokens"
+local Code7 = "OmatsuriMambo"; local Desc7 = "500 Tokens"
+local Code8 = "MamboIncident"; local Desc8 = "1000 Tokens"
 
-HomeTab.newButton('Use Code: "'..Code1..'"','',function()
-    BoredLibrary.prompt("Sakura Hub  🌸","Used: "..Code1,1.5);
-    local args = {Code1};
-    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("EnterCode"):FireServer(unpack(args));
+HomeTab.newButton('Use Code: "'..Code1..'"', Desc1, function()
+    BoredLibrary.prompt("Sakura Hub  🌸", "Used: "..Code1, 1.5)
+    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("EnterCode"):FireServer(Code1)
 end)
 
-HomeTab.newButton('Use Code: "'..Code2..'"','',function()
-    BoredLibrary.prompt("Sakura Hub   🌸","Used: "..Code2,1.5);
-    local args = {Code2};
-    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("EnterCode"):FireServer(unpack(args));
+HomeTab.newButton('Use Code: "'..Code2..'"', Desc2, function()
+    BoredLibrary.prompt("Sakura Hub  🌸", "Used: "..Code2, 1.5)
+    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("EnterCode"):FireServer(Code2)
 end)
 
-HomeTab.newButton('Use Code: "'..Code3..'"','',function()
-    BoredLibrary.prompt("Sakura Hub  🌸","Used: "..Code3,1.5);
-    local args = {Code3};
-    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("EnterCode"):FireServer(unpack(args));
+HomeTab.newButton('Use Code: "'..Code3..'"', Desc3, function()
+    BoredLibrary.prompt("Sakura Hub  🌸", "Used: "..Code3, 1.5)
+    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("EnterCode"):FireServer(Code3)
 end)
 
-HomeTab.newButton('Use Code: "'..Code4..'"','',function()
-    BoredLibrary.prompt("Sakura Hub  🌸","Used: "..Code4,1.5);
-    local args = {Code4};
-    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("EnterCode"):FireServer(unpack(args));
+HomeTab.newButton('Use Code: "'..Code4..'"', Desc4, function()
+    BoredLibrary.prompt("Sakura Hub  🌸", "Used: "..Code4, 1.5)
+    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("EnterCode"):FireServer(Code4)
 end)
 
-HomeTab.newButton('Use Code: "'..Code5..'"','',function()
-    BoredLibrary.prompt("Sakura Hub  🌸","Used: "..Code5,1.5);
-    local args = {Code5};
-    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("EnterCode"):FireServer(unpack(args));
+HomeTab.newButton('Use Code: "'..Code5..'"', Desc5, function()
+    BoredLibrary.prompt("Sakura Hub  🌸", "Used: "..Code5, 1.5)
+    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("EnterCode"):FireServer(Code5)
 end)
 
-HomeTab.newButton('Use Code: "'..Code6..'"','',function()
-    BoredLibrary.prompt("Sakura Hub  🌸","Used: "..Code6,1.5);
-    local args = {Code6};
-    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("EnterCode"):FireServer(unpack(args));
+HomeTab.newButton('Use Code: "'..Code6..'"', Desc6, function()
+    BoredLibrary.prompt("Sakura Hub  🌸", "Used: "..Code6, 1.5)
+    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("EnterCode"):FireServer(Code6)
 end)
 
-HomeTab.newButton('Use Code: "'..Code7..'"','',function()
-    BoredLibrary.prompt("Sakura Hub  🌸","Used: "..Code7,1.5);
-    local args = {Code7};
-    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("EnterCode"):FireServer(unpack(args));
+HomeTab.newButton('Use Code: "'..Code7..'"', Desc7, function()
+    BoredLibrary.prompt("Sakura Hub  🌸", "Used: "..Code7, 1.5)
+    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("EnterCode"):FireServer(Code7)
 end)
 
-HomeTab.newButton('Use Code: "'..Code8..'"','',function()
-    BoredLibrary.prompt("Sakura Hub  🌸","Used: "..Code8,1.5);
-    local args = {Code8};
-    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("EnterCode"):FireServer(unpack(args));
+HomeTab.newButton('Use Code: "'..Code8..'"', Desc8, function()
+    BoredLibrary.prompt("Sakura Hub  🌸", "Used: "..Code8, 1.5)
+    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("EnterCode"):FireServer(Code8)
 end)
 
 HomeTab.newLabel("Server Hop Scripts   🌐");
