@@ -291,7 +291,6 @@ getgenv().LoadConfigurations = function()
         task.spawn(getgenv().StartLoading("AutoAltFarming")("UsingAltFarming"));
         task.spawn(getgenv().StartLoading("AutoMainFarming")("UsingMainAccountFarming"));
         task.spawn(getgenv().StartLoading("AutofarmOnDeku1")("UsingDekuAutofarm1"));
-        --task.spawn(getgenv().StartLoading("AutofarmOnDeku2")("UsingDekuAutofarm2"));
         task.spawn(getgenv().StartLoading("AutofarmOnDeku3")("UsingDekuAutofarm3"));
         task.spawn(getgenv().StartLoading("AutoConvertTokens")("UsingTokensToCash"));
         --task.spawn(getgenv().StartLoading("AutoStealingOfa")("StealingOneForAll"));
@@ -4215,21 +4214,12 @@ FarmingTab.newButton("Quick Explanation (Open F9 Console)","",function()
     end)
 end)
 
-FarmingTab.newToggle("Start Farming (Without Support)","",getgenv().AutofarmOnDeku1 or false,function(Value)
+FarmingTab.newToggle("Start Farming (Main Account)","This account will be kill bosses",getgenv().AutofarmOnDeku1 or false,function(Value)
     getgenv().AutofarmOnDeku1 = Value
     getgenv().UsingDekuAutofarm1();
 end)
 
-FarmingTab.newToggle("Start Farming (With Support)","",getgenv().AutofarmOnDeku2 or false,function(Value)
-    getgenv().AutofarmOnDeku2 = Value
-
-    if getgenv().AutofarmOnDeku2 == true then
-        BoredLibrary.prompt("Sakura Hub 🌸","Soon, Wait for update.",1.5);
-    end
-    --getgenv().UsingDekuAutofarm2();
-end)
-
-FarmingTab.newToggle("Start Farming (Support Account)","",getgenv().AutofarmOnDeku3 or false,function(Value)
+FarmingTab.newToggle("Start Farming (Support Account)","This account will be summon bosses",getgenv().AutofarmOnDeku3 or false,function(Value)
     getgenv().AutofarmOnDeku3 = Value
     getgenv().UsingDekuAutofarm3();
 end)
