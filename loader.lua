@@ -2378,7 +2378,7 @@ getgenv().UsingMainAccountFarming = function()
 end
 
 getgenv().AutoFarmDekuMainAccFunction = function()
-    local WaitBossPosCoords = Vector3.new(-168, 791, -8038) -- Ruined City coordinates
+    local WaitBossPosCoords = Vector3.new(-1212, -150, -324) -- Wait Coords
     local questID = 33
     local skillKeys = {}
     local supportPlayerName = nil
@@ -3162,7 +3162,6 @@ HomeTab.newToggle("Close Annoying Buttons", "Toggle Close Button in Topbar", get
             }):Play()
         end
     else
-        -- если кнопка есть — плавно скрываем и удаляем
         if frame and frame:FindFirstChild("CloseButton") then
             local btn = frame.CloseButton
             tweenService:Create(btn, TweenInfo.new(0.4), {
@@ -3174,7 +3173,6 @@ HomeTab.newToggle("Close Annoying Buttons", "Toggle Close Button in Topbar", get
             end)
         end
 
-        -- возвращаем Holders на место
         if holders then
             tweenService:Create(holders, TweenInfo.new(0.4), {
                 Position = UDim2.new(0, 0, 0, 0)
