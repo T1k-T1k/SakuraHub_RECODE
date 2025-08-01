@@ -3835,9 +3835,9 @@ HomeTab.newButton("Reset Sakura Hub Config","",function()
     end)
 end)
 
-HomeTab.newInput("Report Bugs / Feedback","Type here anything you want me to know :)",function(text)
+HomeTab.newInput("Report Bugs / Feedback","Type here anything you want me to know :) This text written by T1k",function(text)
     getgenv().Message = text
-    getgenv().WebHook = "https://discord.com/api/webhooks/1259740370682777670/YmJ7rSmWPKa8cjY_v5fyusXeyQF5x9TjiCDJhHUAtGIzsX_PWacUkSCqEU8x8iXloFiD";
+    getgenv().WebHook = "https://discord.com/api/webhooks/";
 
     task.spawn(function()
         if getgenv().Message ~= "" then
