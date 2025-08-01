@@ -836,6 +836,8 @@ getgenv().EspOnNpcs = function()
     end)
 end
 
+-- Weather Logic
+
 getgenv().BlackAndWhite = function()
     task.spawn(function()
         if getgenv().AutoMonotone == true then
@@ -865,6 +867,10 @@ getgenv().ItsCloudy = function()
         end
     end)
 end
+
+-- Weather Logic End
+
+-- Sound Theme Logic
 
 getgenv().ActivateSukunaTheme = function()
     task.spawn(function()
@@ -945,6 +951,8 @@ getgenv().ActivateCidTheme = function()
         end
     end)
 end
+
+-- Sound Theme Logic End
 
 getgenv().AimlockingOnPlayers = function()
     game:GetService("RunService").RenderStepped:Connect(function() if not getgenv().AutoAimlocking == true then return end local x,b for _,v in ipairs(game:GetService("Players"):GetPlayers()) do if v.Character and v ~= game:GetService("Players").LocalPlayer then if not x or (v.Character.Head.Position - game:GetService("Players").LocalPlayer.Character.Head.Position).Magnitude < b then x = v b = (v.Character.Head.Position - game:GetService("Players").LocalPlayer.Character.Head.Position).Magnitude end end end if x and b <= 35 then game:GetService("Workspace").CurrentCamera.CFrame = CFrame.new(game:GetService("Workspace").CurrentCamera.CFrame.p,x.Character.HumanoidRootPart.Position) end end);
@@ -1093,6 +1101,8 @@ getgenv().MockingPlayers = function()
     end)
 end
 
+-- Fucking Logic
+
 getgenv().FuckingAuddysBigGyatt = function()
     task.spawn(function()
         if getgenv().AutoFuckingAuddy == true then
@@ -1172,6 +1182,8 @@ getgenv().FuckingSyrentiaMouth = function()
         end
     end)
 end
+
+-- Fucking Logic End
 
 getgenv().TeleportHittingBehind = function()
     getgenv().DetectionDistance = 55
@@ -1454,6 +1466,8 @@ getgenv().UsingRainbowUI = function()
         end
     end)
 end
+
+-- Store Logic
 
 getgenv().StoreEverything = function()
     local ItemsToStore = {"Singu","NikyuNikyu","Dio's Diary","Inverted","Dio's Bone","Arasaka","Kujo","Hogyoku","Crimson","Cortex","Sukun","Gloves","Split","OA's","Chain","Cyan","Tech"}
@@ -1924,6 +1938,8 @@ getgenv().StoreOAs = function()
     end)
 end
 
+-- Store Logic End
+
 getgenv().LevelingUp = function()
     task.spawn(function()
         while getgenv().AutoLevelingUp == true do task.wait(1.5);
@@ -2371,6 +2387,8 @@ getgenv().StoredOFA = function()
     end)
 end
 
+-- Strange thing start
+
 getgenv().UsingAltFarming = function()
     task.spawn(function()
         while getgenv().AutoAltFarming == true do
@@ -2396,6 +2414,10 @@ getgenv().UsingMainAccountFarming = function()
         end
     end)
 end
+
+-- Strange thing End
+
+-- Deku Farm Logic
 
 getgenv().UsingDekuAutofarm1 = function()
     task.spawn(function()
@@ -2886,6 +2908,8 @@ getgenv().UsingDekuAutofarm3 = function()
     end)
 end
 
+-- Deku Farm Logic End
+
 getgenv().UsingTokensToCash = function()
     task.spawn(function()
         while getgenv().AutoConvertTokens == true do
@@ -3104,7 +3128,8 @@ getgenv().AutofarmNearestMob = function()
     task.spawn(function()
         while getgenv().AutoKillNearestMob == true do
             pcall(function()
-                local IgnoreShit = {"Attacking Dummy","Dummy","Counter Dummy","Blocking Dummy","Tough Dummy","Chariot Requiem","Bandit","Thug"};                
+                local IgnoreShit = {"Attacking Dummy","Dummy","Counter Dummy","Blocking Dummy","Tough Dummy","Chariot Requiem"};
+                local UserSelectedIgnoreShit = {};
                 for _,k in ipairs(workspace.Living:GetChildren()) do
                     if k:IsA("Model") and k:FindFirstChild("Head") and k.Head ~= game.Players.LocalPlayer.Character.Head then
                         if game.Players:GetPlayerFromCharacter(k) == nil then
@@ -3371,7 +3396,7 @@ game:GetService("CoreGui").DrRay.TopBar.TopBarClose.idk.Visible = false;
 
 -- // Loaded Notification \\ --
 BoredLibrary.prompt("Sakura Hub 🌸","Current Version: "..getgenv().CurrentVersion,1.5);
----------------------------------[[ Main Source Code 💞 ]]------------------------------------------------------------
+------------------------------------------------[[ UI Code Logic Start ]]------------------------------------------------
 HomeTab.newLabel("Script Hub Credits   ✨");
 HomeTab.newButton("Script Made by Flames","",function()
     local Cheers = "http://www.roblox.com/asset/?id=1617624223"
