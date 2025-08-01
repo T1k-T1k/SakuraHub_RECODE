@@ -60,9 +60,9 @@ end)
 -- // Anti AFK \\ --
 task.spawn(function()
     if not getgenv().AntiAfk == true then getgenv().AntiAfk = true;
-        while true do task.wait(1100);
+        while true do task.wait(1100); -- 18 Minutes 20 Seconds
             pcall(function()
-                game:GetService("VirtualInputManager"):SendKeyEvent(true,"RightBracket",false,game);
+                game:GetService("VirtualInputManager"):SendKeyEvent(true,"RightBracket",false,game); -- Presses "]" Every ~ 18 Minutes
             end)
         end
     end
