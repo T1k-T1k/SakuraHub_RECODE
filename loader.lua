@@ -2417,6 +2417,8 @@ end
 
 -- Strange thing End
 
+-- New Deku Farm
+
 getgenv().UsingDekuFarmMain = function()
     task.spawn(function()
         while getgenv().AutoFarmDekuMainAcc == true do
@@ -2621,8 +2623,8 @@ getgenv().UsingDekuFarmMain = function()
                 end)
 
                 -- Анимация появления
-                mainFrame.Size = UDim2.new(0, 300, 0, 0)
-                game:GetService("TweenService"):Create(mainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 300, 0, 350)}):Play()
+                mainFrame.Size = UDim2.new(0, 220, 0, 0)
+                game:GetService("TweenService"):Create(mainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 220, 0, 350)}):Play()
 
                 -- Первоначальное обновление списка
                 updatePlayerList()
