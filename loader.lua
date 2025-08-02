@@ -3908,7 +3908,7 @@ HomeTab.newButton("Teleport Maker","",function()
 end)
 
 HomeTab.newLabel("Sakura Hub Stuff  🌸");
-HomeTab.newButton("Official Discord Server (Copied to Clipboard)","",function()
+HomeTab.newButton("Official Discord Server (Click To Copy To Clipboard)","",function()
     setclipboard("https://discord.gg/XcUFRW4DWH");
     BoredLibrary.prompt("Sakura Hub  🌸","Copied to clipboard",0.5);
 end)
@@ -4461,6 +4461,8 @@ FarmingTab.newToggle("Start Farming (Support Account)","This account will summon
     getgenv().AutoFarmDekuAlt = Value
     getgenv().UsingDekuFarmAlt();
 end)
+
+StorageTab.newLabel("-------------------------------------------------------------------");
 
 FarmingTab.newToggle("Start Farming (Without Support)","This account will do everything solo (In Development)",getgenv().AutoFarmDekuSolo or false,function(Value)
     -- getgenv().AutoFarmDekuSolo = Value
