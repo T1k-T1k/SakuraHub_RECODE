@@ -2423,12 +2423,8 @@ getgenv().UsingDekuFarmMain = function()
     task.spawn(function()
         while getgenv().AutoFarmDekuMainAcc == true do
             pcall(function()
-                local Players = game:GetService("Players")
-                local TweenService = game:GetService("TweenService")
-
-                local selectedPlayer = nil
-                local selectedLine = nil
-                local selectedButton = nil
+                local Players = game:GetService("Players") local TweenService = game:GetService("TweenService");
+                local selectedPlayer = nil local selectedLine = nil local selectedButton = nil
 
                 local playerSelectionUI = Instance.new("ScreenGui")
                 playerSelectionUI.Name = "SakuraPlayerSelection"
