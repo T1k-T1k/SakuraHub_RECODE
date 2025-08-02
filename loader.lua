@@ -2515,17 +2515,17 @@ getgenv().UsingDekuFarmMain = function()
                 local function createLine(button)
                     local line = Instance.new("Frame")
                     line.Name = "SelectionLine"
-                    line.AnchorPoint = Vector2.new(0.5, 0.5)
-                    line.Position = UDim2.new(0.5, 0, 1.1, 0)
+                    line.AnchorPoint = Vector2.new(0.5, 1)
+                    line.Position = UDim2.new(0.5, 0, 1, -5) -- немного приподнята
                     line.Size = UDim2.new(0, 0, 0, 4)
                     line.BackgroundColor3 = Color3.fromRGB(207, 114, 151)
                     line.BorderSizePixel = 0
                     line.ZIndex = 10
-
+                
                     local corner = Instance.new("UICorner")
-                    corner.CornerRadius = UDim.new(1, 0)
+                    corner.CornerRadius = UDim.new(0, 6) -- уменьшенное скругление
                     corner.Parent = line
-
+                
                     line.Parent = button
                     return line
                 end
