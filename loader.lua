@@ -2419,210 +2419,204 @@ end
 
 -- New Deku Farm
 
--- New Deku Farm
-
 getgenv().UsingDekuFarmMain = function()
-    -- Первая часть — выбор игрока
     local Players = game:GetService("Players")
     local TweenService = game:GetService("TweenService")
+
     local selectedPlayer = nil
     local selectedLine = nil
     local selectedButton = nil
 
+    local selectionCompletedEvent = Instance.new("BindableEvent")
     local completed = false
 
-    pcall(function()
-        local playerSelectionUI = Instance.new("ScreenGui")
-        playerSelectionUI.Name = "SakuraPlayerSelection"
-        playerSelectionUI.ResetOnSpawn = false
-        playerSelectionUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        playerSelectionUI.Parent = game:GetService("CoreGui")
+    -- UI выбор игрока
+    local playerSelectionUI = Instance.new("ScreenGui")
+    playerSelectionUI.Name = "SakuraPlayerSelection"
+    playerSelectionUI.ResetOnSpawn = false
+    playerSelectionUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    playerSelectionUI.Parent = game:GetService("CoreGui")
 
-        local mainFrame = Instance.new("Frame")
-        mainFrame.Size = UDim2.new(0, 300, 0, 250)
-        mainFrame.Position = UDim2.new(0.5, -150, 0.5, -125)
-        mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-        mainFrame.BorderSizePixel = 0
-        mainFrame.ClipsDescendants = true
-        mainFrame.Parent = playerSelectionUI
-        Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 300, 0, 250)
+    mainFrame.Position = UDim2.new(0.5, -150, 0.5, -125)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.ClipsDescendants = true
+    mainFrame.Parent = playerSelectionUI
+    Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
 
-        local UIStroke = Instance.new("UIStroke")
-        UIStroke.Color = Color3.fromRGB(80, 80, 90)
-        UIStroke.Thickness = 2
-        UIStroke.Parent = mainFrame
+    local UIStroke = Instance.new("UIStroke")
+    UIStroke.Color = Color3.fromRGB(80, 80, 90)
+    UIStroke.Thickness = 2
+    UIStroke.Parent = mainFrame
 
-        local titleFrame = Instance.new("Frame")
-        titleFrame.Size = UDim2.new(1, 0, 0, 40)
-        titleFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-        titleFrame.BorderSizePixel = 0
-        titleFrame.Parent = mainFrame
-        Instance.new("UICorner", titleFrame).CornerRadius = UDim.new(0, 12)
+    local titleFrame = Instance.new("Frame")
+    titleFrame.Size = UDim2.new(1, 0, 0, 40)
+    titleFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+    titleFrame.BorderSizePixel = 0
+    titleFrame.Parent = mainFrame
+    Instance.new("UICorner", titleFrame).CornerRadius = UDim.new(0, 12)
 
-        local title = Instance.new("TextLabel")
-        title.Text = "🌸 Select Summoner"
-        title.Size = UDim2.new(1, -20, 1, 0)
-        title.Position = UDim2.new(0, 10, 0, 0)
-        title.BackgroundTransparency = 1
-        title.TextColor3 = Color3.fromRGB(255, 220, 240)
-        title.Font = Enum.Font.GothamBold
-        title.TextSize = 18
-        title.TextXAlignment = Enum.TextXAlignment.Left
-        title.Parent = titleFrame
+    local title = Instance.new("TextLabel")
+    title.Text = "🌸 Select Summoner"
+    title.Size = UDim2.new(1, -20, 1, 0)
+    title.Position = UDim2.new(0, 10, 0, 0)
+    title.BackgroundTransparency = 1
+    title.TextColor3 = Color3.fromRGB(255, 220, 240)
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 18
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = titleFrame
 
-        local scrollFrame = Instance.new("ScrollingFrame")
-        scrollFrame.Size = UDim2.new(1, -10, 1, -100)
-        scrollFrame.Position = UDim2.new(0, 5, 0, 45)
-        scrollFrame.BackgroundTransparency = 1
-        scrollFrame.ScrollBarThickness = 4
-        scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
-        scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-        scrollFrame.Parent = mainFrame
+    local scrollFrame = Instance.new("ScrollingFrame")
+    scrollFrame.Size = UDim2.new(1, -10, 1, -100)
+    scrollFrame.Position = UDim2.new(0, 5, 0, 45)
+    scrollFrame.BackgroundTransparency = 1
+    scrollFrame.ScrollBarThickness = 4
+    scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    scrollFrame.Parent = mainFrame
 
-        local scrollLayout = Instance.new("UIListLayout")
-        scrollLayout.Padding = UDim.new(0, 5)
-        scrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        scrollLayout.Parent = scrollFrame
+    local scrollLayout = Instance.new("UIListLayout")
+    scrollLayout.Padding = UDim.new(0, 5)
+    scrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    scrollLayout.Parent = scrollFrame
 
-        local buttonFrame = Instance.new("Frame")
-        buttonFrame.Size = UDim2.new(1, -20, 0, 40)
-        buttonFrame.Position = UDim2.new(0, 10, 1, -50)
-        buttonFrame.BackgroundTransparency = 1
-        buttonFrame.Parent = mainFrame
+    local buttonFrame = Instance.new("Frame")
+    buttonFrame.Size = UDim2.new(1, -20, 0, 40)
+    buttonFrame.Position = UDim2.new(0, 10, 1, -50)
+    buttonFrame.BackgroundTransparency = 1
+    buttonFrame.Parent = mainFrame
 
-        local continueButton = Instance.new("TextButton")
-        continueButton.Text = "Continue"
-        continueButton.Size = UDim2.new(0.45, 0, 1, 0)
-        continueButton.BackgroundColor3 = Color3.fromRGB(80, 180, 120)
-        continueButton.TextColor3 = Color3.new(1, 1, 1)
-        continueButton.Font = Enum.Font.GothamSemibold
-        continueButton.TextSize = 16
-        continueButton.AutoButtonColor = false
-        Instance.new("UICorner", continueButton).CornerRadius = UDim.new(0, 8)
-        continueButton.Parent = buttonFrame
+    local continueButton = Instance.new("TextButton")
+    continueButton.Text = "Continue"
+    continueButton.Size = UDim2.new(0.45, 0, 1, 0)
+    continueButton.BackgroundColor3 = Color3.fromRGB(80, 180, 120)
+    continueButton.TextColor3 = Color3.new(1, 1, 1)
+    continueButton.Font = Enum.Font.GothamSemibold
+    continueButton.TextSize = 16
+    continueButton.AutoButtonColor = false
+    Instance.new("UICorner", continueButton).CornerRadius = UDim.new(0, 8)
+    continueButton.Parent = buttonFrame
 
-        local cancelButton = Instance.new("TextButton")
-        cancelButton.Text = "Cancel"
-        cancelButton.Size = UDim2.new(0.45, 0, 1, 0)
-        cancelButton.Position = UDim2.new(0.55, 0, 0, 0)
-        cancelButton.BackgroundColor3 = Color3.fromRGB(180, 80, 80)
-        cancelButton.TextColor3 = Color3.new(1, 1, 1)
-        cancelButton.Font = Enum.Font.GothamSemibold
-        cancelButton.TextSize = 16
-        cancelButton.AutoButtonColor = false
-        Instance.new("UICorner", cancelButton).CornerRadius = UDim.new(0, 8)
-        cancelButton.Parent = buttonFrame
+    local cancelButton = Instance.new("TextButton")
+    cancelButton.Text = "Cancel"
+    cancelButton.Size = UDim2.new(0.45, 0, 1, 0)
+    cancelButton.Position = UDim2.new(0.55, 0, 0, 0)
+    cancelButton.BackgroundColor3 = Color3.fromRGB(180, 80, 80)
+    cancelButton.TextColor3 = Color3.new(1, 1, 1)
+    cancelButton.Font = Enum.Font.GothamSemibold
+    cancelButton.TextSize = 16
+    cancelButton.AutoButtonColor = false
+    Instance.new("UICorner", cancelButton).CornerRadius = UDim.new(0, 8)
+    cancelButton.Parent = buttonFrame
 
-        local function createLine(button)
-            local line = Instance.new("Frame")
-            line.Name = "SelectionLine"
-            line.AnchorPoint = Vector2.new(0.5, 1)
-            line.Position = UDim2.new(0.5, 0, 1, -1)
-            line.Size = UDim2.new(1, 0, 0, 2)
-            line.BackgroundColor3 = Color3.fromRGB(207, 114, 151)
-            line.BorderSizePixel = 0
-            line.ZIndex = 10
+    local function createLine(button)
+        local line = Instance.new("Frame")
+        line.Name = "SelectionLine"
+        line.AnchorPoint = Vector2.new(0.5, 1)
+        line.Position = UDim2.new(0.5, 0, 1, -1)
+        line.Size = UDim2.new(1, 0, 0, 2)
+        line.BackgroundColor3 = Color3.fromRGB(207, 114, 151)
+        line.BorderSizePixel = 0
+        line.ZIndex = 10
+        Instance.new("UICorner", line).CornerRadius = UDim.new(0, 6)
+        line.Parent = button
+        return line
+    end
 
-            local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(0, 6)
-            corner.Parent = line
+    local function animateLineExpand(line)
+        local tween = TweenService:Create(line, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Size = UDim2.new(1, 0, 0, 4)
+        })
+        tween:Play()
+    end
 
-            line.Parent = button
-            return line
+    local function animateLineCollapse(line)
+        local tween = TweenService:Create(line, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            Size = UDim2.new(0, 0, 0, 4)
+        })
+        tween:Play()
+        tween.Completed:Wait()
+        line:Destroy()
+    end
+
+    local function updatePlayerList()
+        for _, child in ipairs(scrollFrame:GetChildren()) do
+            if child:IsA("TextButton") then child:Destroy() end
         end
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= Players.LocalPlayer then
+                local playerButton = Instance.new("TextButton")
+                playerButton.Text = string.format("%s (@%s)", player.DisplayName, player.Name)
+                playerButton.Size = UDim2.new(1, 0, 0, 40)
+                playerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+                playerButton.TextColor3 = Color3.new(1, 1, 1)
+                playerButton.Font = Enum.Font.Gotham
+                playerButton.TextSize = 14
+                playerButton.AutoButtonColor = false
+                Instance.new("UICorner", playerButton).CornerRadius = UDim.new(0, 6)
+                playerButton.Parent = scrollFrame
 
-        local function animateLineExpand(line)
-            local tween = TweenService:Create(line, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Size = UDim2.new(1, 0, 0, 4)
-            })
-            tween:Play()
-        end
-
-        local function animateLineCollapse(line)
-            local tween = TweenService:Create(line, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-                Size = UDim2.new(0, 0, 0, 4)
-            })
-            tween:Play()
-            tween.Completed:Wait()
-            line:Destroy()
-        end
-
-        local function updatePlayerList()
-            for _, child in ipairs(scrollFrame:GetChildren()) do
-                if child:IsA("TextButton") then child:Destroy() end
-            end
-
-            for _, player in ipairs(Players:GetPlayers()) do
-                if player ~= Players.LocalPlayer then
-                    local playerButton = Instance.new("TextButton")
-                    playerButton.Text = string.format("%s (@%s)", player.DisplayName, player.Name)
-                    playerButton.Size = UDim2.new(1, 0, 0, 40)
-                    playerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
-                    playerButton.TextColor3 = Color3.new(1, 1, 1)
-                    playerButton.Font = Enum.Font.Gotham
-                    playerButton.TextSize = 14
-                    playerButton.AutoButtonColor = false
-                    Instance.new("UICorner", playerButton).CornerRadius = UDim.new(0, 6)
-                    playerButton.Parent = scrollFrame
-
-                    playerButton.MouseButton1Click:Connect(function()
-                        if selectedPlayer == player then
-                            if selectedLine then
-                                animateLineCollapse(selectedLine)
-                                selectedPlayer = nil
-                                selectedLine = nil
-                                selectedButton = nil
-                            end
-                        else
-                            if selectedLine then
-                                animateLineCollapse(selectedLine)
-                            end
-                            selectedPlayer = player
-                            selectedButton = playerButton
-                            selectedLine = createLine(playerButton)
-                            animateLineExpand(selectedLine)
+                playerButton.MouseButton1Click:Connect(function()
+                    if selectedPlayer == player then
+                        if selectedLine then
+                            animateLineCollapse(selectedLine)
+                            selectedPlayer = nil
+                            selectedLine = nil
+                            selectedButton = nil
                         end
-                    end)
-                end
+                    else
+                        if selectedLine then animateLineCollapse(selectedLine) end
+                        selectedPlayer = player
+                        selectedButton = playerButton
+                        selectedLine = createLine(playerButton)
+                        animateLineExpand(selectedLine)
+                    end
+                end)
             end
         end
+    end
 
-        updatePlayerList()
-        Players.PlayerAdded:Connect(updatePlayerList)
-        Players.PlayerRemoving:Connect(updatePlayerList)
+    updatePlayerList()
+    Players.PlayerAdded:Connect(updatePlayerList)
+    Players.PlayerRemoving:Connect(updatePlayerList)
 
-        continueButton.MouseButton1Click:Connect(function()
-            if selectedPlayer then
-                getgenv().ThePlayerWhoSupports = selectedPlayer
-                playerSelectionUI:Destroy()
-                BoredLibrary.prompt("Sakura Hub", "Preparation Step Completed 1/1", 1.5)
-                BoredLibrary.prompt("Sakura Hub", "✅ Summoner selected!", 1.5)
-                local root = Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if root then root.CFrame = CFrame.new(-1212, -150, -324) end
-                completed = true
-            else
-                BoredLibrary.prompt("Sakura Hub", "⚠️ Select a player first!", 1.5)
-            end
-        end)
-
-        cancelButton.MouseButton1Click:Connect(function()
+    continueButton.MouseButton1Click:Connect(function()
+        if selectedPlayer then
+            getgenv().ThePlayerWhoSupports = selectedPlayer
             playerSelectionUI:Destroy()
-            getgenv().AutoFarmDekuMainAcc = false
-            completed = false
-        end)
-
-        mainFrame.Size = UDim2.new(0, 300, 0, 0)
-        TweenService:Create(mainFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, 300, 0, 250)}):Play()
-
-        while playerSelectionUI.Parent and getgenv().AutoFarmDekuMainAcc do task.wait() end
+            BoredLibrary.prompt("Sakura Hub", "Preparation Step Completed 1/1", 1.5)
+            BoredLibrary.prompt("Sakura Hub", "✅ Summoner selected!", 1.0)
+            local root = Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if root then root.CFrame = CFrame.new(-1212, -150, -324) end
+            completed = true
+            selectionCompletedEvent:Fire()
+        else
+            BoredLibrary.prompt("Sakura Hub", "⚠️ Select a player first!", 1.5)
+        end
     end)
 
-    -- Вторая часть — фарм запускается только после выбора игрока
+    cancelButton.MouseButton1Click:Connect(function()
+        playerSelectionUI:Destroy()
+        getgenv().AutoFarmDekuMainAcc = false
+        completed = false
+        selectionCompletedEvent:Fire()
+    end)
+
+    mainFrame.Size = UDim2.new(0, 300, 0, 0)
+    TweenService:Create(mainFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, 300, 0, 250)}):Play()
+
+    -- ⏳ Ждём выбора игрока
+    selectionCompletedEvent.Event:Wait()
+
+    -- ✅ Если пользователь выбрал игрока — запускаем фарм
     if completed and getgenv().AutoFarmDekuMainAcc and getgenv().ThePlayerWhoSupports then
         task.spawn(function()
             while getgenv().AutoFarmDekuMainAcc do
                 pcall(function()
-                    -- Здесь будет логика фарма
+                    -- Твоя логика фарма
                     BoredLibrary.prompt("Sakura Hub", "Ponos test", 1.5)
                 end)
                 task.wait()
