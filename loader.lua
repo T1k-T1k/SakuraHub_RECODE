@@ -2417,6 +2417,141 @@ end
 
 -- Strange thing End
 
+getgenv().UsingDekuFarmMain = function()
+    task.spawn(function()
+        while getgenv().AutoFarmDekuMainAcc == true do
+            pcall(function()
+                -- Создаем окно выбора игрока
+                local selectedPlayer = nil
+                local playerSelectionUI = Instance.new("ScreenGui")
+                playerSelectionUI.Name = "PlayerSelectionUI"
+                playerSelectionUI.Parent = game:GetService("CoreGui")
+                
+                local mainFrame = Instance.new("Frame")
+                mainFrame.Size = UDim2.new(0, 350, 0, 400)
+                mainFrame.Position = UDim2.new(0.5, -175, 0.5, -200)
+                mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                mainFrame.Parent = playerSelectionUI
+                
+                local title = Instance.new("TextLabel")
+                title.Text = "Select the player who will be the summoner"
+                title.Size = UDim2.new(1, 0, 0, 30)
+                title.Position = UDim2.new(0, 0, 0, 0)
+                title.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                title.TextColor3 = Color3.new(1, 1, 1)
+                title.Font = Enum.Font.GothamBold
+                title.Parent = mainFrame
+                
+                local scrollFrame = Instance.new("ScrollingFrame")
+                scrollFrame.Size = UDim2.new(1, -10, 1, -80)
+                scrollFrame.Position = UDim2.new(0, 5, 0, 35)
+                scrollFrame.BackgroundTransparency = 1
+                scrollFrame.Parent = mainFrame
+                
+                local continueButton = Instance.new("TextButton")
+                continueButton.Text = "Continue"
+                continueButton.Size = UDim2.new(0.4, 0, 0, 30)
+                continueButton.Position = UDim2.new(0.1, 0, 1, -40)
+                continueButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+                continueButton.TextColor3 = Color3.new(1, 1, 1)
+                continueButton.Font = Enum.Font.Gotham
+                continueButton.Parent = mainFrame
+                
+                local cancelButton = Instance.new("TextButton")
+                cancelButton.Text = "Cancel"
+                cancelButton.Size = UDim2.new(0.4, 0, 0, 30)
+                cancelButton.Position = UDim2.new(0.5, 0, 1, -40)
+                cancelButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+                cancelButton.TextColor3 = Color3.new(1, 1, 1)
+                cancelButton.Font = Enum.Font.Gotham
+                cancelButton.Parent = mainFrame
+                
+                -- Функция обновления списка игроков
+                local function updatePlayerList()
+                    local players = game:GetService("Players"):GetPlayers()
+                    local localPlayer = game:GetService("Players").LocalPlayer
+                    
+                    -- Очищаем предыдущий список
+                    for _, child in ipairs(scrollFrame:GetChildren()) do
+                        if child:IsA("TextButton") then
+                            child:Destroy()
+                        end
+                    end
+                    
+                    -- Добавляем текущих игроков (кроме себя)
+                    for i, player in ipairs(players) do
+                        if player ~= localPlayer then
+                            local playerButton = Instance.new("TextButton")
+                            playerButton.Text = string.format("%s (@%s)", player.DisplayName, player.Name)
+                            playerButton.Size = UDim2.new(1, 0, 0, 30)
+                            playerButton.Position = UDim2.new(0, 0, 0, (i-1)*35)
+                            playerButton.BackgroundColor3 = selectedPlayer == player and Color3.fromRGB(80, 120, 80) or Color3.fromRGB(60, 60, 60)
+                            playerButton.TextColor3 = Color3.new(1, 1, 1)
+                            playerButton.Font = Enum.Font.Gotham
+                            playerButton.Parent = scrollFrame
+                            
+                            playerButton.MouseButton1Click:Connect(function()
+                                selectedPlayer = player
+                                updatePlayerList()
+                            end)
+                        end
+                    end
+                end
+                
+                -- Обновляем список каждую секунду
+                local updateConnection
+                updateConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                    updatePlayerList()
+                    task.wait(1)
+                end)
+                
+                -- Обработчики кнопок
+                continueButton.MouseButton1Click:Connect(function()
+                    if selectedPlayer then
+                        getgenv().ThePlayerWhoSupports = selectedPlayer
+                        playerSelectionUI:Destroy()
+                        updateConnection:Disconnect()
+                        
+                        BoredLibrary.prompt("Sakura Hub   🌸","Preparation Step Completed 1/1",1.0)
+                        
+                        -- Телепортация на координаты
+                        local character = game:GetService("Players").LocalPlayer.Character
+                        if character then
+                            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                            if humanoidRootPart then
+                                humanoidRootPart.CFrame = CFrame.new(-1212, -150, -324)
+                            end
+                        end
+                    else
+                        BoredLibrary.prompt("Sakura Hub   🌸","Please select a player first",1.0)
+                    end
+                end)
+                
+                cancelButton.MouseButton1Click:Connect(function()
+                    playerSelectionUI:Destroy()
+                    updateConnection:Disconnect()
+                    getgenv().AutoFarmDekuMainAcc = false
+                end)
+                
+                -- Первоначальное обновление списка
+                updatePlayerList()
+                
+                -- Ждем пока окно не закроют
+                while playerSelectionUI.Parent do
+                    task.wait()
+                end
+                
+                -- Основной цикл фарма (после выбора игрока)
+                while getgenv().AutoFarmDekuMainAcc and getgenv().ThePlayerWhoSupports do
+                    -- Здесь основная логика фарма
+                    task.wait()
+                end
+            end)
+            task.wait()
+        end
+    end)
+end
+
 -- Deku Farm Logic
 
 getgenv().UsingDekuAutofarm1 = function()
