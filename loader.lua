@@ -2613,6 +2613,15 @@ getgenv().UsingDekuFarmMain = function()
             task.wait()
         end
     end)
+
+    task.spawn(function()
+        while getgenv().AutoFarmDekuMainAcc == true do
+            pcall(function()
+                BoredLibrary.prompt("Sakura Hub", "Ponos test", 1.5)
+            end)
+            task.wait()  -- Задержка, чтобы не нагружать систему
+        end
+    end)
 end
 
 -- Deku Farm Logic
