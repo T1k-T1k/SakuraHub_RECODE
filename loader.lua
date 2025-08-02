@@ -2594,6 +2594,7 @@ getgenv().UsingDekuFarmMain = function()
                     if selectedPlayer then
                         getgenv().ThePlayerWhoSupports = selectedPlayer
                         playerSelectionUI:Destroy()
+                        BoredLibrary.prompt("Sakura Hub", "Preparation Step Completed 1/1", 1.5)
                         BoredLibrary.prompt("Sakura Hub", "✅ Summoner selected!", 1.5)
                         local root = Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                         if root then root.CFrame = CFrame.new(-1212, -150, -324) end
