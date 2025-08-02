@@ -2433,7 +2433,7 @@ getgenv().UsingDekuFarmMain = function()
 
                 -- Основной контейнер (с закругленными углами)
                 local mainFrame = Instance.new("Frame")
-                mainFrame.Size = UDim2.new(0, 220, 0, 350) -- Уменьшил размер для телефона
+                mainFrame.Size = UDim2.new(0, 300, 0, 250) -- Уменьшил размер для телефона
                 mainFrame.Position = UDim2.new(0.5, -150, 0.5, -175)
                 mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
                 mainFrame.BorderSizePixel = 0
@@ -2623,8 +2623,8 @@ getgenv().UsingDekuFarmMain = function()
                 end)
 
                 -- Анимация появления
-                mainFrame.Size = UDim2.new(0, 220, 0, 0)
-                game:GetService("TweenService"):Create(mainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 220, 0, 350)}):Play()
+                mainFrame.Size = UDim2.new(0, 300, 0, 0)
+                game:GetService("TweenService"):Create(mainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 300, 0, 250)}):Play()
 
                 -- Первоначальное обновление списка
                 updatePlayerList()
