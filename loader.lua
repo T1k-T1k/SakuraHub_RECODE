@@ -4462,7 +4462,7 @@ FarmingTab.newToggle("Start Farming (Support Account)","This account will summon
     getgenv().UsingDekuFarmAlt();
 end)
 
-StorageTab.newLabel("-------------------------------------------------------------------");
+FarmingTab.newLabel("-------------------------------------------------------------------");
 
 FarmingTab.newToggle("Start Farming (Without Support)","This account will do everything solo (In Development)",getgenv().AutoFarmDekuSolo or false,function(Value)
     -- getgenv().AutoFarmDekuSolo = Value
