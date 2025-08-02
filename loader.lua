@@ -2421,51 +2421,125 @@ getgenv().UsingDekuFarmMain = function()
     task.spawn(function()
         while getgenv().AutoFarmDekuMainAcc == true do
             pcall(function()
-                -- Создаем окно выбора игрока
+                -- Создаем красивое GUI для выбора игрока
                 local selectedPlayer = nil
                 local playerSelectionUI = Instance.new("ScreenGui")
-                playerSelectionUI.Name = "PlayerSelectionUI"
+                playerSelectionUI.Name = "SakuraPlayerSelection"
+                playerSelectionUI.ResetOnSpawn = false
+                playerSelectionUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
                 playerSelectionUI.Parent = game:GetService("CoreGui")
-                
+
+                -- Основной контейнер (с закругленными углами)
                 local mainFrame = Instance.new("Frame")
-                mainFrame.Size = UDim2.new(0, 350, 0, 400)
-                mainFrame.Position = UDim2.new(0.5, -175, 0.5, -200)
-                mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                mainFrame.Size = UDim2.new(0, 300, 0, 350) -- Уменьшил размер для телефона
+                mainFrame.Position = UDim2.new(0.5, -150, 0.5, -175)
+                mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+                mainFrame.BorderSizePixel = 0
+                mainFrame.ClipsDescendants = true
                 mainFrame.Parent = playerSelectionUI
-                
+
+                -- Скругление углов
+                local UICorner = Instance.new("UICorner")
+                UICorner.CornerRadius = UDim.new(0, 12)
+                UICorner.Parent = mainFrame
+
+                -- Тень (для красоты)
+                local UIStroke = Instance.new("UIStroke")
+                UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                UIStroke.Color = Color3.fromRGB(80, 80, 90)
+                UIStroke.Thickness = 2
+                UIStroke.Parent = mainFrame
+
+                -- Заголовок (красивый, с градиентом)
+                local titleFrame = Instance.new("Frame")
+                titleFrame.Size = UDim2.new(1, 0, 0, 40)
+                titleFrame.Position = UDim2.new(0, 0, 0, 0)
+                titleFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+                titleFrame.BorderSizePixel = 0
+                titleFrame.Parent = mainFrame
+
+                local titleCorner = Instance.new("UICorner")
+                titleCorner.CornerRadius = UDim.new(0, 12)
+                titleCorner.Parent = titleFrame
+
                 local title = Instance.new("TextLabel")
-                title.Text = "Select the player who will be the summoner"
-                title.Size = UDim2.new(1, 0, 0, 30)
-                title.Position = UDim2.new(0, 0, 0, 0)
-                title.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-                title.TextColor3 = Color3.new(1, 1, 1)
+                title.Text = "🌸 Select Summoner"
+                title.Size = UDim2.new(1, -20, 1, 0)
+                title.Position = UDim2.new(0, 10, 0, 0)
+                title.BackgroundTransparency = 1
+                title.TextColor3 = Color3.fromRGB(255, 220, 240)
                 title.Font = Enum.Font.GothamBold
-                title.Parent = mainFrame
-                
+                title.TextSize = 18
+                title.TextXAlignment = Enum.TextXAlignment.Left
+                title.Parent = titleFrame
+
+                -- Список игроков (с скроллом)
                 local scrollFrame = Instance.new("ScrollingFrame")
-                scrollFrame.Size = UDim2.new(1, -10, 1, -80)
-                scrollFrame.Position = UDim2.new(0, 5, 0, 35)
+                scrollFrame.Size = UDim2.new(1, -10, 1, -100)
+                scrollFrame.Position = UDim2.new(0, 5, 0, 45)
                 scrollFrame.BackgroundTransparency = 1
+                scrollFrame.ScrollBarThickness = 4
+                scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+                scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
                 scrollFrame.Parent = mainFrame
-                
+
+                local scrollLayout = Instance.new("UIListLayout")
+                scrollLayout.Padding = UDim.new(0, 5)
+                scrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                scrollLayout.Parent = scrollFrame
+
+                -- Кнопки (красивые, с анимацией)
+                local buttonFrame = Instance.new("Frame")
+                buttonFrame.Size = UDim2.new(1, -20, 0, 40)
+                buttonFrame.Position = UDim2.new(0, 10, 1, -50)
+                buttonFrame.BackgroundTransparency = 1
+                buttonFrame.Parent = mainFrame
+
                 local continueButton = Instance.new("TextButton")
                 continueButton.Text = "Continue"
-                continueButton.Size = UDim2.new(0.4, 0, 0, 30)
-                continueButton.Position = UDim2.new(0.1, 0, 1, -40)
-                continueButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+                continueButton.Size = UDim2.new(0.45, 0, 1, 0)
+                continueButton.Position = UDim2.new(0, 0, 0, 0)
+                continueButton.BackgroundColor3 = Color3.fromRGB(80, 180, 120)
                 continueButton.TextColor3 = Color3.new(1, 1, 1)
-                continueButton.Font = Enum.Font.Gotham
-                continueButton.Parent = mainFrame
-                
+                continueButton.Font = Enum.Font.GothamSemibold
+                continueButton.TextSize = 16
+                continueButton.AutoButtonColor = false
+                continueButton.Parent = buttonFrame
+
                 local cancelButton = Instance.new("TextButton")
                 cancelButton.Text = "Cancel"
-                cancelButton.Size = UDim2.new(0.4, 0, 0, 30)
-                cancelButton.Position = UDim2.new(0.5, 0, 1, -40)
-                cancelButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+                cancelButton.Size = UDim2.new(0.45, 0, 1, 0)
+                cancelButton.Position = UDim2.new(0.55, 0, 0, 0)
+                cancelButton.BackgroundColor3 = Color3.fromRGB(180, 80, 80)
                 cancelButton.TextColor3 = Color3.new(1, 1, 1)
-                cancelButton.Font = Enum.Font.Gotham
-                cancelButton.Parent = mainFrame
-                
+                cancelButton.Font = Enum.Font.GothamSemibold
+                cancelButton.TextSize = 16
+                cancelButton.AutoButtonColor = false
+                cancelButton.Parent = buttonFrame
+
+                -- Закругление кнопок
+                local continueCorner = Instance.new("UICorner")
+                continueCorner.CornerRadius = UDim.new(0, 8)
+                continueCorner.Parent = continueButton
+
+                local cancelCorner = Instance.new("UICorner")
+                cancelCorner.CornerRadius = UDim.new(0, 8)
+                cancelCorner.Parent = cancelButton
+
+                -- Анимация кнопок (при наведении)
+                local function buttonHoverEffect(button, hoverColor)
+                    local originalColor = button.BackgroundColor3
+                    button.MouseEnter:Connect(function()
+                        game:GetService("TweenService"):Create(button, TweenInfo.new(0.15), {BackgroundColor3 = hoverColor}):Play()
+                    end)
+                    button.MouseLeave:Connect(function()
+                        game:GetService("TweenService"):Create(button, TweenInfo.new(0.15), {BackgroundColor3 = originalColor}):Play()
+                    end)
+                end
+
+                buttonHoverEffect(continueButton, Color3.fromRGB(100, 200, 140))
+                buttonHoverEffect(cancelButton, Color3.fromRGB(200, 100, 100))
+
                 -- Функция обновления списка игроков
                 local function updatePlayerList()
                     local players = game:GetService("Players"):GetPlayers()
@@ -2479,17 +2553,27 @@ getgenv().UsingDekuFarmMain = function()
                     end
                     
                     -- Добавляем текущих игроков (кроме себя)
-                    for i, player in ipairs(players) do
+                    for _, player in ipairs(players) do
                         if player ~= localPlayer then
                             local playerButton = Instance.new("TextButton")
                             playerButton.Text = string.format("%s (@%s)", player.DisplayName, player.Name)
-                            playerButton.Size = UDim2.new(1, 0, 0, 30)
-                            playerButton.Position = UDim2.new(0, 0, 0, (i-1)*35)
-                            playerButton.BackgroundColor3 = selectedPlayer == player and Color3.fromRGB(80, 120, 80) or Color3.fromRGB(60, 60, 60)
+                            playerButton.Size = UDim2.new(1, 0, 0, 40) -- Увеличил высоту для удобства на телефоне
+                            playerButton.BackgroundColor3 = selectedPlayer == player and Color3.fromRGB(90, 140, 90) or Color3.fromRGB(50, 50, 55)
                             playerButton.TextColor3 = Color3.new(1, 1, 1)
                             playerButton.Font = Enum.Font.Gotham
+                            playerButton.TextSize = 14
+                            playerButton.AutoButtonColor = false
+                            playerButton.LayoutOrder = #scrollFrame:GetChildren()
                             playerButton.Parent = scrollFrame
-                            
+
+                            -- Закругление кнопки игрока
+                            local buttonCorner = Instance.new("UICorner")
+                            buttonCorner.CornerRadius = UDim.new(0, 6)
+                            buttonCorner.Parent = playerButton
+
+                            -- Анимация при наведении
+                            buttonHoverEffect(playerButton, selectedPlayer == player and Color3.fromRGB(100, 160, 100) or Color3.fromRGB(70, 70, 75))
+
                             playerButton.MouseButton1Click:Connect(function()
                                 selectedPlayer = player
                                 updatePlayerList()
@@ -2497,14 +2581,14 @@ getgenv().UsingDekuFarmMain = function()
                         end
                     end
                 end
-                
+
                 -- Обновляем список каждую секунду
                 local updateConnection
                 updateConnection = game:GetService("RunService").Heartbeat:Connect(function()
                     updatePlayerList()
                     task.wait(1)
                 end)
-                
+
                 -- Обработчики кнопок
                 continueButton.MouseButton1Click:Connect(function()
                     if selectedPlayer then
@@ -2512,35 +2596,42 @@ getgenv().UsingDekuFarmMain = function()
                         playerSelectionUI:Destroy()
                         updateConnection:Disconnect()
                         
-                        BoredLibrary.prompt("Sakura Hub   🌸","Preparation Step Completed 1/1",1.0)
+                        -- Красивое уведомление
+                        BoredLibrary.prompt("Sakura Hub   🌸", "✅ Summoner selected: " .. selectedPlayer.DisplayName, 1.5)
                         
-                        -- Телепортация на координаты
+                        -- Телепортация на координаты (с эффектом)
                         local character = game:GetService("Players").LocalPlayer.Character
                         if character then
                             local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
                             if humanoidRootPart then
-                                humanoidRootPart.CFrame = CFrame.new(-1212, -150, -324)
+                                game:GetService("TweenService"):Create(humanoidRootPart, TweenInfo.new(0.5), {CFrame = CFrame.new(-1212, -150, -324)}):Play()
                             end
                         end
                     else
-                        BoredLibrary.prompt("Sakura Hub   🌸","Please select a player first",1.0)
+                        BoredLibrary.prompt("Sakura Hub   🌸", "⚠️ Please select a player first!", 1.5)
                     end
                 end)
                 
                 cancelButton.MouseButton1Click:Connect(function()
+                    game:GetService("TweenService"):Create(mainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 300, 0, 0)}):Play()
+                    task.wait(0.3)
                     playerSelectionUI:Destroy()
                     updateConnection:Disconnect()
                     getgenv().AutoFarmDekuMainAcc = false
                 end)
-                
+
+                -- Анимация появления
+                mainFrame.Size = UDim2.new(0, 300, 0, 0)
+                game:GetService("TweenService"):Create(mainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 300, 0, 350)}):Play()
+
                 -- Первоначальное обновление списка
                 updatePlayerList()
                 
-                -- Ждем пока окно не закроют
+                -- Ждем, пока GUI не закроют
                 while playerSelectionUI.Parent do
                     task.wait()
                 end
-                
+
                 -- Основной цикл фарма (после выбора игрока)
                 while getgenv().AutoFarmDekuMainAcc and getgenv().ThePlayerWhoSupports do
                     -- Здесь основная логика фарма
