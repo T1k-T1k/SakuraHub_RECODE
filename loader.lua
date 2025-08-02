@@ -2423,6 +2423,9 @@ getgenv().UsingDekuFarmMain = function()
     task.spawn(function()
         while getgenv().AutoFarmDekuMainAcc == true do
             pcall(function()
+                local Players = game:GetService("Players")
+                local TweenService = game:GetService("TweenService")
+
                 local selectedPlayer = nil
                 local selectedLine = nil
                 local selectedButton = nil
@@ -2509,22 +2512,38 @@ getgenv().UsingDekuFarmMain = function()
                 Instance.new("UICorner", cancelButton).CornerRadius = UDim.new(0, 8)
                 cancelButton.Parent = buttonFrame
 
-                local function createSelectionLine(parent)
+                local function createLine(button)
                     local line = Instance.new("Frame")
                     line.Name = "SelectionLine"
-                    line.Size = UDim2.new(1, 0, 0, 2)
-                    line.Position = UDim2.new(0, 0, 1, -2)
+                    line.AnchorPoint = Vector2.new(0.5, 0.5)
+                    line.Position = UDim2.new(0.5, 0, 1.1, 0)
+                    line.Size = UDim2.new(0, 0, 0, 4)
                     line.BackgroundColor3 = Color3.fromRGB(207, 114, 151)
                     line.BorderSizePixel = 0
-                    line.Parent = parent
+                    line.ZIndex = 10
+
+                    local corner = Instance.new("UICorner")
+                    corner.CornerRadius = UDim.new(1, 0)
+                    corner.Parent = line
+
+                    line.Parent = button
                     return line
                 end
 
-                local function removeSelectionLine()
-                    if selectedLine then
-                        selectedLine:Destroy()
-                        selectedLine = nil
-                    end
+                local function animateLineExpand(line)
+                    local tween = TweenService:Create(line, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        Size = UDim2.new(1, 0, 0, 4)
+                    })
+                    tween:Play()
+                end
+
+                local function animateLineCollapse(line)
+                    local tween = TweenService:Create(line, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+                        Size = UDim2.new(0, 0, 0, 4)
+                    })
+                    tween:Play()
+                    tween.Completed:Wait()
+                    line:Destroy()
                 end
 
                 local function updatePlayerList()
@@ -2532,11 +2551,8 @@ getgenv().UsingDekuFarmMain = function()
                         if child:IsA("TextButton") then child:Destroy() end
                     end
 
-                    local players = game:GetService("Players"):GetPlayers()
-                    local localPlayer = game:GetService("Players").LocalPlayer
-
-                    for _, player in ipairs(players) do
-                        if player ~= localPlayer then
+                    for _, player in ipairs(Players:GetPlayers()) do
+                        if player ~= Players.LocalPlayer then
                             local playerButton = Instance.new("TextButton")
                             playerButton.Text = string.format("%s (@%s)", player.DisplayName, player.Name)
                             playerButton.Size = UDim2.new(1, 0, 0, 40)
@@ -2549,27 +2565,37 @@ getgenv().UsingDekuFarmMain = function()
                             playerButton.Parent = scrollFrame
 
                             playerButton.MouseButton1Click:Connect(function()
-                                removeSelectionLine()
-                                selectedPlayer = player
-                                selectedButton = playerButton
-                                selectedLine = createSelectionLine(playerButton)
+                                if selectedPlayer == player then
+                                    if selectedLine then
+                                        animateLineCollapse(selectedLine)
+                                        selectedPlayer = nil
+                                        selectedLine = nil
+                                        selectedButton = nil
+                                    end
+                                else
+                                    if selectedLine then
+                                        animateLineCollapse(selectedLine)
+                                    end
+                                    selectedPlayer = player
+                                    selectedButton = playerButton
+                                    selectedLine = createLine(playerButton)
+                                    animateLineExpand(selectedLine)
+                                end
                             end)
                         end
                     end
                 end
 
                 updatePlayerList()
-
-                local playersService = game:GetService("Players")
-                playersService.PlayerAdded:Connect(updatePlayerList)
-                playersService.PlayerRemoving:Connect(updatePlayerList)
+                Players.PlayerAdded:Connect(updatePlayerList)
+                Players.PlayerRemoving:Connect(updatePlayerList)
 
                 continueButton.MouseButton1Click:Connect(function()
                     if selectedPlayer then
                         getgenv().ThePlayerWhoSupports = selectedPlayer
                         playerSelectionUI:Destroy()
                         BoredLibrary.prompt("Sakura Hub", "✅ Summoner selected!", 1.5)
-                        local root = game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                        local root = Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                         if root then root.CFrame = CFrame.new(-1212, -150, -324) end
                     else
                         BoredLibrary.prompt("Sakura Hub", "⚠️ Select a player first!", 1.5)
@@ -2581,14 +2607,11 @@ getgenv().UsingDekuFarmMain = function()
                     getgenv().AutoFarmDekuMainAcc = false
                 end)
 
-                -- Анимация появления
                 mainFrame.Size = UDim2.new(0, 300, 0, 0)
-                game:GetService("TweenService"):Create(mainFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, 300, 0, 250)}):Play()
+                TweenService:Create(mainFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, 300, 0, 250)}):Play()
 
                 while playerSelectionUI.Parent do task.wait() end
-                while getgenv().AutoFarmDekuMainAcc and getgenv().ThePlayerWhoSupports do
-                    task.wait()
-                end
+                while getgenv().AutoFarmDekuMainAcc and getgenv().ThePlayerWhoSupports do task.wait() end
             end)
             task.wait()
         end
