@@ -2511,7 +2511,9 @@ getgenv().UsingDekuFarmMain = function()
                 cancelButton.AutoButtonColor = false
                 cancelButton.Parent = buttonFrame
 
-                -- Закругление кнопок
+                -- Закругление
+                Instance.new("UICorner", titleFrame).CornerRadius = UDim.new(0, 12)
+
                 Instance.new("UICorner", continueButton).CornerRadius = UDim.new(0, 8)
                 Instance.new("UICorner", cancelButton).CornerRadius = UDim.new(0, 8)
 
