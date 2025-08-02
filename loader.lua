@@ -2913,6 +2913,7 @@ getgenv().UsingDekuFarmMain = function()
             setNoClip(false)
         end)
     end
+end
 
 -- Deku Farm Logic
 
