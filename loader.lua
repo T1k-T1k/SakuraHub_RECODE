@@ -2825,6 +2825,17 @@ getgenv().UsingDekuFarmMain = function()
             end
             
             -- Отслеживание Roland квеста (исправленная версия)
+            local function checkRolandDamaged()
+                local roland = workspace.Living:FindFirstChild("Roland")
+                if roland and roland:FindFirstChild("Humanoid") then
+                    local currentHP = roland.Humanoid.Health
+                    local maxHP = roland.Humanoid.MaxHealth
+                    -- Считаем что Roland получил урон если его HP меньше максимального
+                    return currentHP < maxHP
+                end
+                return false
+            end
+            
             local function handleRolandQuest()
                 local proximityPrompt = workspace.Map.RuinedCity.Spawn:FindFirstChild("ProximityPromptB")
                 local rolandExists = workspace.Living:FindFirstChild("Roland")
@@ -2849,55 +2860,66 @@ getgenv().UsingDekuFarmMain = function()
                     
                     local roland = workspace.Living:FindFirstChild("Roland")
                     if roland then
-                        print("Starting Roland fight")
-                        isKillingBoss = true
-                        setNoClip(true)
-                        updateMaxHP() -- Обновляем максимальное HP
+                        print("Roland spawned, waiting for damage...")
                         
-                        -- Основной цикл атаки босса
-                        while workspace.Living:FindFirstChild("Roland") and getgenv().AutoFarmDekuMainAcc do
-                            local currentRoland = workspace.Living:FindFirstChild("Roland")
-                            if currentRoland then
-                                -- Постоянно телепортируемся к боссу каждые 0.1 сек
-                                teleportToBoss(currentRoland)
-                                
-                                -- Выполняем комбо атаку
-                                task.spawn(function()
-                                    performBossCombo()
-                                end)
-                                
-                                -- Проверяем урон
-                                if checkPlayerDamage() then
-                                    teleportToVoid()
-                                    -- Ждем респавна
-                                    while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
-                                        task.wait(0.1)
+                        -- Ждем пока Roland не получит урон
+                        while workspace.Living:FindFirstChild("Roland") and not checkRolandDamaged() and getgenv().AutoFarmDekuMainAcc do
+                            task.wait(0.1)
+                            print("Roland HP:", workspace.Living:FindFirstChild("Roland") and workspace.Living.Roland.Humanoid.Health or "N/A")
+                        end
+                        
+                        -- Проверяем что Roland все еще жив и получил урон
+                        if workspace.Living:FindFirstChild("Roland") and checkRolandDamaged() then
+                            print("Roland damaged! Starting fight")
+                            isKillingBoss = true
+                            setNoClip(true)
+                            updateMaxHP() -- Обновляем максимальное HP
+                            
+                            -- Основной цикл атаки босса
+                            while workspace.Living:FindFirstChild("Roland") and getgenv().AutoFarmDekuMainAcc do
+                                local currentRoland = workspace.Living:FindFirstChild("Roland")
+                                if currentRoland then
+                                    -- Постоянно телепортируемся к боссу каждые 0.1 сек
+                                    teleportToBoss(currentRoland)
+                                    
+                                    -- Выполняем комбо атаку
+                                    task.spawn(function()
+                                        performBossCombo()
+                                    end)
+                                    
+                                    -- Проверяем урон
+                                    if checkPlayerDamage() then
+                                        teleportToVoid()
+                                        -- Ждем респавна
+                                        while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
+                                            task.wait(0.1)
+                                        end
+                                        updateMaxHP() -- Обновляем HP после респавна
                                     end
-                                    updateMaxHP() -- Обновляем HP после респавна
+                                    
+                                    task.wait(0.1) -- Повторяем каждые 0.1 секунды
+                                else
+                                    break -- Босс мертв
                                 end
-                                
-                                task.wait(0.1) -- Повторяем каждые 0.1 секунды
-                            else
-                                break -- Босс мертв
                             end
+                            
+                            -- После убийства босса завершаем квест и возвращаемся на позицию ожидания
+                            if not workspace.Living:FindFirstChild("Roland") then
+                                pcall(function()
+                                    local questRemotes = replicatedStorage:FindFirstChild("QuestRemotes")
+                                    if questRemotes and questRemotes:FindFirstChild("ClaimQuest") then
+                                        questRemotes.ClaimQuest:FireServer(33)
+                                        print("Claimed Roland quest")
+                                    end
+                                end)
+                                teleportToWaitPos() -- Возвращаемся на позицию ожидания
+                                print("Roland killed, returned to wait position")
+                            end
+                            
+                            setNoClip(false)
+                            isKillingBoss = false
+                            return true
                         end
-                        
-                        -- После убийства босса завершаем квест и возвращаемся на позицию ожидания
-                        if not workspace.Living:FindFirstChild("Roland") then
-                            pcall(function()
-                                local questRemotes = replicatedStorage:FindFirstChild("QuestRemotes")
-                                if questRemotes and questRemotes:FindFirstChild("ClaimQuest") then
-                                    questRemotes.ClaimQuest:FireServer(33)
-                                    print("Claimed Roland quest")
-                                end
-                            end)
-                            teleportToWaitPos() -- Возвращаемся на позицию ожидания
-                            print("Roland killed, returned to wait position")
-                        end
-                        
-                        setNoClip(false)
-                        isKillingBoss = false
-                        return true
                     end
                 end
                 return false
