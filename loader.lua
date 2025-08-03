@@ -3130,6 +3130,204 @@ end
 
 -- Deku Farm New
 
+getgenv().UsingDekuFarmAlt = function()
+    local Players = game:GetService("Players")
+    local TweenService = game:GetService("TweenService")
+
+    local selectedPlayerKiller = nil
+    local selectedKillerLine = nil
+    local selectedKillerButton = nil
+
+    local killerSelectionCompletedEvent = Instance.new("BindableEvent")
+    local killerSelectionCompleted = false
+
+    local killerSelectionUI = Instance.new("ScreenGui")
+    killerSelectionUI.Name = "SakuraKillerSelection"
+    killerSelectionUI.ResetOnSpawn = false
+    killerSelectionUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    killerSelectionUI.Parent = game:GetService("CoreGui")
+
+    local killerMainFrame = Instance.new("Frame")
+    killerMainFrame.Size = UDim2.new(0, 300, 0, 250)
+    killerMainFrame.Position = UDim2.new(0.5, -150, 0.5, -125)
+    killerMainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    killerMainFrame.BorderSizePixel = 0
+    killerMainFrame.ClipsDescendants = true
+    killerMainFrame.Parent = killerSelectionUI
+    Instance.new("UICorner", killerMainFrame).CornerRadius = UDim.new(0, 12)
+
+    local killerUIStroke = Instance.new("UIStroke")
+    killerUIStroke.Color = Color3.fromRGB(80, 80, 90)
+    killerUIStroke.Thickness = 2
+    killerUIStroke.Parent = killerMainFrame
+
+    local killerTitleFrame = Instance.new("Frame")
+    killerTitleFrame.Size = UDim2.new(1, 0, 0, 40)
+    killerTitleFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+    killerTitleFrame.BorderSizePixel = 0
+    killerTitleFrame.Parent = killerMainFrame
+    Instance.new("UICorner", killerTitleFrame).CornerRadius = UDim.new(0, 12)
+
+    local killerTitle = Instance.new("TextLabel")
+    killerTitle.Text = "🌸 Select Killer"
+    killerTitle.Size = UDim2.new(1, -20, 1, 0)
+    killerTitle.Position = UDim2.new(0, 10, 0, 0)
+    killerTitle.BackgroundTransparency = 1
+    killerTitle.TextColor3 = Color3.fromRGB(255, 220, 240)
+    killerTitle.Font = Enum.Font.GothamBold
+    killerTitle.TextSize = 18
+    killerTitle.TextXAlignment = Enum.TextXAlignment.Left
+    killerTitle.Parent = killerTitleFrame
+
+    local killerScrollFrame = Instance.new("ScrollingFrame")
+    killerScrollFrame.Size = UDim2.new(1, -10, 1, -100)
+    killerScrollFrame.Position = UDim2.new(0, 5, 0, 45)
+    killerScrollFrame.BackgroundTransparency = 1
+    killerScrollFrame.ScrollBarThickness = 4
+    killerScrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    killerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    killerScrollFrame.Parent = killerMainFrame
+
+    local killerScrollLayout = Instance.new("UIListLayout")
+    killerScrollLayout.Padding = UDim.new(0, 5)
+    killerScrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    killerScrollLayout.Parent = killerScrollFrame
+
+    local killerButtonFrame = Instance.new("Frame")
+    killerButtonFrame.Size = UDim2.new(1, -20, 0, 40)
+    killerButtonFrame.Position = UDim2.new(0, 10, 1, -50)
+    killerButtonFrame.BackgroundTransparency = 1
+    killerButtonFrame.Parent = killerMainFrame
+
+    local killerContinueButton = Instance.new("TextButton")
+    killerContinueButton.Text = "Continue"
+    killerContinueButton.Size = UDim2.new(0.45, 0, 1, 0)
+    killerContinueButton.BackgroundColor3 = Color3.fromRGB(80, 180, 120)
+    killerContinueButton.TextColor3 = Color3.new(1, 1, 1)
+    killerContinueButton.Font = Enum.Font.GothamSemibold
+    killerContinueButton.TextSize = 16
+    killerContinueButton.AutoButtonColor = false
+    Instance.new("UICorner", killerContinueButton).CornerRadius = UDim.new(0, 8)
+    killerContinueButton.Parent = killerButtonFrame
+
+    local killerCancelButton = Instance.new("TextButton")
+    killerCancelButton.Text = "Cancel"
+    killerCancelButton.Size = UDim2.new(0.45, 0, 1, 0)
+    killerCancelButton.Position = UDim2.new(0.55, 0, 0, 0)
+    killerCancelButton.BackgroundColor3 = Color3.fromRGB(180, 80, 80)
+    killerCancelButton.TextColor3 = Color3.new(1, 1, 1)
+    killerCancelButton.Font = Enum.Font.GothamSemibold
+    killerCancelButton.TextSize = 16
+    killerCancelButton.AutoButtonColor = false
+    Instance.new("UICorner", killerCancelButton).CornerRadius = UDim.new(0, 8)
+    killerCancelButton.Parent = killerButtonFrame
+
+    local function createKillerLine(button)
+        local killerLine = Instance.new("Frame")
+        killerLine.Name = "KillerSelectionLine"
+        killerLine.AnchorPoint = Vector2.new(0.5, 1)
+        killerLine.Position = UDim2.new(0.5, 0, 1, -1)
+        killerLine.Size = UDim2.new(1, 0, 0, 2)
+        killerLine.BackgroundColor3 = Color3.fromRGB(207, 114, 151)
+        killerLine.BorderSizePixel = 0
+        killerLine.ZIndex = 10
+        Instance.new("UICorner", killerLine).CornerRadius = UDim.new(0, 6)
+        killerLine.Parent = button
+        return killerLine
+    end
+
+    local function animateKillerLineExpand(line)
+        local tween = TweenService:Create(line, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Size = UDim2.new(1, 0, 0, 4)
+        })
+        tween:Play()
+    end
+
+    local function animateKillerLineCollapse(line)
+        local tween = TweenService:Create(line, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            Size = UDim2.new(0, 0, 0, 4)
+        })
+        tween:Play()
+        tween.Completed:Wait()
+        line:Destroy()
+    end
+
+    local function updateKillerList()
+        for _, child in ipairs(killerScrollFrame:GetChildren()) do
+            if child:IsA("TextButton") then child:Destroy() end
+        end
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= Players.LocalPlayer then
+                local killerPlayerButton = Instance.new("TextButton")
+                killerPlayerButton.Text = string.format("%s (@%s)", player.DisplayName, player.Name)
+                killerPlayerButton.Size = UDim2.new(1, 0, 0, 40)
+                killerPlayerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+                killerPlayerButton.TextColor3 = Color3.new(1, 1, 1)
+                killerPlayerButton.Font = Enum.Font.Gotham
+                killerPlayerButton.TextSize = 14
+                killerPlayerButton.AutoButtonColor = false
+                Instance.new("UICorner", killerPlayerButton).CornerRadius = UDim.new(0, 6)
+                killerPlayerButton.Parent = killerScrollFrame
+
+                killerPlayerButton.MouseButton1Click:Connect(function()
+                    if selectedPlayerKiller == player then
+                        if selectedKillerLine then
+                            animateKillerLineCollapse(selectedKillerLine)
+                            selectedPlayerKiller = nil
+                            selectedKillerLine = nil
+                            selectedKillerButton = nil
+                        end
+                    else
+                        if selectedKillerLine then animateKillerLineCollapse(selectedKillerLine) end
+                        selectedPlayerKiller = player
+                        selectedKillerButton = killerPlayerButton
+                        selectedKillerLine = createKillerLine(killerPlayerButton)
+                        animateKillerLineExpand(selectedKillerLine)
+                    end
+                end)
+            end
+        end
+    end
+
+    updateKillerList()
+    Players.PlayerAdded:Connect(updateKillerList)
+    Players.PlayerRemoving:Connect(updateKillerList)
+
+    killerContinueButton.MouseButton1Click:Connect(function()
+        if selectedPlayerKiller then
+            getgenv().ThePlayerWhoKills = selectedPlayerKiller
+            killerSelectionUI:Destroy()
+            BoredLibrary.prompt("Sakura Hub", "Preparation Step Completed 1/1", 1.5)
+            BoredLibrary.prompt("Sakura Hub", "✅ Killer selected!", 1.0)
+            local root = Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if root then root.CFrame = CFrame.new(-1212, -150, -324) end
+            killerSelectionCompleted = true
+            killerSelectionCompletedEvent:Fire()
+        else
+            BoredLibrary.prompt("Sakura Hub", "⚠️ Select a player first!", 1.5)
+        end
+    end)
+
+    killerCancelButton.MouseButton1Click:Connect(function()
+        killerSelectionUI:Destroy()
+        getgenv().AutoFarmDekuAlt = false
+        killerSelectionCompleted = false
+        killerSelectionCompletedEvent:Fire()
+    end)
+
+    killerMainFrame.Size = UDim2.new(0, 300, 0, 0)
+    TweenService:Create(killerMainFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, 300, 0, 250)}):Play()
+
+    killerSelectionCompletedEvent.Event:Wait()
+
+    -- Основной код фарма начинается здесь (призыв боссов)
+    if killerSelectionCompleted and getgenv().AutoFarmDekuAlt and getgenv().ThePlayerWhoKills then
+        -- Логика призыва боссов будет здесь
+        BoredLibrary.prompt("Sakura Hub", "El bozo", 1.0)
+        
+    end
+end
+
 -- Deku Farm Logic
 
 getgenv().UsingDekuAutofarm1 = function()
