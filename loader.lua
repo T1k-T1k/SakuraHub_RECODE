@@ -2657,6 +2657,9 @@ getgenv().UsingDekuFarmMain = function()
                     local shinraRemote = replicatedStorage:FindFirstChild("ShinraRemote")
                     if shinraRemote then
                         local skills = {}
+                        if shinraRemote:FindFirstChild("Punch") then
+                            table.insert(skills, function() shinraRemote.Punch:FireServer() end)
+                        end
                         if shinraRemote:FindFirstChild("Ignition") then
                             table.insert(skills, function() shinraRemote.Ignition:FireServer() end)
                         end
@@ -2694,6 +2697,43 @@ getgenv().UsingDekuFarmMain = function()
                 end
             end
             
+            -- Использование Punch для Shinra
+            local function usePunch()
+                if currentStand and string.sub(currentStand, 1, 6) == "Shinra" then
+                    local shinraRemote = replicatedStorage:FindFirstChild("ShinraRemote")
+                    if shinraRemote and shinraRemote:FindFirstChild("Punch") then
+                        local success, error = pcall(function()
+                            shinraRemote.Punch:FireServer()
+                        end)
+                        
+                        if not success then
+                            print("Punch error:", error)
+                        else
+                            print("Used Punch")
+                            return true
+                        end
+                    end
+                end
+                return false
+            end
+            
+            -- Комбо атака при телепорте к боссу
+            local function performBossCombo()
+                if currentStand and string.sub(currentStand, 1, 6) == "Shinra" then
+                    -- Используем Punch 3 раза с задержками
+                    for i = 1, 3 do
+                        usePunch()
+                        task.wait(0.65)
+                    end
+                    
+                    -- После 3 Punch используем случайный скилл
+                    useRandomSkill()
+                else
+                    -- Для других персонажей просто используем случайный скилл
+                    useRandomSkill()
+                end
+            end
+            
             -- Использование случайного скилла
             local function useRandomSkill()
                 if #standSkills > 0 then
@@ -2713,7 +2753,7 @@ getgenv().UsingDekuFarmMain = function()
                 return false
             end
             
-            -- Телепорт к боссу (в притык)
+            -- Телепорт к боссу (в притык) с комбо атакой
             local function teleportToBoss(boss)
                 if boss and boss:FindFirstChild("HumanoidRootPart") and character and character:FindFirstChild("HumanoidRootPart") then
                     local hrp = boss.HumanoidRootPart
@@ -2721,6 +2761,13 @@ getgenv().UsingDekuFarmMain = function()
                     local targetCFrame = CFrame.new(hrp.Position + closeOffset, hrp.Position)
                     
                     character.HumanoidRootPart.CFrame = targetCFrame
+                    
+                    -- Небольшая задержка после телепорта
+                    task.wait(0.2)
+                    
+                    -- Выполняем комбо атаку
+                    performBossCombo()
+                    
                     return true
                 end
                 return false
@@ -2808,20 +2855,20 @@ getgenv().UsingDekuFarmMain = function()
                         
                         -- Основной цикл атаки босса
                         while workspace.Living:FindFirstChild("Roland") and getgenv().AutoFarmDekuMainAcc do
-                            -- 1. Используем случайный скилл
+                            -- 1. Используем случайный скилл перед телепортом
                             useRandomSkill()
                             
                             -- 2. Ждем 0.5 секунды
                             task.wait(0.5)
                             
-                            -- 3. Телепортируемся к боссу
+                            -- 3. Телепортируемся к боссу (телепорт уже включает комбо атаку)
                             local currentRoland = workspace.Living:FindFirstChild("Roland")
                             if currentRoland then
                                 teleportToBoss(currentRoland)
                                 
                                 -- Проверяем урон каждые 0.1 секунды
                                 local checkTime = 0
-                                while checkTime < 3 and workspace.Living:FindFirstChild("Roland") and getgenv().AutoFarmDekuMainAcc do
+                                while checkTime < 5 and workspace.Living:FindFirstChild("Roland") and getgenv().AutoFarmDekuMainAcc do
                                     task.wait(0.1)
                                     checkTime = checkTime + 0.1
                                     
@@ -2884,20 +2931,20 @@ getgenv().UsingDekuFarmMain = function()
                     
                     -- Основной цикл атаки босса
                     while workspace.Living:FindFirstChild(foundBossName) and getgenv().AutoFarmDekuMainAcc do
-                        -- 1. Используем случайный скилл
+                        -- 1. Используем случайный скилл перед телепортом
                         useRandomSkill()
                         
                         -- 2. Ждем 0.5 секунды
                         task.wait(0.5)
                         
-                        -- 3. Телепортируемся к боссу
+                        -- 3. Телепортируемся к боссу (телепорт уже включает комбо атаку)
                         local currentBoss = workspace.Living:FindFirstChild(foundBossName)
                         if currentBoss then
                             teleportToBoss(currentBoss)
                             
                             -- Проверяем урон каждые 0.1 секунды
                             local checkTime = 0
-                            while checkTime < 3 and workspace.Living:FindFirstChild(foundBossName) and getgenv().AutoFarmDekuMainAcc do
+                            while checkTime < 5 and workspace.Living:FindFirstChild(foundBossName) and getgenv().AutoFarmDekuMainAcc do
                                 task.wait(0.1)
                                 checkTime = checkTime + 0.1
                                 
