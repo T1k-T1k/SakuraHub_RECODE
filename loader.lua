@@ -2824,6 +2824,16 @@ getgenv().UsingDekuFarmMain = function()
                 end
             end
             
+            -- Проверка смерти Deku по появлению OA's Grace
+            local function checkDekuDeath()
+                return workspace.Item2:FindFirstChild("OA's Grace") ~= nil
+            end
+            
+            -- Проверка смерти Roland по появлению Angelica
+            local function checkRolandDeath()
+                return workspace.Living:FindFirstChild("Angelica") ~= nil
+            end
+            
             -- Отслеживание Roland квеста (исправленная версия)
             local function checkRolandDamaged()
                 local roland = workspace.Living:FindFirstChild("Roland")
@@ -2876,7 +2886,7 @@ getgenv().UsingDekuFarmMain = function()
                             updateMaxHP() -- Обновляем максимальное HP
                             
                             -- Основной цикл атаки босса
-                            while workspace.Living:FindFirstChild("Roland") and getgenv().AutoFarmDekuMainAcc do
+                            while workspace.Living:FindFirstChild("Roland") and not checkRolandDeath() and getgenv().AutoFarmDekuMainAcc do
                                 local currentRoland = workspace.Living:FindFirstChild("Roland")
                                 if currentRoland then
                                     -- Постоянно телепортируемся к боссу каждые 0.1 сек
@@ -2899,12 +2909,12 @@ getgenv().UsingDekuFarmMain = function()
                                     
                                     task.wait(0.1) -- Повторяем каждые 0.1 секунды
                                 else
-                                    break -- Босс мертв
+                                    break -- Босс пропал
                                 end
                             end
                             
-                            -- После убийства босса завершаем квест и возвращаемся на позицию ожидания
-                            if not workspace.Living:FindFirstChild("Roland") then
+                            -- Проверяем появилась ли Angelica (Roland умер)
+                            if checkRolandDeath() then
                                 pcall(function()
                                     local questRemotes = replicatedStorage:FindFirstChild("QuestRemotes")
                                     if questRemotes and questRemotes:FindFirstChild("ClaimQuest") then
@@ -2912,9 +2922,43 @@ getgenv().UsingDekuFarmMain = function()
                                         print("Claimed Roland quest")
                                     end
                                 end)
-                                teleportToWaitPos() -- Возвращаемся на позицию ожидания
-                                print("Roland killed, returned to wait position")
+                                
+                                print("Roland died! Angelica appeared, starting Angelica fight")
+                                
+                                -- Убиваем Angelica
+                                while workspace.Living:FindFirstChild("Angelica") and getgenv().AutoFarmDekuMainAcc do
+                                    local currentAngelica = workspace.Living:FindFirstChild("Angelica")
+                                    if currentAngelica then
+                                        -- Постоянно телепортируемся к Angelica каждые 0.1 сек
+                                        teleportToBoss(currentAngelica)
+                                        
+                                        -- Выполняем комбо атаку
+                                        task.spawn(function()
+                                            performBossCombo()
+                                        end)
+                                        
+                                        -- Проверяем урон
+                                        if checkPlayerDamage() then
+                                            teleportToVoid()
+                                            -- Ждем респавна
+                                            while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
+                                                task.wait(0.1)
+                                            end
+                                            updateMaxHP() -- Обновляем HP после респавна
+                                        end
+                                        
+                                        task.wait(0.1) -- Повторяем каждые 0.1 секунды
+                                    else
+                                        break -- Angelica умерла
+                                    end
+                                end
+                                
+                                print("Angelica killed!")
                             end
+                            
+                            -- Возвращаемся на позицию ожидания после убийства Roland и Angelica
+                            teleportToWaitPos()
+                            print("Roland + Angelica sequence completed, returned to wait position")
                             
                             setNoClip(false)
                             isKillingBoss = false
@@ -2946,39 +2990,75 @@ getgenv().UsingDekuFarmMain = function()
                     setNoClip(true)
                     updateMaxHP() -- Обновляем максимальное HP
                     
-                    -- Основной цикл атаки босса
-                    while workspace.Living:FindFirstChild(foundBossName) and getgenv().AutoFarmDekuMainAcc do
-                        local currentBoss = workspace.Living:FindFirstChild(foundBossName)
-                        if currentBoss then
-                            -- Постоянно телепортируемся к боссу каждые 0.1 сек
-                            teleportToBoss(currentBoss)
-                            
-                            -- Выполняем комбо атаку
-                            task.spawn(function()
-                                performBossCombo()
-                            end)
-                            
-                            -- Проверяем урон
-                            if checkPlayerDamage() then
-                                teleportToVoid()
-                                -- Ждем респавна
-                                while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
-                                    task.wait(0.1)
+                    -- Специальная логика для Deku
+                    if foundBossName == "Deku" then
+                        -- Основной цикл атаки Deku
+                        while workspace.Living:FindFirstChild("Deku") and not checkDekuDeath() and getgenv().AutoFarmDekuMainAcc do
+                            local currentDeku = workspace.Living:FindFirstChild("Deku")
+                            if currentDeku then
+                                -- Постоянно телепортируемся к боссу каждые 0.1 сек
+                                teleportToBoss(currentDeku)
+                                
+                                -- Выполняем комбо атаку
+                                task.spawn(function()
+                                    performBossCombo()
+                                end)
+                                
+                                -- Проверяем урон
+                                if checkPlayerDamage() then
+                                    teleportToVoid()
+                                    -- Ждем респавна
+                                    while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
+                                        task.wait(0.1)
+                                    end
+                                    updateMaxHP() -- Обновляем HP после респавна
                                 end
-                                updateMaxHP() -- Обновляем HP после респавна
+                                
+                                task.wait(0.1) -- Повторяем каждые 0.1 секунды
+                            else
+                                break -- Deku пропал
                             end
-                            
-                            task.wait(0.1) -- Повторяем каждые 0.1 секунды
-                        else
-                            break -- Босс мертв
                         end
+                        
+                        -- Проверяем появился ли OA's Grace (Deku умер)
+                        if checkDekuDeath() then
+                            print("Deku killed! OA's Grace appeared")
+                        end
+                    else
+                        -- Обычная логика для других боссов
+                        while workspace.Living:FindFirstChild(foundBossName) and getgenv().AutoFarmDekuMainAcc do
+                            local currentBoss = workspace.Living:FindFirstChild(foundBossName)
+                            if currentBoss then
+                                -- Постоянно телепортируемся к боссу каждые 0.1 сек
+                                teleportToBoss(currentBoss)
+                                
+                                -- Выполняем комбо атаку
+                                task.spawn(function()
+                                    performBossCombo()
+                                end)
+                                
+                                -- Проверяем урон
+                                if checkPlayerDamage() then
+                                    teleportToVoid()
+                                    -- Ждем респавна
+                                    while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
+                                        task.wait(0.1)
+                                    end
+                                    updateMaxHP() -- Обновляем HP после респавна
+                                end
+                                
+                                task.wait(0.1) -- Повторяем каждые 0.1 секунды
+                            else
+                                break -- Босс мертв
+                            end
+                        end
+                        
+                        print(foundBossName .. " killed!")
                     end
                     
                     -- После убийства босса возвращаемся на позицию ожидания
-                    if not workspace.Living:FindFirstChild(foundBossName) then
-                        teleportToWaitPos() -- Возвращаемся на позицию ожидания
-                        print(foundBossName .. " killed, returned to wait position")
-                    end
+                    teleportToWaitPos()
+                    print(foundBossName .. " sequence completed, returned to wait position")
                     
                     setNoClip(false)
                     isKillingBoss = false
