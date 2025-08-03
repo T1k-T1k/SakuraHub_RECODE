@@ -3322,8 +3322,276 @@ getgenv().UsingDekuFarmAlt = function()
 
     -- Основной код фарма начинается здесь (призыв боссов)
     if killerSelectionCompleted and getgenv().AutoFarmDekuAlt and getgenv().ThePlayerWhoKills then
-        -- Логика призыва боссов будет здесь
-        BoredLibrary.prompt("Sakura Hub", "El bozo", 1.0)
+        local Lplayer = game:GetService("Players").LocalPlayer
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Workspace = game:GetService("Workspace")
+        local RunService = game:GetService("RunService")
+        
+        local WaitBossDiePos = Vector3.new(-1252, -150, -320)
+        local OriginalPosition = Lplayer.Character.HumanoidRootPart.Position
+        local RequiredStand = "One for All [Stage 4]"
+        
+        -- Функция для сохранения оригинальной позиции
+        local function saveOriginalPosition()
+            if Lplayer.Character and Lplayer.Character:FindFirstChild("HumanoidRootPart") then
+                OriginalPosition = Lplayer.Character.HumanoidRootPart.Position
+            end
+        end
+        
+        -- Функция для телепортации
+        local function teleportTo(position)
+            if Lplayer.Character and Lplayer.Character:FindFirstChild("HumanoidRootPart") then
+                Lplayer.Character.HumanoidRootPart.CFrame = CFrame.new(position)
+            end
+        end
+        
+        -- Функция для экипировки стенда
+        local function equipStand(standName)
+            local searchName = standName == "One for All [Stage 4]" and "OA [Stage 4]" or standName
+            
+            for i = 1, 100 do
+                pcall(function()
+                    if Lplayer.PlayerGui.StandStorage.Outer.Inner.Inner["Slot"..i].Text.Text == searchName then
+                        local args = {"Slot"..i}
+                        if i <= 6 then
+                            ReplicatedStorage.StorageRemote["Slot"..i]:FireServer()
+                        else
+                            ReplicatedStorage.StorageRemote.UseStorageExtra:FireServer(unpack(args))
+                        end
+                        return true
+                    end
+                end)
+            end
+            return false
+        end
+        
+        -- Функция для проверки текущего стенда
+        local function getCurrentStand()
+            return Lplayer.Data.StandName.Value
+        end
+        
+        -- Функция для использования OA's Grace
+        local function useOAGrace()
+            pcall(function()
+                ReplicatedStorage:WaitForChild("UseItem"):WaitForChild("OFA"):FireServer()
+                Lplayer.Character.Humanoid:EquipTool(Lplayer.Backpack:FindFirstChild("OA's Grace"))
+                task.wait(0.15)
+                ReplicatedStorage:WaitForChild("UseItem"):WaitForChild("OFA"):FireServer()
+                if Lplayer.Character:FindFirstChild("OA's Grace") then
+                    Lplayer.Character:FindFirstChild("OA's Grace"):Activate()
+                end
+                ReplicatedStorage:WaitForChild("UseItem"):WaitForChild("OFA"):FireServer()
+            end)
+        end
+        
+        -- Функция для взаимодействия с proximity prompt
+        local function interactWithPrompt(prompt)
+            if prompt and prompt.Enabled then
+                fireproximityprompt(prompt)
+            end
+        end
+        
+        -- Сохраняем оригинальную позицию
+        saveOriginalPosition()
+        
+        -- Проверяем наличие нужного стенда
+        if getCurrentStand() ~= RequiredStand then
+            BoredLibrary.prompt("Sakura Hub", "Equipping One for All [Stage 4]...", 1.5)
+            
+            if not equipStand(RequiredStand) then
+                BoredLibrary.prompt("Sakura Hub", "You do not have One for All [Stage 4] ❌", 2.0)
+                getgenv().AutoFarmDekuAlt = false
+                teleportTo(OriginalPosition)
+                return
+            end
+            
+            -- Ждем экипировки стенда
+            local equipWait = 0
+            while getCurrentStand() ~= RequiredStand and equipWait < 50 do
+                task.wait(0.1)
+                equipWait = equipWait + 1
+            end
+            
+            if getCurrentStand() ~= RequiredStand then
+                BoredLibrary.prompt("Sakura Hub", "Failed to equip One for All [Stage 4] ❌", 2.0)
+                getgenv().AutoFarmDekuAlt = false
+                teleportTo(OriginalPosition)
+                return
+            end
+        end
+        
+        -- Телепортируемся на позицию ожидания
+        teleportTo(WaitBossDiePos)
+        BoredLibrary.prompt("Sakura Hub", "Boss summoning started! 🎯", 1.5)
+        
+        -- Отключаем proximity prompts для предметов
+        local itemPrompts = {}
+        local function disableItemPrompts()
+            local items = {"Durandal", "Zelkova", "Allas"}
+            for _, itemName in pairs(items) do
+                pcall(function()
+                    local item = Workspace.Item:FindFirstChild(itemName)
+                    if item and item:FindFirstChild("ProximityPrompt") then
+                        item.ProximityPrompt.Enabled = false
+                        table.insert(itemPrompts, item.ProximityPrompt)
+                    end
+                end)
+            end
+        end
+        
+        -- Включаем proximity prompts обратно при выключении
+        local function enableItemPrompts()
+            for _, prompt in pairs(itemPrompts) do
+                pcall(function()
+                    prompt.Enabled = true
+                end)
+            end
+        end
+        
+        disableItemPrompts()
+        
+        -- Настраиваем HoldDuration для спавн промптов
+        pcall(function()
+            local spawnPrompt = Workspace.Map.RuinedCity.Spawn.ProximityPrompt
+            local spawnPromptB = Workspace.Map.RuinedCity.Spawn.ProximityPromptB
+            if spawnPrompt then spawnPrompt.HoldDuration = 0 end
+            if spawnPromptB then spawnPromptB.HoldDuration = 0 end
+        end)
+        
+        -- Основные циклы
+        local connections = {}
+        local isQuestAccepted = false
+        local isWaitingForGrace = false
+        
+        -- Цикл для мониторинга OA's Grace
+        connections.graceMonitor = RunService.Heartbeat:Connect(function()
+            if not getgenv().AutoFarmDekuAlt then return end
+            
+            pcall(function()
+                local grace = Workspace.Item2:FindFirstChild("OA's Grace")
+                if grace and grace:FindFirstChild("ProximityPrompt") then
+                    grace.ProximityPrompt.HoldDuration = 0
+                    if not isWaitingForGrace then
+                        isWaitingForGrace = true
+                        teleportTo(grace.Position)
+                        task.wait(0.1)
+                        
+                        local graceInteraction
+                        graceInteraction = RunService.Heartbeat:Connect(function()
+                            if not getgenv().AutoFarmDekuAlt then 
+                                graceInteraction:Disconnect()
+                                return 
+                            end
+                            
+                            if grace.Parent and grace:FindFirstChild("ProximityPrompt") then
+                                interactWithPrompt(grace.ProximityPrompt)
+                            else
+                                graceInteraction:Disconnect()
+                                task.wait(0.1)
+                                useOAGrace()
+                                isWaitingForGrace = false
+                            end
+                        end)
+                    end
+                end
+            end)
+        end)
+        
+        -- Цикл для мониторинга стенда и призыва боссов
+        connections.bossSpawner = RunService.Heartbeat:Connect(function()
+            if not getgenv().AutoFarmDekuAlt then return end
+            if isWaitingForGrace then return end
+            
+            -- Проверяем текущий стенд
+            if getCurrentStand() ~= RequiredStand then
+                -- Ищем OA's Grace для восстановления стенда
+                local grace = Workspace.Item2:FindFirstChild("OA's Grace")
+                if grace then
+                    return -- Пусть graceMonitor обработает это
+                end
+            else
+                -- У нас правильный стенд, можем призывать босса
+                pcall(function()
+                    local spawnPoint = Workspace.Map.RuinedCity.Spawn
+                    local promptB = spawnPoint.ProximityPromptB
+                    local prompt = spawnPoint.ProximityPrompt
+                    
+                    -- Проверяем ProximityPromptB для квеста
+                    if promptB and promptB.Enabled then
+                        if not isQuestAccepted then
+                            isQuestAccepted = true
+                            ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("AcceptQuest"):FireServer(33)
+                        end
+                        
+                        -- Меняем на Standless для взаимодействия с Roland
+                        equipStand("Standless")
+                        task.wait(0.2)
+                        
+                        -- Телепортируемся к Roland
+                        local roland = Workspace.Living:FindFirstChild("Roland")
+                        if roland then
+                            teleportTo(roland.Position)
+                            task.wait(0.15)
+                            
+                            -- Идем на позицию ожидания
+                            teleportTo(WaitBossDiePos)
+                            task.wait(1.25)
+                            
+                            -- Возвращаемся к Roland для атаки
+                            teleportTo(roland.Position + Vector3.new(0, 0, -5))
+                            task.wait(0.1)
+                            
+                            -- Атакуем Roland
+                            ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
+                            task.wait(0.1)
+                            ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
+                            
+                            -- Возвращаем One for All
+                            equipStand(RequiredStand)
+                            
+                            -- Проверяем завершение квеста
+                            task.wait(0.5)
+                            if (promptB.Enabled and prompt.Enabled) or (not promptB.Enabled and prompt.Enabled) then
+                                ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
+                                isQuestAccepted = false
+                            end
+                        end
+                    else
+                        -- Обычный призыв босса
+                        teleportTo(spawnPoint.Position)
+                        
+                        if prompt and prompt.Enabled then
+                            interactWithPrompt(prompt)
+                        elseif promptB and promptB.Enabled then
+                            interactWithPrompt(promptB)
+                        end
+                        
+                        -- Если промпт стал неактивным, идем ждать
+                        if (prompt and not prompt.Enabled) or (promptB and not promptB.Enabled) then
+                            teleportTo(WaitBossDiePos)
+                        end
+                    end
+                end)
+            end
+            
+            task.wait(0.1)
+        end)
+        
+        -- Отключаем все при остановке
+        local originalAutoFarmState = getgenv().AutoFarmDekuAlt
+        spawn(function()
+            while getgenv().AutoFarmDekuAlt do
+                task.wait(1)
+            end
+            
+            -- Очистка при остановке
+            for _, connection in pairs(connections) do
+                connection:Disconnect()
+            end
+            enableItemPrompts()
+            teleportTo(OriginalPosition)
+            BoredLibrary.prompt("Sakura Hub", "Boss summoning stopped! 🛑", 1.5)
+        end)
         
     end
 end
