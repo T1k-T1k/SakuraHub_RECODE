@@ -2609,7 +2609,7 @@ getgenv().UsingDekuFarmMain = function()
 
     selectionCompletedEvent.Event:Wait()
 
-    if completed and getgenv().AutoFarmDekuMainAcc and getgenv().ThePlayerWhoSupports then
+if completed and getgenv().AutoFarmDekuMainAcc and getgenv().ThePlayerWhoSupports then
         task.spawn(function()
             local player = game:GetService("Players").LocalPlayer
             local runService = game:GetService("RunService")
@@ -2803,7 +2803,10 @@ getgenv().UsingDekuFarmMain = function()
                 if proximityPrompt and proximityPrompt.Enabled then
                     -- Принимаем квест
                     pcall(function()
-                        game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("AcceptQuest"):FireServer(33)
+                        local questRemotes = replicatedStorage:FindFirstChild("QuestRemotes")
+                        if questRemotes and questRemotes:FindFirstChild("AcceptQuest") then
+                            questRemotes.AcceptQuest:FireServer(33)
+                        end
                     end)
                     
                     -- Ждем появления Roland
@@ -2817,36 +2820,39 @@ getgenv().UsingDekuFarmMain = function()
                         isKillingBoss = true
                         setNoClip(true)
                         
-                        -- Используем первый скилл перед телепортом
-                        useSkill()
-                        task.wait(0.1)
-                        
-                        -- Убийство Roland с постоянным телепортом и использованием скиллов
-                        while roland and roland.Parent and getgenv().AutoFarmDekuMainAcc do
-                            -- Постоянно телепортируемся к боссу
-                            teleportToBoss(roland)
+                        -- Используем только один скилл
+                        if #standSkills > 0 and standSkills[currentSkillIndex] then
+                            pcall(function()
+                                standSkills[currentSkillIndex]()
+                            end)
                             
-                            -- Используем скилл если прошел кулдаун
-                            useSkill()
-                            
-                            -- Очень короткая задержка для быстрого телепорта
-                            task.wait(0.01)
-                            
-                            -- Проверяем, не умер ли босс
-                            if not workspace.Living:FindFirstChild("Roland") then
-                                break
+                            -- Переходим к следующему скиллу для следующего раза
+                            currentSkillIndex = currentSkillIndex + 1
+                            if currentSkillIndex > #standSkills then
+                                currentSkillIndex = 1
                             end
                         end
                         
-                        -- Завершаем квест после смерти Roland
-                        pcall(function()
-                            game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
-                        end)
+                        -- Ждем 0.5 секунды после использования скилла
+                        task.wait(0.5)
                         
-                        -- После убийства босса
+                        -- Проверяем, жив ли еще босс
+                        if workspace.Living:FindFirstChild("Roland") then
+                            -- Босс еще жив, респавним персонажа
+                            teleportToVoid()
+                        else
+                            -- Босс мертв, завершаем квест
+                            pcall(function()
+                                local questRemotes = replicatedStorage:FindFirstChild("QuestRemotes")
+                                if questRemotes and questRemotes:FindFirstChild("ClaimQuest") then
+                                    questRemotes.ClaimQuest:FireServer(33)
+                                end
+                            end)
+                        end
+                        
+                        -- После убийства босса или респавна
                         if getgenv().AutoFarmDekuMainAcc then
                             setNoClip(false)
-                            teleportToVoid()
                             isKillingBoss = false
                         end
                         
@@ -2875,31 +2881,31 @@ getgenv().UsingDekuFarmMain = function()
                     isKillingBoss = true
                     setNoClip(true)
                     
-                    -- Используем первый скилл перед телепортом
-                    useSkill()
-                    task.wait(0.1)
-                    
-                    -- Убийство босса с постоянным телепортом и использованием скиллов
-                    while foundBoss and foundBoss.Parent and getgenv().AutoFarmDekuMainAcc do
-                        -- Постоянно телепортируемся к боссу
-                        teleportToBoss(foundBoss)
+                    -- Используем только один скилл
+                    if #standSkills > 0 and standSkills[currentSkillIndex] then
+                        pcall(function()
+                            standSkills[currentSkillIndex]()
+                        end)
                         
-                        -- Используем скилл если прошел кулдаун
-                        useSkill()
-                        
-                        -- Очень короткая задержка для быстрого телепорта
-                        task.wait(0.01)
-                        
-                        -- Проверяем, не умер ли босс
-                        if not workspace.Living:FindFirstChild(foundBossName) then
-                            break
+                        -- Переходим к следующему скиллу для следующего раза
+                        currentSkillIndex = currentSkillIndex + 1
+                        if currentSkillIndex > #standSkills then
+                            currentSkillIndex = 1
                         end
                     end
                     
-                    -- После убийства босса
+                    -- Ждем 0.5 секунды после использования скилла
+                    task.wait(0.5)
+                    
+                    -- Проверяем, жив ли еще босс
+                    if workspace.Living:FindFirstChild(foundBossName) then
+                        -- Босс еще жив, респавним персонажа
+                        teleportToVoid()
+                    end
+                    
+                    -- После убийства босса или респавна
                     if getgenv().AutoFarmDekuMainAcc then
                         setNoClip(false)
-                        teleportToVoid()
                         isKillingBoss = false
                     end
                 end
