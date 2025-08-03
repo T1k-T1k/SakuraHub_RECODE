@@ -3300,7 +3300,7 @@ getgenv().UsingDekuFarmAlt = function()
             BoredLibrary.prompt("Sakura Hub", "Preparation Step Completed 1/1", 1.5)
             BoredLibrary.prompt("Sakura Hub", "✅ Killer selected!", 1.0)
             local root = Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if root then root.CFrame = CFrame.new(-1212, -150, -324) end
+            if root then root.CFrame = CFrame.new(-1252, -150, -320) end
             killerSelectionCompleted = true
             killerSelectionCompletedEvent:Fire()
         else
