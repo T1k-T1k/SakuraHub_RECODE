@@ -2713,12 +2713,12 @@ getgenv().UsingDekuFarmMain = function()
                 return false
             end
             
-            -- Телепорт к боссу (за спину)
+            -- Телепорт к боссу (в притык)
             local function teleportToBoss(boss)
                 if boss and boss:FindFirstChild("HumanoidRootPart") and character and character:FindFirstChild("HumanoidRootPart") then
                     local hrp = boss.HumanoidRootPart
-                    local backOffset = hrp.CFrame.LookVector * -4.5
-                    local targetCFrame = CFrame.new(hrp.Position + backOffset, hrp.Position)
+                    local closeOffset = hrp.CFrame.LookVector * -1.5 -- Очень близко к боссу
+                    local targetCFrame = CFrame.new(hrp.Position + closeOffset, hrp.Position)
                     
                     character.HumanoidRootPart.CFrame = targetCFrame
                     return true
@@ -2745,9 +2745,30 @@ getgenv().UsingDekuFarmMain = function()
                 return false
             end
             
-            -- Проверка смерти босса
-            local function checkBossDeath(bossName)
-                return not workspace.Living:FindFirstChild(bossName)
+            -- Проверка урона по HP
+            local currentHP = 100
+            local function checkPlayerDamage()
+                if character and character:FindFirstChild("Humanoid") then
+                    local humanoid = character.Humanoid
+                    local newHP = humanoid.Health
+                    
+                    -- Если HP уменьшилось, значит получили урон
+                    if newHP < currentHP then
+                        currentHP = newHP
+                        return true -- Получили урон
+                    else
+                        currentHP = newHP
+                        return false -- Урона нет
+                    end
+                end
+                return false
+            end
+            
+            -- Обновление HP при респавне
+            local function updateCurrentHP()
+                if character and character:FindFirstChild("Humanoid") then
+                    currentHP = character.Humanoid.Health
+                end
             end
             
             -- Отслеживание Roland квеста
@@ -2771,6 +2792,7 @@ getgenv().UsingDekuFarmMain = function()
                     if roland then
                         isKillingBoss = true
                         setNoClip(true)
+                        updateCurrentHP() -- Обновляем текущее HP
                         
                         -- Основной цикл атаки босса
                         while workspace.Living:FindFirstChild("Roland") and getgenv().AutoFarmDekuMainAcc do
@@ -2785,22 +2807,25 @@ getgenv().UsingDekuFarmMain = function()
                             if currentRoland then
                                 teleportToBoss(currentRoland)
                                 
-                                -- Проверяем каждые 0.1 секунды в течение некоторого времени
+                                -- Проверяем урон каждые 0.1 секунды
                                 local checkTime = 0
-                                while checkTime < 2 and workspace.Living:FindFirstChild("Roland") and getgenv().AutoFarmDekuMainAcc do
+                                while checkTime < 3 and workspace.Living:FindFirstChild("Roland") and getgenv().AutoFarmDekuMainAcc do
                                     task.wait(0.1)
                                     checkTime = checkTime + 0.1
+                                    
+                                    -- Если получили урон, респавним
+                                    if checkPlayerDamage() then
+                                        teleportToVoid()
+                                        break
+                                    end
                                 end
                                 
-                                -- Если босс все еще жив, респавним через войд
-                                if workspace.Living:FindFirstChild("Roland") then
-                                    teleportToVoid()
-                                    -- Ждем респавна персонажа
+                                -- Если получили урон, ждем респавна
+                                if isWaitingForRespawn then
                                     while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
                                         task.wait(0.1)
                                     end
-                                    -- Телепортируемся на позицию ожидания после респавна
-                                    teleportToWaitPos()
+                                    updateCurrentHP() -- Обновляем HP после респавна
                                 end
                             else
                                 break -- Босс мертв
@@ -2808,7 +2833,7 @@ getgenv().UsingDekuFarmMain = function()
                         end
                         
                         -- Завершаем квест если босс мертв
-                        if checkBossDeath("Roland") then
+                        if not workspace.Living:FindFirstChild("Roland") then
                             pcall(function()
                                 local questRemotes = replicatedStorage:FindFirstChild("QuestRemotes")
                                 if questRemotes and questRemotes:FindFirstChild("ClaimQuest") then
@@ -2843,6 +2868,7 @@ getgenv().UsingDekuFarmMain = function()
                 if foundBoss then
                     isKillingBoss = true
                     setNoClip(true)
+                    updateCurrentHP() -- Обновляем текущее HP
                     
                     -- Основной цикл атаки босса
                     while workspace.Living:FindFirstChild(foundBossName) and getgenv().AutoFarmDekuMainAcc do
@@ -2857,22 +2883,25 @@ getgenv().UsingDekuFarmMain = function()
                         if currentBoss then
                             teleportToBoss(currentBoss)
                             
-                            -- Проверяем каждые 0.1 секунды в течение некоторого времени
+                            -- Проверяем урон каждые 0.1 секунды
                             local checkTime = 0
-                            while checkTime < 2 and workspace.Living:FindFirstChild(foundBossName) and getgenv().AutoFarmDekuMainAcc do
+                            while checkTime < 3 and workspace.Living:FindFirstChild(foundBossName) and getgenv().AutoFarmDekuMainAcc do
                                 task.wait(0.1)
                                 checkTime = checkTime + 0.1
+                                
+                                -- Если получили урон, респавним
+                                if checkPlayerDamage() then
+                                    teleportToVoid()
+                                    break
+                                end
                             end
                             
-                            -- Если босс все еще жив, респавним через войд
-                            if workspace.Living:FindFirstChild(foundBossName) then
-                                teleportToVoid()
-                                -- Ждем респавна персонажа
+                            -- Если получили урон, ждем респавна
+                            if isWaitingForRespawn then
                                 while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
                                     task.wait(0.1)
                                 end
-                                -- Телепортируемся на позицию ожидания после респавна
-                                teleportToWaitPos()
+                                updateCurrentHP() -- Обновляем HP после респавна
                             end
                         else
                             break -- Босс мертв
@@ -2894,6 +2923,7 @@ getgenv().UsingDekuFarmMain = function()
                     if character:WaitForChild("HumanoidRootPart", 10) then
                         task.wait(1) -- Небольшая задержка для стабильности
                         teleportToWaitPos()
+                        updateCurrentHP() -- Обновляем HP после респавна
                         isWaitingForRespawn = false
                     end
                 end
@@ -2906,33 +2936,9 @@ getgenv().UsingDekuFarmMain = function()
                 BoredLibrary.prompt("Sakura Hub", "Starting Wait For Bosses...", 1.5)
             end)
             
-            -- Отменяем квест 33 при запуске (если активен)
-            pcall(function()
-                local globalUsedRemotes = replicatedStorage:FindFirstChild("GlobalUsedRemotes")
-                if globalUsedRemotes and globalUsedRemotes:FindFirstChild("CancelQuest") then
-                    globalUsedRemotes.CancelQuest:FireServer(33)
-                    task.wait(0.5)
-                    
-                    local confirmButton = player.PlayerGui:FindFirstChild("CancelQuestConfirmation")
-                    if confirmButton and confirmButton:FindFirstChild("Outer") and confirmButton.Outer:FindFirstChild("Confirm") then
-                        local button = confirmButton.Outer.Confirm
-                        
-                        game:GetService("VirtualInputManager"):SendMouseButtonEvent(
-                            button.AbsolutePosition.X + button.AbsoluteSize.X/2,
-                            button.AbsolutePosition.Y + button.AbsoluteSize.Y/2,
-                            0, true, button, 1
-                        )
-                        game:GetService("VirtualInputManager"):SendMouseButtonEvent(
-                            button.AbsolutePosition.X + button.AbsoluteSize.X/2,
-                            button.AbsolutePosition.Y + button.AbsoluteSize.Y/2,
-                            0, false, button, 1
-                        )
-                    end
-                end
-            end)
-            
             -- Определяем персонажа в начале
             detectStand()
+            updateCurrentHP()
             
             -- Телепортируемся на позицию ожидания
             teleportToWaitPos()
