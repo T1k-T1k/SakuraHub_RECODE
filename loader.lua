@@ -2958,6 +2958,22 @@ getgenv().UsingDekuFarmMain = function()
             -- Основной цикл фарма
             while getgenv().AutoFarmDekuMainAcc do
                 if not isKillingBoss and not isWaitingForRespawn then
+                    -- Проверяем наличие любого босса перед телепортом в комнату ожидания
+                    local targetBosses = {"Roland", "Deku", "AngelicaWeak", "Angelica", "Bygone", "BlackSilence"}
+                    local anyBossExists = false
+                    
+                    for _, bossName in pairs(targetBosses) do
+                        if workspace.Living:FindFirstChild(bossName) then
+                            anyBossExists = true
+                            break
+                        end
+                    end
+                    
+                    -- Если нет боссов, телепортируемся в комнату ожидания
+                    if not anyBossExists then
+                        teleportToWaitPos()
+                    end
+                    
                     -- Сначала проверяем Roland квест
                     if not handleRolandQuest() then
                         -- Если Roland квеста нет, ищем обычных боссов
