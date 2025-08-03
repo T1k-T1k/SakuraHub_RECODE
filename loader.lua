@@ -2610,190 +2610,261 @@ getgenv().UsingDekuFarmMain = function()
     selectionCompletedEvent.Event:Wait()
 
     if completed and getgenv().AutoFarmDekuMainAcc and getgenv().ThePlayerWhoSupports then
-        task.spawn(function()
-            local player = game:GetService("Players").LocalPlayer
-            local runService = game:GetService("RunService")
-            local replicatedStorage = game:GetService("ReplicatedStorage")
-            
-            -- Переменные
-            local BossWaitPos = CFrame.new(-1212, -150, -324)
-            local VoidPos = CFrame.new(0, -1000, 0)
-            local character = player.Character or player.CharacterAdded:Wait()
-            local currentStand = ""
-            local standSkills = {}
-            local currentSkillIndex = 1
-            local isKillingBoss = false
-            local isWaitingForRespawn = false
-            
-            -- Определение персонажа и его скиллов
-            local function detectStand()
-                local standName = player.Data.StandName.Value
-                currentStand = standName
+            task.spawn(function()
+                local player = game:GetService("Players").LocalPlayer
+                local runService = game:GetService("RunService")
+                local replicatedStorage = game:GetService("ReplicatedStorage")
                 
-                if string.sub(standName, 1, 5) == "Ronin" then
-                    standSkills = {
-                        function() replicatedStorage.RoninRemote.H:FireServer() end
-                    }
-                elseif string.sub(standName, 1, 3) == "Cid" then
-                    standSkills = {
-                        function() replicatedStorage.CidRemote.PauseWalker:FireServer() end
-                    }
-                elseif string.sub(standName, 1, 4) == "Gojo" then
-                    standSkills = {
-                        function() replicatedStorage:WaitForChild("SkillRemote"):WaitForChild("GojoRemote"):WaitForChild("Aerial"):FireServer() end
-                    }
-                elseif string.sub(standName, 1, 6) == "Shinra" then
-                    standSkills = {
-                        function() replicatedStorage:WaitForChild("ShinraRemote"):WaitForChild("Ignition"):FireServer() end,
-                        function() replicatedStorage:WaitForChild("ShinraRemote"):WaitForChild("Fierce"):FireServer() end,
-                        function() replicatedStorage:WaitForChild("ShinraRemote"):WaitForChild("Corna"):FireServer() end
-                    }
-                end
-            end
-            
-            -- NoClip функция
-            local noClipConnection = nil
-            local function setNoClip(enabled)
-                if enabled then
-                    noClipConnection = runService.Stepped:Connect(function()
-                        if character then
-                            for _, part in pairs(character:GetDescendants()) do
-                                if part:IsA("BasePart") then
-                                    part.CanCollide = false
-                                end
-                            end
-                        end
-                    end)
-                else
-                    if noClipConnection then
-                        noClipConnection:Disconnect()
-                        noClipConnection = nil
+                -- Переменные
+                local BossWaitPos = CFrame.new(-1212, -150, -324)
+                local VoidPos = CFrame.new(0, -1000, 0)
+                local character = player.Character or player.CharacterAdded:Wait()
+                local currentStand = ""
+                local standSkills = {}
+                local currentSkillIndex = 1
+                local isKillingBoss = false
+                local isWaitingForRespawn = false
+                local lastSkillTime = 0
+                local skillCooldown = 0.1 -- Кулдаун между скиллами в секундах
+                
+                -- Определение персонажа и его скиллов
+                local function detectStand()
+                    local standName = player.Data.StandName.Value
+                    currentStand = standName
+                    
+                    if string.sub(standName, 1, 5) == "Ronin" then
+                        standSkills = {
+                            function() replicatedStorage.RoninRemote.H:FireServer() end
+                        }
+                    elseif string.sub(standName, 1, 3) == "Cid" then
+                        standSkills = {
+                            function() replicatedStorage.CidRemote.PauseWalker:FireServer() end
+                        }
+                    elseif string.sub(standName, 1, 4) == "Gojo" then
+                        standSkills = {
+                            function() replicatedStorage:WaitForChild("SkillRemote"):WaitForChild("GojoRemote"):WaitForChild("Aerial"):FireServer() end
+                        }
+                    elseif string.sub(standName, 1, 6) == "Shinra" then
+                        standSkills = {
+                            function() replicatedStorage:WaitForChild("ShinraRemote"):WaitForChild("Ignition"):FireServer() end,
+                            function() replicatedStorage:WaitForChild("ShinraRemote"):WaitForChild("Fierce"):FireServer() end,
+                            function() replicatedStorage:WaitForChild("ShinraRemote"):WaitForChild("Corna"):FireServer() end
+                        }
                     end
                 end
-            end
-            
-            -- Телепорт к боссу
-            local function teleportToBoss(boss)
-                if boss and boss:FindFirstChild("HumanoidRootPart") and character and character:FindFirstChild("HumanoidRootPart") then
-                    local hrp = boss.HumanoidRootPart
-                    local backOffset = hrp.CFrame.LookVector * -4.5
-                    local targetCFrame = CFrame.new(hrp.Position + backOffset, hrp.Position)
-                    
-                    character.HumanoidRootPart.CFrame = targetCFrame
-                end
-            end
-            
-            -- Телепорт в войд
-            local function teleportToVoid()
-                if character and character:FindFirstChild("HumanoidRootPart") then
-                    character.HumanoidRootPart.CFrame = VoidPos
-                    isWaitingForRespawn = true
-                end
-            end
-            
-            -- Телепорт на позицию ожидания
-            local function teleportToWaitPos()
-                if character and character:FindFirstChild("HumanoidRootPart") then
-                    character.HumanoidRootPart.CFrame = BossWaitPos
-                end
-            end
-            
-            -- Использование скилла
-            local function useSkill()
-                if #standSkills > 0 and currentSkillIndex <= #standSkills then
-                    pcall(function()
-                        standSkills[currentSkillIndex]()
-                    end)
-                    currentSkillIndex = currentSkillIndex + 1
-                    if currentSkillIndex > #standSkills then
-                        currentSkillIndex = 1
-                    end
-                end
-            end
-            
-            -- Отслеживание смерти босса через WalkToPoint
-            local function trackBossDeath(boss, bossName)
-                local humanoid = boss:FindFirstChild("Humanoid")
-                if not humanoid then return false end
                 
-                local lastWalkToPoint = humanoid.WalkToPoint
-                local stoppedTime = 0
-                local checkInterval = 0.1
-                
-                while boss.Parent and humanoid.Parent and getgenv().AutoFarmDekuMainAcc do
-                    task.wait(checkInterval)
-                    
-                    local currentWalkToPoint = humanoid.WalkToPoint
-                    
-                    -- Проверяем, изменился ли WalkToPoint
-                    if currentWalkToPoint == lastWalkToPoint then
-                        stoppedTime = stoppedTime + checkInterval
-                        
-                        -- Если остановился на 1.5 секунды, считаем потенциально мертвым
-                        if stoppedTime >= 1.5 then
-                            -- Дополнительная проверка - ждем еще немного
-                            task.wait(0.5)
-                            
-                            -- Проверяем, не начал ли двигаться снова
-                            if humanoid.WalkToPoint == currentWalkToPoint then
-                                -- Скорее всего мертв, но еще проверим существование
-                                task.wait(0.5)
-                                if not workspace.Living:FindFirstChild(bossName) then
-                                    return true -- Точно мертв - исчез из Living
+                -- NoClip функция
+                local noClipConnection = nil
+                local function setNoClip(enabled)
+                    if enabled then
+                        noClipConnection = runService.Stepped:Connect(function()
+                            if character then
+                                for _, part in pairs(character:GetDescendants()) do
+                                    if part:IsA("BasePart") then
+                                        part.CanCollide = false
+                                    end
                                 end
-                            else
-                                -- Начал двигаться снова, сбрасываем счетчик
-                                stoppedTime = 0
-                                lastWalkToPoint = humanoid.WalkToPoint
                             end
-                        end
+                        end)
                     else
-                        -- WalkToPoint изменился, сбрасываем счетчик
-                        stoppedTime = 0
-                        lastWalkToPoint = currentWalkToPoint
+                        if noClipConnection then
+                            noClipConnection:Disconnect()
+                            noClipConnection = nil
+                        end
                     end
                 end
                 
-                -- Финальная проверка - исчез ли из Living
-                return not workspace.Living:FindFirstChild(bossName)
-            end
-            
-            -- Отслеживание Roland квеста
-            local function checkRolandQuest()
-                local proximityPrompt = workspace.Map.RuinedCity.Spawn:FindFirstChild("ProximityPromptB")
-                if proximityPrompt and proximityPrompt.Enabled then
-                    -- Принимаем квест
-                    pcall(function()
-                        game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("AcceptQuest"):FireServer(33)
-                    end)
+                -- Телепорт к боссу (за спину)
+                local function teleportToBoss(boss)
+                    if boss and boss:FindFirstChild("HumanoidRootPart") and character and character:FindFirstChild("HumanoidRootPart") then
+                        local hrp = boss.HumanoidRootPart
+                        local backOffset = hrp.CFrame.LookVector * -4.5
+                        local targetCFrame = CFrame.new(hrp.Position + backOffset, hrp.Position)
+                        
+                        character.HumanoidRootPart.CFrame = targetCFrame
+                    end
+                end
+                
+                -- Телепорт в войд
+                local function teleportToVoid()
+                    if character and character:FindFirstChild("HumanoidRootPart") then
+                        character.HumanoidRootPart.CFrame = VoidPos
+                        isWaitingForRespawn = true
+                    end
+                end
+                
+                -- Телепорт на позицию ожидания
+                local function teleportToWaitPos()
+                    if character and character:FindFirstChild("HumanoidRootPart") then
+                        character.HumanoidRootPart.CFrame = BossWaitPos
+                    end
+                end
+                
+                -- Использование скилла с кулдауном и циклом
+                local function useSkill()
+                    local currentTime = tick()
+                    if #standSkills > 0 and (currentTime - lastSkillTime) >= skillCooldown then
+                        pcall(function()
+                            standSkills[currentSkillIndex]()
+                        end)
+                        
+                        -- Переходим к следующему скиллу
+                        currentSkillIndex = currentSkillIndex + 1
+                        if currentSkillIndex > #standSkills then
+                            currentSkillIndex = 1
+                        end
+                        
+                        lastSkillTime = currentTime
+                        return true
+                    end
+                    return false
+                end
+                
+                -- Отслеживание смерти босса через WalkToPoint
+                local function trackBossDeath(boss, bossName)
+                    local humanoid = boss:FindFirstChild("Humanoid")
+                    if not humanoid then return false end
                     
-                    -- Ждем появления Roland
-                    local roland = nil
-                    while not roland and getgenv().AutoFarmDekuMainAcc do
-                        roland = workspace.Living:FindFirstChild("Roland")
-                        task.wait(0.5)
+                    local lastWalkToPoint = humanoid.WalkToPoint
+                    local stoppedTime = 0
+                    local checkInterval = 0.1
+                    
+                    while boss.Parent and humanoid.Parent and getgenv().AutoFarmDekuMainAcc do
+                        task.wait(checkInterval)
+                        
+                        local currentWalkToPoint = humanoid.WalkToPoint
+                        
+                        -- Проверяем, изменился ли WalkToPoint
+                        if currentWalkToPoint == lastWalkToPoint then
+                            stoppedTime = stoppedTime + checkInterval
+                            
+                            -- Если остановился на 1.5 секунды, считаем потенциально мертвым
+                            if stoppedTime >= 1.5 then
+                                -- Дополнительная проверка - ждем еще немного
+                                task.wait(0.5)
+                                
+                                -- Проверяем, не начал ли двигаться снова
+                                if humanoid.WalkToPoint == currentWalkToPoint then
+                                    -- Скорее всего мертв, но еще проверим существование
+                                    task.wait(0.5)
+                                    if not workspace.Living:FindFirstChild(bossName) then
+                                        return true -- Точно мертв - исчез из Living
+                                    end
+                                else
+                                    -- Начал двигаться снова, сбрасываем счетчик
+                                    stoppedTime = 0
+                                    lastWalkToPoint = humanoid.WalkToPoint
+                                end
+                            end
+                        else
+                            -- WalkToPoint изменился, сбрасываем счетчик
+                            stoppedTime = 0
+                            lastWalkToPoint = currentWalkToPoint
+                        end
                     end
                     
-                    if roland then
+                    -- Финальная проверка - исчез ли из Living
+                    return not workspace.Living:FindFirstChild(bossName)
+                end
+                
+                -- Отслеживание Roland квеста
+                local function checkRolandQuest()
+                    local proximityPrompt = workspace.Map.RuinedCity.Spawn:FindFirstChild("ProximityPromptB")
+                    if proximityPrompt and proximityPrompt.Enabled then
+                        -- Принимаем квест
+                        pcall(function()
+                            game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("AcceptQuest"):FireServer(33)
+                        end)
+                        
+                        -- Ждем появления Roland
+                        local roland = nil
+                        while not roland and getgenv().AutoFarmDekuMainAcc do
+                            roland = workspace.Living:FindFirstChild("Roland")
+                            task.wait(0.5)
+                        end
+                        
+                        if roland then
+                            isKillingBoss = true
+                            setNoClip(true)
+                            
+                            -- Используем первый скилл перед телепортом
+                            useSkill()
+                            task.wait(0.1)
+                            
+                            -- Убийство Roland с постоянным телепортом и использованием скиллов
+                            while roland and roland.Parent and getgenv().AutoFarmDekuMainAcc do
+                                -- Постоянно телепортируемся к боссу
+                                teleportToBoss(roland)
+                                
+                                -- Используем скилл если прошел кулдаун
+                                useSkill()
+                                
+                                -- Очень короткая задержка для быстрого телепорта
+                                task.wait(0.01)
+                                
+                                -- Проверяем, не умер ли босс
+                                if not workspace.Living:FindFirstChild("Roland") then
+                                    break
+                                end
+                            end
+                            
+                            -- Завершаем квест после смерти Roland
+                            pcall(function()
+                                game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
+                            end)
+                            
+                            -- После убийства босса
+                            if getgenv().AutoFarmDekuMainAcc then
+                                setNoClip(false)
+                                teleportToVoid()
+                                isKillingBoss = false
+                            end
+                            
+                            return true -- Roland квест выполнен
+                        end
+                    end
+                    return false
+                end
+                
+                -- Поиск и убийство обычных боссов
+                local function findAndKillBosses()
+                    local targetBosses = {"Deku", "AngelicaWeak", "Angelica", "Bygone", "BlackSilence"}
+                    local foundBoss = nil
+                    local foundBossName = nil
+                    
+                    for _, bossName in pairs(targetBosses) do
+                        local boss = workspace.Living:FindFirstChild(bossName)
+                        if boss and boss:FindFirstChild("Humanoid") then
+                            foundBoss = boss
+                            foundBossName = bossName
+                            break
+                        end
+                    end
+                    
+                    if foundBoss then
                         isKillingBoss = true
                         setNoClip(true)
                         
-                        -- Убийство Roland с использованием скиллов
-                        while roland and roland.Parent and getgenv().AutoFarmDekuMainAcc do
-                            useSkill()
-                            teleportToBoss(roland)
-                            task.wait(0.1)
+                        -- Используем первый скилл перед телепортом
+                        useSkill()
+                        task.wait(0.1)
+                        
+                        -- Убийство босса с постоянным телепортом и использованием скиллов
+                        while foundBoss and foundBoss.Parent and getgenv().AutoFarmDekuMainAcc do
+                            -- Постоянно телепортируемся к боссу
+                            teleportToBoss(foundBoss)
                             
-                            -- Проверяем смерть через WalkToPoint
-                            if trackBossDeath(roland, "Roland") then
+                            -- Используем скилл если прошел кулдаун
+                            useSkill()
+                            
+                            -- Очень короткая задержка для быстрого телепорта
+                            task.wait(0.01)
+                            
+                            -- Проверяем, не умер ли босс
+                            if not workspace.Living:FindFirstChild(foundBossName) then
                                 break
                             end
                         end
-                        
-                        -- Завершаем квест после смерти Roland
-                        pcall(function()
-                            game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
-                        end)
                         
                         -- После убийства босса
                         if getgenv().AutoFarmDekuMainAcc then
@@ -2801,117 +2872,74 @@ getgenv().UsingDekuFarmMain = function()
                             teleportToVoid()
                             isKillingBoss = false
                         end
-                        
-                        return true -- Roland квест выполнен
-                    end
-                end
-                return false
-            end
-            
-            -- Поиск и убийство обычных боссов
-            local function findAndKillBosses()
-                local targetBosses = {"Deku", "AngelicaWeak", "Angelica", "Bygone", "BlackSilence"}
-                local foundBoss = nil
-                local foundBossName = nil
-                
-                for _, bossName in pairs(targetBosses) do
-                    local boss = workspace.Living:FindFirstChild(bossName)
-                    if boss and boss:FindFirstChild("Humanoid") then
-                        foundBoss = boss
-                        foundBossName = bossName
-                        break
                     end
                 end
                 
-                if foundBoss then
-                    isKillingBoss = true
-                    setNoClip(true)
-                    
-                    -- Убийство босса с использованием скиллов
-                    while foundBoss and foundBoss.Parent and getgenv().AutoFarmDekuMainAcc do
-                        useSkill()
-                        teleportToBoss(foundBoss)
-                        task.wait(0.1)
-                        
-                        -- Проверяем смерть через WalkToPoint
-                        if trackBossDeath(foundBoss, foundBossName) then
-                            break
+                -- Обработчик респавна персонажа
+                local function onCharacterAdded(newCharacter)
+                    character = newCharacter
+                    if isWaitingForRespawn then
+                        -- Ждем, пока персонаж полностью загрузится
+                        if character:WaitForChild("HumanoidRootPart", 10) then
+                            task.wait(1) -- Небольшая задержка для стабильности
+                            teleportToWaitPos()
+                            isWaitingForRespawn = false
                         end
                     end
-                    
-                    -- После убийства босса
-                    if getgenv().AutoFarmDekuMainAcc then
-                        setNoClip(false)
-                        teleportToVoid()
-                        isKillingBoss = false
-                    end
                 end
-            end
-            
-            -- Обработчик респавна персонажа
-            local function onCharacterAdded(newCharacter)
-                character = newCharacter
-                if isWaitingForRespawn then
-                    -- Ждем, пока персонаж полностью загрузится
-                    if character:WaitForChild("HumanoidRootPart", 10) then
-                        task.wait(1) -- Небольшая задержка для стабильности
-                        teleportToWaitPos()
-                        isWaitingForRespawn = false
-                    end
-                end
-            end
-            
-            player.CharacterAdded:Connect(onCharacterAdded)
-            
-            -- Основной цикл
-            pcall(function()
-                BoredLibrary.prompt("Sakura Hub", "Starting Wait For Bosses...", 1.5)
-            end)
-            
-            -- Отменяем квест 33 при запуске (если активен)
-            pcall(function()
-                game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("CancelQuest"):FireServer(33)
-                task.wait(0.5) -- Небольшая задержка для появления окна подтверждения
                 
-                -- Подтверждаем отмену квеста
-                local confirmButton = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("CancelQuestConfirmation")
-                if confirmButton and confirmButton:FindFirstChild("Outer") and confirmButton.Outer:FindFirstChild("Confirm") then
-                    local button = confirmButton.Outer.Confirm
+                player.CharacterAdded:Connect(onCharacterAdded)
+                
+                -- Основной цикл
+                pcall(function()
+                    BoredLibrary.prompt("Sakura Hub", "Starting Wait For Bosses...", 1.5)
+                end)
+                
+                -- Отменяем квест 33 при запуске (если активен)
+                pcall(function()
+                    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("CancelQuest"):FireServer(33)
+                    task.wait(0.5) -- Небольшая задержка для появления окна подтверждения
                     
-                    -- Используем VirtualInputManager для клика по кнопке
-                    game:GetService("VirtualInputManager"):SendMouseButtonEvent(
-                        button.AbsolutePosition.X + button.AbsoluteSize.X/2,
-                        button.AbsolutePosition.Y + button.AbsoluteSize.Y/2,
-                        0, true, button, 1
-                    )
-                    game:GetService("VirtualInputManager"):SendMouseButtonEvent(
-                        button.AbsolutePosition.X + button.AbsoluteSize.X/2,
-                        button.AbsolutePosition.Y + button.AbsoluteSize.Y/2,
-                        0, false, button, 1
-                    )
-                end
-            end)
-            
-            -- Определяем персонажа в начале
-            detectStand()
-            
-            -- Телепортируемся на позицию ожидания
-            teleportToWaitPos()
-            
-            while getgenv().AutoFarmDekuMainAcc do
-                if not isKillingBoss and not isWaitingForRespawn then
-                    -- Сначала проверяем Roland квест
-                    if not checkRolandQuest() then
-                        -- Если Roland квеста нет, ищем обычных боссов
-                        findAndKillBosses()
+                    -- Подтверждаем отмену квеста
+                    local confirmButton = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("CancelQuestConfirmation")
+                    if confirmButton and confirmButton:FindFirstChild("Outer") and confirmButton.Outer:FindFirstChild("Confirm") then
+                        local button = confirmButton.Outer.Confirm
+                        
+                        -- Используем VirtualInputManager для клика по кнопке
+                        game:GetService("VirtualInputManager"):SendMouseButtonEvent(
+                            button.AbsolutePosition.X + button.AbsoluteSize.X/2,
+                            button.AbsolutePosition.Y + button.AbsoluteSize.Y/2,
+                            0, true, button, 1
+                        )
+                        game:GetService("VirtualInputManager"):SendMouseButtonEvent(
+                            button.AbsolutePosition.X + button.AbsoluteSize.X/2,
+                            button.AbsolutePosition.Y + button.AbsoluteSize.Y/2,
+                            0, false, button, 1
+                        )
                     end
+                end)
+                
+                -- Определяем персонажа в начале
+                detectStand()
+                
+                -- Телепортируемся на позицию ожидания
+                teleportToWaitPos()
+                
+                while getgenv().AutoFarmDekuMainAcc do
+                    if not isKillingBoss and not isWaitingForRespawn then
+                        -- Сначала проверяем Roland квест
+                        if not checkRolandQuest() then
+                            -- Если Roland квеста нет, ищем обычных боссов
+                            findAndKillBosses()
+                        end
+                    end
+                    task.wait(1) -- Проверяем каждую секунду
                 end
-                task.wait(1) -- Проверяем каждую секунду
-            end
-            
-            -- Отключаем NoClip при завершении
-            setNoClip(false)
-        end)
+                
+                -- Отключаем NoClip при завершении
+                setNoClip(false)
+            end)
+        end
     end
 end
 
