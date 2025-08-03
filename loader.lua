@@ -2862,29 +2862,27 @@ getgenv().UsingDekuFarmMain = function()
                                 teleportToBoss(currentRoland)
                                 
                                 -- Выполняем комбо атаку
-                                performBossCombo()
+                                task.spawn(function()
+                                    performBossCombo()
+                                end)
                                 
                                 -- Проверяем урон
                                 if checkPlayerDamage() then
                                     teleportToVoid()
-                                    break
-                                end
-                                
-                                task.wait(0.1) -- Повторяем каждые 0.1 секунды
-                                
-                                -- Если получили урон, ждем респавна
-                                if isWaitingForRespawn then
+                                    -- Ждем респавна
                                     while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
                                         task.wait(0.1)
                                     end
                                     updateMaxHP() -- Обновляем HP после респавна
                                 end
+                                
+                                task.wait(0.1) -- Повторяем каждые 0.1 секунды
                             else
                                 break -- Босс мертв
                             end
                         end
                         
-                        -- Завершаем квест если босс мертв
+                        -- После убийства босса завершаем квест и возвращаемся на позицию ожидания
                         if not workspace.Living:FindFirstChild("Roland") then
                             pcall(function()
                                 local questRemotes = replicatedStorage:FindFirstChild("QuestRemotes")
@@ -2893,6 +2891,8 @@ getgenv().UsingDekuFarmMain = function()
                                     print("Claimed Roland quest")
                                 end
                             end)
+                            teleportToWaitPos() -- Возвращаемся на позицию ожидания
+                            print("Roland killed, returned to wait position")
                         end
                         
                         setNoClip(false)
@@ -2932,26 +2932,30 @@ getgenv().UsingDekuFarmMain = function()
                             teleportToBoss(currentBoss)
                             
                             -- Выполняем комбо атаку
-                            performBossCombo()
+                            task.spawn(function()
+                                performBossCombo()
+                            end)
                             
                             -- Проверяем урон
                             if checkPlayerDamage() then
                                 teleportToVoid()
-                                break
-                            end
-                            
-                            task.wait(0.1) -- Повторяем каждые 0.1 секунды
-                            
-                            -- Если получили урон, ждем респавна
-                            if isWaitingForRespawn then
+                                -- Ждем респавна
                                 while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
                                     task.wait(0.1)
                                 end
                                 updateMaxHP() -- Обновляем HP после респавна
                             end
+                            
+                            task.wait(0.1) -- Повторяем каждые 0.1 секунды
                         else
                             break -- Босс мертв
                         end
+                    end
+                    
+                    -- После убийства босса возвращаемся на позицию ожидания
+                    if not workspace.Living:FindFirstChild(foundBossName) then
+                        teleportToWaitPos() -- Возвращаемся на позицию ожидания
+                        print(foundBossName .. " killed, returned to wait position")
                     end
                     
                     setNoClip(false)
@@ -2992,7 +2996,7 @@ getgenv().UsingDekuFarmMain = function()
             -- Основной цикл фарма
             while getgenv().AutoFarmDekuMainAcc do
                 if not isKillingBoss and not isWaitingForRespawn then
-                    -- Проверяем наличие любого босса перед телепортом в комнату ожидания
+                    -- Проверяем наличие любого босса
                     local targetBosses = {"Roland", "Deku", "AngelicaWeak", "Angelica", "Bygone", "BlackSilence"}
                     local anyBossExists = false
                     
@@ -3006,15 +3010,16 @@ getgenv().UsingDekuFarmMain = function()
                     -- Если нет боссов, телепортируемся в комнату ожидания
                     if not anyBossExists then
                         teleportToWaitPos()
+                        print("No bosses found, waiting at spawn...")
                     end
                     
                     -- Сначала проверяем Roland квест
-                    if not handleRolandQuest() then
-                        -- Если Roland квеста нет, ищем обычных боссов
-                        handleRegularBosses()
-                    end
+                    handleRolandQuest()
+                    
+                    -- Затем ищем обычных боссов
+                    handleRegularBosses()
                 end
-                task.wait(1) -- Проверяем каждую секунду
+                task.wait(0.5) -- Проверяем каждые 0.5 секунд
             end
             
             -- Отключаем NoClip при завершении
