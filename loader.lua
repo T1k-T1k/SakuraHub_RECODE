@@ -2753,12 +2753,12 @@ getgenv().UsingDekuFarmMain = function()
                 return false
             end
             
-            -- Телепорт к боссу (в притык) с комбо атакой
+            -- Телепорт к боссу (спереди) с комбо атакой
             local function teleportToBoss(boss)
                 if boss and boss:FindFirstChild("HumanoidRootPart") and character and character:FindFirstChild("HumanoidRootPart") then
                     local hrp = boss.HumanoidRootPart
-                    local closeOffset = hrp.CFrame.LookVector * -1.5 -- Очень близко к боссу
-                    local targetCFrame = CFrame.new(hrp.Position + closeOffset, hrp.Position)
+                    local frontOffset = hrp.CFrame.LookVector * 1.5 -- Спереди босса
+                    local targetCFrame = CFrame.new(hrp.Position + frontOffset, hrp.Position)
                     
                     character.HumanoidRootPart.CFrame = targetCFrame
                     
@@ -2830,25 +2830,32 @@ getgenv().UsingDekuFarmMain = function()
                 end
             end
             
-            -- Отслеживание Roland квеста
+            -- Отслеживание Roland квеста (исправленная версия)
             local function handleRolandQuest()
                 local proximityPrompt = workspace.Map.RuinedCity.Spawn:FindFirstChild("ProximityPromptB")
-                if proximityPrompt and proximityPrompt.Enabled then
-                    -- Принимаем квест
+                local rolandExists = workspace.Living:FindFirstChild("Roland")
+                
+                -- Проверяем: есть ли проксимити промпт включен ИЛИ уже есть Roland в living
+                if (proximityPrompt and proximityPrompt.Enabled) or rolandExists then
+                    -- Принимаем квест (даже если Roland уже есть)
                     pcall(function()
                         local questRemotes = replicatedStorage:FindFirstChild("QuestRemotes")
                         if questRemotes and questRemotes:FindFirstChild("AcceptQuest") then
                             questRemotes.AcceptQuest:FireServer(33)
+                            print("Accepted Roland quest")
                         end
                     end)
                     
-                    -- Ждем появления Roland
-                    while not workspace.Living:FindFirstChild("Roland") and getgenv().AutoFarmDekuMainAcc do
-                        task.wait(0.5)
+                    -- Если Roland еще нет, ждем его появления
+                    if not rolandExists then
+                        while not workspace.Living:FindFirstChild("Roland") and getgenv().AutoFarmDekuMainAcc do
+                            task.wait(0.5)
+                        end
                     end
                     
                     local roland = workspace.Living:FindFirstChild("Roland")
                     if roland then
+                        print("Starting Roland fight")
                         isKillingBoss = true
                         setNoClip(true)
                         updateMaxHP() -- Обновляем максимальное HP
@@ -2897,6 +2904,7 @@ getgenv().UsingDekuFarmMain = function()
                                 local questRemotes = replicatedStorage:FindFirstChild("QuestRemotes")
                                 if questRemotes and questRemotes:FindFirstChild("ClaimQuest") then
                                     questRemotes.ClaimQuest:FireServer(33)
+                                    print("Claimed Roland quest")
                                 end
                             end)
                         end
@@ -2925,6 +2933,7 @@ getgenv().UsingDekuFarmMain = function()
                 end
                 
                 if foundBoss then
+                    print("Starting fight with", foundBossName)
                     isKillingBoss = true
                     setNoClip(true)
                     updateMaxHP() -- Обновляем максимальное HP
