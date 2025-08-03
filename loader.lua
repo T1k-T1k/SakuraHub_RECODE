@@ -2721,10 +2721,11 @@ getgenv().UsingDekuFarmMain = function()
             local function performBossCombo()
                 if currentStand and string.sub(currentStand, 1, 6) == "Shinra" then
                     -- Используем Punch 3 раза с задержками
-                    for i = 1, 3 do
-                        usePunch()
-                        task.wait(0.65)
-                    end
+                    usePunch()
+                    task.wait(0.65)
+                    usePunch()
+                    task.wait(0.65)
+                    usePunch()
                     
                     -- После 3 Punch используем случайный скилл
                     useRandomSkill()
@@ -2753,7 +2754,7 @@ getgenv().UsingDekuFarmMain = function()
                 return false
             end
             
-            -- Телепорт к боссу (спереди) с комбо атакой
+            -- Телепорт к боссу (постоянно каждые 0.1 сек)
             local function teleportToBoss(boss)
                 if boss and boss:FindFirstChild("HumanoidRootPart") and character and character:FindFirstChild("HumanoidRootPart") then
                     local hrp = boss.HumanoidRootPart
@@ -2761,13 +2762,6 @@ getgenv().UsingDekuFarmMain = function()
                     local targetCFrame = CFrame.new(hrp.Position + frontOffset, hrp.Position)
                     
                     character.HumanoidRootPart.CFrame = targetCFrame
-                    
-                    -- Небольшая задержка после телепорта
-                    task.wait(0.2)
-                    
-                    -- Выполняем комбо атаку
-                    performBossCombo()
-                    
                     return true
                 end
                 return false
@@ -2862,29 +2856,21 @@ getgenv().UsingDekuFarmMain = function()
                         
                         -- Основной цикл атаки босса
                         while workspace.Living:FindFirstChild("Roland") and getgenv().AutoFarmDekuMainAcc do
-                            -- 1. Используем случайный скилл перед телепортом
-                            useRandomSkill()
-                            
-                            -- 2. Ждем 0.5 секунды
-                            task.wait(0.5)
-                            
-                            -- 3. Телепортируемся к боссу (телепорт уже включает комбо атаку)
                             local currentRoland = workspace.Living:FindFirstChild("Roland")
                             if currentRoland then
+                                -- Постоянно телепортируемся к боссу каждые 0.1 сек
                                 teleportToBoss(currentRoland)
                                 
-                                -- Проверяем урон каждые 0.1 секунды
-                                local checkTime = 0
-                                while checkTime < 5 and workspace.Living:FindFirstChild("Roland") and getgenv().AutoFarmDekuMainAcc do
-                                    task.wait(0.1)
-                                    checkTime = checkTime + 0.1
-                                    
-                                    -- Если получили урон, респавним
-                                    if checkPlayerDamage() then
-                                        teleportToVoid()
-                                        break
-                                    end
+                                -- Выполняем комбо атаку
+                                performBossCombo()
+                                
+                                -- Проверяем урон
+                                if checkPlayerDamage() then
+                                    teleportToVoid()
+                                    break
                                 end
+                                
+                                task.wait(0.1) -- Повторяем каждые 0.1 секунды
                                 
                                 -- Если получили урон, ждем респавна
                                 if isWaitingForRespawn then
@@ -2940,29 +2926,21 @@ getgenv().UsingDekuFarmMain = function()
                     
                     -- Основной цикл атаки босса
                     while workspace.Living:FindFirstChild(foundBossName) and getgenv().AutoFarmDekuMainAcc do
-                        -- 1. Используем случайный скилл перед телепортом
-                        useRandomSkill()
-                        
-                        -- 2. Ждем 0.5 секунды
-                        task.wait(0.5)
-                        
-                        -- 3. Телепортируемся к боссу (телепорт уже включает комбо атаку)
                         local currentBoss = workspace.Living:FindFirstChild(foundBossName)
                         if currentBoss then
+                            -- Постоянно телепортируемся к боссу каждые 0.1 сек
                             teleportToBoss(currentBoss)
                             
-                            -- Проверяем урон каждые 0.1 секунды
-                            local checkTime = 0
-                            while checkTime < 5 and workspace.Living:FindFirstChild(foundBossName) and getgenv().AutoFarmDekuMainAcc do
-                                task.wait(0.1)
-                                checkTime = checkTime + 0.1
-                                
-                                -- Если получили урон, респавним
-                                if checkPlayerDamage() then
-                                    teleportToVoid()
-                                    break
-                                end
+                            -- Выполняем комбо атаку
+                            performBossCombo()
+                            
+                            -- Проверяем урон
+                            if checkPlayerDamage() then
+                                teleportToVoid()
+                                break
                             end
+                            
+                            task.wait(0.1) -- Повторяем каждые 0.1 секунды
                             
                             -- Если получили урон, ждем респавна
                             if isWaitingForRespawn then
