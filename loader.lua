@@ -2745,29 +2745,41 @@ getgenv().UsingDekuFarmMain = function()
                 return false
             end
             
-            -- Проверка урона по HP
-            local currentHP = 100
+            -- Проверка урона по HP в workspace.Living
+            local maxHP = nil
             local function checkPlayerDamage()
-                if character and character:FindFirstChild("Humanoid") then
-                    local humanoid = character.Humanoid
-                    local newHP = humanoid.Health
+                local playerName = player.Name
+                local playerModel = workspace.Living:FindFirstChild(playerName)
+                
+                if playerModel and playerModel:FindFirstChild("Humanoid") then
+                    local humanoid = playerModel.Humanoid
+                    local currentHP = humanoid.Health
+                    local playerMaxHP = humanoid.MaxHealth
                     
-                    -- Если HP уменьшилось, значит получили урон
-                    if newHP < currentHP then
-                        currentHP = newHP
-                        return true -- Получили урон
-                    else
-                        currentHP = newHP
-                        return false -- Урона нет
+                    -- Инициализируем maxHP при первой проверке
+                    if maxHP == nil then
+                        maxHP = playerMaxHP
                     end
+                    
+                    -- Если HP меньше максимального, значит получили урон
+                    if currentHP < maxHP then
+                        print("Player took damage! HP:", currentHP, "/", maxHP)
+                        return true -- Получили урон
+                    end
+                    
+                    return false -- Урона нет
                 end
                 return false
             end
             
-            -- Обновление HP при респавне
-            local function updateCurrentHP()
-                if character and character:FindFirstChild("Humanoid") then
-                    currentHP = character.Humanoid.Health
+            -- Обновление максимального HP
+            local function updateMaxHP()
+                local playerName = player.Name
+                local playerModel = workspace.Living:FindFirstChild(playerName)
+                
+                if playerModel and playerModel:FindFirstChild("Humanoid") then
+                    maxHP = playerModel.Humanoid.MaxHealth
+                    print("Updated max HP:", maxHP)
                 end
             end
             
@@ -2792,7 +2804,7 @@ getgenv().UsingDekuFarmMain = function()
                     if roland then
                         isKillingBoss = true
                         setNoClip(true)
-                        updateCurrentHP() -- Обновляем текущее HP
+                        updateMaxHP() -- Обновляем максимальное HP
                         
                         -- Основной цикл атаки босса
                         while workspace.Living:FindFirstChild("Roland") and getgenv().AutoFarmDekuMainAcc do
@@ -2825,7 +2837,7 @@ getgenv().UsingDekuFarmMain = function()
                                     while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
                                         task.wait(0.1)
                                     end
-                                    updateCurrentHP() -- Обновляем HP после респавна
+                                    updateMaxHP() -- Обновляем HP после респавна
                                 end
                             else
                                 break -- Босс мертв
@@ -2868,7 +2880,7 @@ getgenv().UsingDekuFarmMain = function()
                 if foundBoss then
                     isKillingBoss = true
                     setNoClip(true)
-                    updateCurrentHP() -- Обновляем текущее HP
+                    updateMaxHP() -- Обновляем максимальное HP
                     
                     -- Основной цикл атаки босса
                     while workspace.Living:FindFirstChild(foundBossName) and getgenv().AutoFarmDekuMainAcc do
@@ -2901,7 +2913,7 @@ getgenv().UsingDekuFarmMain = function()
                                 while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
                                     task.wait(0.1)
                                 end
-                                updateCurrentHP() -- Обновляем HP после респавна
+                                updateMaxHP() -- Обновляем HP после респавна
                             end
                         else
                             break -- Босс мертв
@@ -2923,7 +2935,7 @@ getgenv().UsingDekuFarmMain = function()
                     if character:WaitForChild("HumanoidRootPart", 10) then
                         task.wait(1) -- Небольшая задержка для стабильности
                         teleportToWaitPos()
-                        updateCurrentHP() -- Обновляем HP после респавна
+                        updateMaxHP() -- Обновляем HP после респавна
                         isWaitingForRespawn = false
                     end
                 end
@@ -2938,7 +2950,7 @@ getgenv().UsingDekuFarmMain = function()
             
             -- Определяем персонажа в начале
             detectStand()
-            updateCurrentHP()
+            updateMaxHP()
             
             -- Телепортируемся на позицию ожидания
             teleportToWaitPos()
