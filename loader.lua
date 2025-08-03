@@ -2417,8 +2417,6 @@ end
 
 -- Strange thing End
 
--- New Deku Farm
-
 getgenv().UsingDekuFarmMain = function()
     local Players = game:GetService("Players")
     local TweenService = game:GetService("TweenService")
@@ -3129,6 +3127,8 @@ getgenv().UsingDekuFarmMain = function()
         end)
     end
 end
+
+-- Deku Farm New
 
 -- Deku Farm Logic
 
