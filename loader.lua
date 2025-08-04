@@ -2417,7 +2417,6 @@ end
 
 -- Strange thing End
 
-
 getgenv().UsingDekuFarmMain = function()
     local Players = game:GetService("Players")
     local TweenService = game:GetService("TweenService")
@@ -2626,8 +2625,8 @@ getgenv().UsingDekuFarmMain = function()
             
             -- НОВЫЙ ФЛАГ для отслеживания смерти Deku
             local isDekuDead = false
-            
-            -- Мониторинг ProximityPrompt для управления AutoOneShotting
+
+             -- Мониторинг ProximityPrompt для управления AutoOneShotting
             local function monitorProximityPrompt()
                 task.spawn(function()
                     while getgenv().AutoFarmDekuMainAcc do
@@ -2642,9 +2641,6 @@ getgenv().UsingDekuFarmMain = function()
                     end
                 end)
             end
-            
-            -- Запускаем мониторинг ProximityPrompt
-            monitorProximityPrompt()
             
             -- Определение персонажа и его скиллов
             local function detectStand()
@@ -2944,7 +2940,7 @@ getgenv().UsingDekuFarmMain = function()
                                         getgenv().AutoOneShotting = true
                                         print("Teleported to Roland - AutoOneShotting enabled after 1.1s")
                                     end)
-                                    
+
                                     -- Выполняем комбо атаку
                                     task.spawn(function()
                                         performBossCombo()
@@ -2961,6 +2957,121 @@ getgenv().UsingDekuFarmMain = function()
                                     end
                                     
                                     task.wait(0.1) -- Повторяем каждые 0.1 секунды
+                                else
+                                    break -- Босс пропал
+                                end
+                            end
+                            
+                            -- Проверяем появилась ли AngelicaWeak (Roland умер)
+                            if checkRolandDeath() then
+                                pcall(function()
+                                    local questRemotes = replicatedStorage:FindFirstChild("QuestRemotes")
+                                    if questRemotes and questRemotes:FindFirstChild("ClaimQuest") then
+                                        questRemotes.ClaimQuest:FireServer(33)
+                                        print("Claimed Roland quest")
+                                    end
+                                end)
+                                
+                                print("Roland died! AngelicaWeak appeared, starting AngelicaWeak fight")
+                                
+                                -- Убиваем AngelicaWeak (не просто Angelica)
+                                while workspace.Living:FindFirstChild("AngelicaWeak") and getgenv().AutoFarmDekuMainAcc do
+                                    local currentAngelica = workspace.Living:FindFirstChild("AngelicaWeak")
+                                    if currentAngelica then
+                                        -- Постоянно телепортируемся к AngelicaWeak каждые 0.1 сек
+                                        teleportToBoss(currentAngelica)
+                                        
+                                        -- Выполняем комбо атаку
+                                        task.spawn(function()
+                                            performBossCombo()
+                                        end)
+                                        
+                                        -- Проверяем урон
+                                        if checkPlayerDamage() then
+                                            teleportToVoid()
+                                            -- Ждем респавна
+                                            while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
+                                                task.wait(0.1)
+                                            end
+                                            updateMaxHP() -- Обновляем HP после респавна
+                                        end
+                                        
+                                        task.wait(0.1) -- Повторяем каждые 0.1 секунды
+                                    else
+                                        break -- AngelicaWeak умерла
+                                    end
+                                end
+                                
+                                print("AngelicaWeak killed!")
+                            end
+                            
+                            -- Возвращаемся на позицию ожидания после убийства Roland и AngelicaWeak
+                            teleportToWaitPos()
+                            print("Roland + AngelicaWeak sequence completed, returned to wait position")
+                            
+                            setNoClip(false)
+                            isKillingBoss = false
+                            return true
+                        end
+                    end
+                end
+                return false
+            end
+            
+            -- Поиск и убийство обычных боссов
+            local function handleRegularBosses()
+                local targetBosses = {"Deku", "AngelicaWeak", "Angelica", "Bygone", "BlackSilence"}
+                local foundBoss = nil
+                local foundBossName = nil
+                
+                for _, bossName in pairs(targetBosses) do
+                    local boss = workspace.Living:FindFirstChild(bossName)
+                    if boss and boss:FindFirstChild("Humanoid") then
+                        foundBoss = boss
+                        foundBossName = bossName
+                        break
+                    end
+                end
+                
+                if foundBoss then
+                    print("Starting fight with", foundBossName)
+                    isKillingBoss = true
+                    setNoClip(true)
+                    updateMaxHP() -- Обновляем максимальное HP
+                    
+                    -- Специальная логика для Deku с флагом
+                    if foundBossName == "Deku" then
+                        -- Проверяем флаг isDekuDead перед началом атаки
+                        if isDekuDead then
+                            print("Deku found but isDekuDead = true, skipping attack")
+                            setNoClip(false)
+                            isKillingBoss = false
+                            return false
+                        end
+                        
+                        -- Основной цикл атаки Deku
+                        while workspace.Living:FindFirstChild("Deku") and not checkDekuDeath() and getgenv().AutoFarmDekuMainAcc do
+                            local currentDeku = workspace.Living:FindFirstChild("Deku")
+                            if currentDeku then
+                                -- Постоянно телепортируемся к боссу каждые 0.1 сек
+                                teleportToBoss(currentDeku)
+                                
+                                -- Выполняем комбо атаку
+                                task.spawn(function()
+                                    performBossCombo()
+                                end)
+                                
+                                -- Проверяем урон
+                                if checkPlayerDamage() then
+                                    teleportToVoid()
+                                    -- Ждем респавна
+                                    while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
+                                        task.wait(0.1)
+                                    end
+                                    updateMaxHP() -- Обновляем HP после респавна
+                                end
+                                
+                                task.wait(0.1) -- Повторяем каждые 0.1 секунды
                             else
                                 break -- Deku пропал
                             end
