@@ -2417,6 +2417,7 @@ end
 
 -- Strange thing End
 
+
 getgenv().UsingDekuFarmMain = function()
     local Players = game:GetService("Players")
     local TweenService = game:GetService("TweenService")
@@ -2623,6 +2624,9 @@ getgenv().UsingDekuFarmMain = function()
             local isKillingBoss = false
             local isWaitingForRespawn = false
             
+            -- НОВЫЙ ФЛАГ для отслеживания смерти Deku
+            local isDekuDead = false
+            
             -- Определение персонажа и его скиллов
             local function detectStand()
                 local standName = player.Data.StandName.Value
@@ -2822,17 +2826,40 @@ getgenv().UsingDekuFarmMain = function()
                 end
             end
             
-            -- Проверка смерти Deku по появлению OA's Grace
+            -- ОБНОВЛЕННАЯ проверка смерти Deku с флагом
             local function checkDekuDeath()
-                return workspace.Item2:FindFirstChild("OA's Grace") ~= nil
+                local starExists = workspace.Item2:FindFirstChild("OA's Grace") ~= nil
+                
+                -- Если звезда появилась, устанавливаем флаг и запускаем таймер
+                if starExists and not isDekuDead then
+                    isDekuDead = true
+                    print("Deku died! Star appeared, setting isDekuDead = true")
+                    
+                    -- Запускаем таймер на 4 секунды
+                    task.spawn(function()
+                        task.wait(4)
+                        isDekuDead = false
+                        print("isDekuDead flag reset to false after 4 seconds")
+                    end)
+                    
+                    return true
+                end
+                
+                -- Если флаг активен, считаем что Deku мертв (даже если звезды нет)
+                if isDekuDead then
+                    return true
+                end
+                
+                -- Если флаг не активен и звезды нет, Deku жив
+                return false
             end
             
-            -- ИСПРАВЛЕНО: Проверка смерти Roland по появлению AngelicaWeak (не просто Angelica)
+            -- Проверка смерти Roland по появлению AngelicaWeak (не просто Angelica)
             local function checkRolandDeath()
                 return workspace.Living:FindFirstChild("AngelicaWeak") ~= nil
             end
             
-            -- ИСПРАВЛЕНО: Отслеживание Roland квеста с проверкой HP < 8000
+            -- Отслеживание Roland квеста с проверкой HP < 8000
             local function checkRolandDamaged()
                 local roland = workspace.Living:FindFirstChild("Roland")
                 if roland and roland:FindFirstChild("Humanoid") then
@@ -2869,7 +2896,7 @@ getgenv().UsingDekuFarmMain = function()
                     if roland then
                         print("Roland spawned, waiting for HP < 8000...")
                         
-                        -- ИСПРАВЛЕНО: Ждем пока Roland HP не станет меньше 8000
+                        -- Ждем пока Roland HP не станет меньше 8000
                         while workspace.Living:FindFirstChild("Roland") and not checkRolandDamaged() and getgenv().AutoFarmDekuMainAcc do
                             task.wait(0.1)
                             local currentRoland = workspace.Living:FindFirstChild("Roland")
@@ -2913,7 +2940,7 @@ getgenv().UsingDekuFarmMain = function()
                                 end
                             end
                             
-                            -- ИСПРАВЛЕНО: Проверяем появилась ли AngelicaWeak (Roland умер)
+                            -- Проверяем появилась ли AngelicaWeak (Roland умер)
                             if checkRolandDeath() then
                                 pcall(function()
                                     local questRemotes = replicatedStorage:FindFirstChild("QuestRemotes")
@@ -2925,7 +2952,7 @@ getgenv().UsingDekuFarmMain = function()
                                 
                                 print("Roland died! AngelicaWeak appeared, starting AngelicaWeak fight")
                                 
-                                -- ИСПРАВЛЕНО: Убиваем AngelicaWeak (не просто Angelica)
+                                -- Убиваем AngelicaWeak (не просто Angelica)
                                 while workspace.Living:FindFirstChild("AngelicaWeak") and getgenv().AutoFarmDekuMainAcc do
                                     local currentAngelica = workspace.Living:FindFirstChild("AngelicaWeak")
                                     if currentAngelica then
@@ -2990,8 +3017,16 @@ getgenv().UsingDekuFarmMain = function()
                     setNoClip(true)
                     updateMaxHP() -- Обновляем максимальное HP
                     
-                    -- Специальная логика для Deku
+                    -- Специальная логика для Deku с флагом
                     if foundBossName == "Deku" then
+                        -- Проверяем флаг isDekuDead перед началом атаки
+                        if isDekuDead then
+                            print("Deku found but isDekuDead = true, skipping attack")
+                            setNoClip(false)
+                            isKillingBoss = false
+                            return false
+                        end
+                        
                         -- Основной цикл атаки Deku
                         while workspace.Living:FindFirstChild("Deku") and not checkDekuDeath() and getgenv().AutoFarmDekuMainAcc do
                             local currentDeku = workspace.Living:FindFirstChild("Deku")
@@ -3022,7 +3057,7 @@ getgenv().UsingDekuFarmMain = function()
                         
                         -- Проверяем появился ли OA's Grace (Deku умер)
                         if checkDekuDeath() then
-                            print("Deku killed! OA's Grace appeared")
+                            print("Deku killed! OA's Grace appeared or flag is active")
                         end
                     else
                         -- Обычная логика для других боссов
