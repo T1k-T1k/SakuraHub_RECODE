@@ -2610,7 +2610,7 @@ getgenv().UsingDekuFarmMain = function()
     -- Основной код фарма начинается здесь
     if completed and getgenv().AutoFarmDekuMainAcc and getgenv().ThePlayerWhoSupports then
         task.spawn(function()
-local player = game:GetService("Players").LocalPlayer
+            local player = game:GetService("Players").LocalPlayer
             local runService = game:GetService("RunService")
             local replicatedStorage = game:GetService("ReplicatedStorage")
             
@@ -2827,19 +2827,18 @@ local player = game:GetService("Players").LocalPlayer
                 return workspace.Item2:FindFirstChild("OA's Grace") ~= nil
             end
             
-            -- Проверка смерти Roland по появлению Angelica
+            -- ИСПРАВЛЕНО: Проверка смерти Roland по появлению AngelicaWeak (не просто Angelica)
             local function checkRolandDeath()
                 return workspace.Living:FindFirstChild("AngelicaWeak") ~= nil
             end
             
-            -- Отслеживание Roland квеста (исправленная версия)
+            -- ИСПРАВЛЕНО: Отслеживание Roland квеста с проверкой HP < 8000
             local function checkRolandDamaged()
                 local roland = workspace.Living:FindFirstChild("Roland")
                 if roland and roland:FindFirstChild("Humanoid") then
                     local currentHP = roland.Humanoid.Health
-                    local maxHP = roland.Humanoid.MaxHealth
-                    -- Считаем что Roland получил урон если его HP меньше максимального
-                    return currentHP < maxHP
+                    -- Roland считается поврежденным когда его HP меньше 8000
+                    return currentHP < 8000
                 end
                 return false
             end
@@ -2868,17 +2867,20 @@ local player = game:GetService("Players").LocalPlayer
                     
                     local roland = workspace.Living:FindFirstChild("Roland")
                     if roland then
-                        print("Roland spawned, waiting for damage...")
+                        print("Roland spawned, waiting for HP < 8000...")
                         
-                        -- Ждем пока Roland не получит урон
+                        -- ИСПРАВЛЕНО: Ждем пока Roland HP не станет меньше 8000
                         while workspace.Living:FindFirstChild("Roland") and not checkRolandDamaged() and getgenv().AutoFarmDekuMainAcc do
                             task.wait(0.1)
-                            print("Roland HP:", workspace.Living:FindFirstChild("Roland") and workspace.Living.Roland.Humanoid.Health or "N/A")
+                            local currentRoland = workspace.Living:FindFirstChild("Roland")
+                            if currentRoland and currentRoland:FindFirstChild("Humanoid") then
+                                print("Roland HP:", currentRoland.Humanoid.Health, "/ Target: < 8000")
+                            end
                         end
                         
-                        -- Проверяем что Roland все еще жив и получил урон
+                        -- Проверяем что Roland все еще жив и его HP < 8000
                         if workspace.Living:FindFirstChild("Roland") and checkRolandDamaged() then
-                            print("Roland damaged! Starting fight")
+                            print("Roland HP < 8000! Starting fight")
                             isKillingBoss = true
                             setNoClip(true)
                             updateMaxHP() -- Обновляем максимальное HP
@@ -2911,7 +2913,7 @@ local player = game:GetService("Players").LocalPlayer
                                 end
                             end
                             
-                            -- Проверяем появилась ли Angelica (Roland умер)
+                            -- ИСПРАВЛЕНО: Проверяем появилась ли AngelicaWeak (Roland умер)
                             if checkRolandDeath() then
                                 pcall(function()
                                     local questRemotes = replicatedStorage:FindFirstChild("QuestRemotes")
@@ -2921,13 +2923,13 @@ local player = game:GetService("Players").LocalPlayer
                                     end
                                 end)
                                 
-                                print("Roland died! Angelica appeared, starting Angelica fight")
+                                print("Roland died! AngelicaWeak appeared, starting AngelicaWeak fight")
                                 
-                                -- Убиваем Angelica
-                                while workspace.Living:FindFirstChild("Angelica") and getgenv().AutoFarmDekuMainAcc do
-                                    local currentAngelica = workspace.Living:FindFirstChild("Angelica")
+                                -- ИСПРАВЛЕНО: Убиваем AngelicaWeak (не просто Angelica)
+                                while workspace.Living:FindFirstChild("AngelicaWeak") and getgenv().AutoFarmDekuMainAcc do
+                                    local currentAngelica = workspace.Living:FindFirstChild("AngelicaWeak")
                                     if currentAngelica then
-                                        -- Постоянно телепортируемся к Angelica каждые 0.1 сек
+                                        -- Постоянно телепортируемся к AngelicaWeak каждые 0.1 сек
                                         teleportToBoss(currentAngelica)
                                         
                                         -- Выполняем комбо атаку
@@ -2947,16 +2949,16 @@ local player = game:GetService("Players").LocalPlayer
                                         
                                         task.wait(0.1) -- Повторяем каждые 0.1 секунды
                                     else
-                                        break -- Angelica умерла
+                                        break -- AngelicaWeak умерла
                                     end
                                 end
                                 
-                                print("Angelica killed!")
+                                print("AngelicaWeak killed!")
                             end
                             
-                            -- Возвращаемся на позицию ожидания после убийства Roland и Angelica
+                            -- Возвращаемся на позицию ожидания после убийства Roland и AngelicaWeak
                             teleportToWaitPos()
-                            print("Roland + Angelica sequence completed, returned to wait position")
+                            print("Roland + AngelicaWeak sequence completed, returned to wait position")
                             
                             setNoClip(false)
                             isKillingBoss = false
