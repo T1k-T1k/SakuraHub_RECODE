@@ -3347,27 +3347,48 @@ getgenv().UsingDekuFarmAlt = function()
         
         -- Функция для экипировки стенда
         local function equipStand(standName)
-            local searchName = standName == "One for All [Stage 4]" and "OA [Stage 4]" or standName
-            
-            for i = 1, 100 do
-                pcall(function()
-                    if Lplayer.PlayerGui.StandStorage.Outer.Inner.Inner["Slot"..i].Text.Text == searchName then
-                        local args = {"Slot"..i}
-                        if i <= 6 then
-                            ReplicatedStorage.StorageRemote["Slot"..i]:FireServer()
-                        else
-                            ReplicatedStorage.StorageRemote.UseStorageExtra:FireServer(unpack(args))
+            local standNameValue = Lplayer:WaitForChild("Data"):WaitForChild("StandName")
+            if standNameValue.Value ~= standName then
+                local slotsFolder = Lplayer:WaitForChild("PlayerGui")
+                    :WaitForChild("StandStorage")
+                    :WaitForChild("Outer")
+                    :WaitForChild("Inner")
+                    :WaitForChild("Inner")
+                
+                -- Ждём максимум 2.5 секунд, пока появится нужный слот
+                local found = false
+                for try = 1, 50 do
+                    for i = 1, 100 do
+                        local slot = slotsFolder:FindFirstChild("Slot"..i)
+                        if slot and slot:FindFirstChild("Text") and slot.Text:IsA("TextLabel") then
+                            if slot.Text.Text == standName then
+                                local slotName = "Slot"..i
+                                if i <= 3 and ReplicatedStorage.StorageRemote:FindFirstChild(slotName) then
+                                    ReplicatedStorage.StorageRemote[slotName]:FireServer()
+                                    print("FireServer отправлен для", slotName)
+                                else
+                                    ReplicatedStorage.StorageRemote.UseStorageExtra:FireServer(slotName)
+                                    print("UseStorageExtra вызван с аргументом", slotName)
+                                end
+                                found = true
+                                break
+                            end
                         end
-                        return true
                     end
-                end)
+                    if found then break end
+                    task.wait(0.05)
+                end
+                return found
+            else
+                print("Уже есть", standName)
+                return true
             end
-            return false
         end
         
         -- Функция для проверки текущего стенда
         local function getCurrentStand()
-            return Lplayer.Data.StandName.Value
+            local standNameValue = Lplayer:WaitForChild("Data"):WaitForChild("StandName")
+            return standNameValue.Value
         end
         
         -- Функция для использования OA's Grace
