@@ -3393,6 +3393,16 @@ getgenv().UsingDekuFarmAlt = function()
             return standNameValue.Value
         end
         
+        -- Функция для ожидания смены стенда
+        local function waitForStandChange(targetStand, maxWait)
+            local waited = 0
+            while getCurrentStand() ~= targetStand and waited < (maxWait or 50) do
+                task.wait(0.1)
+                waited = waited + 1
+            end
+            return getCurrentStand() == targetStand
+        end
+        
         -- Функция для использования OA's Grace
         local function useOAGrace()
             pcall(function()
@@ -3429,13 +3439,7 @@ getgenv().UsingDekuFarmAlt = function()
             end
             
             -- Ждем экипировки стенда
-            local equipWait = 0
-            while getCurrentStand() ~= RequiredStand and equipWait < 50 do
-                task.wait(0.1)
-                equipWait = equipWait + 1
-            end
-            
-            if getCurrentStand() ~= RequiredStand then
+            if not waitForStandChange(RequiredStand, 50) then
                 BoredLibrary.prompt("Sakura Hub", "Failed to equip One for All [Stage 4] ❌", 2.0)
                 getgenv().AutoFarmDekuAlt = false
                 teleportTo(OriginalPosition)
@@ -3485,10 +3489,11 @@ getgenv().UsingDekuFarmAlt = function()
         local connections = {}
         local isQuestAccepted = false
         local isWaitingForGrace = false
+        local isProcessingQuest = false
         
         -- Цикл для мониторинга OA's Grace
         connections.graceMonitor = RunService.Heartbeat:Connect(function()
-            if not getgenv().AutoFarmDekuAlt then return end
+            if not getgenv().AutoFarmDekuAlt or isProcessingQuest then return end
             
             pcall(function()
                 local grace = Workspace.Item2:FindFirstChild("OA's Grace")
@@ -3523,7 +3528,7 @@ getgenv().UsingDekuFarmAlt = function()
         -- Цикл для мониторинга стенда и призыва боссов
         connections.bossSpawner = RunService.Heartbeat:Connect(function()
             if not getgenv().AutoFarmDekuAlt then return end
-            if isWaitingForGrace then return end
+            if isWaitingForGrace or isProcessingQuest then return end
             
             -- Проверяем текущий стенд
             local currentStand = getCurrentStand()
@@ -3547,16 +3552,37 @@ getgenv().UsingDekuFarmAlt = function()
                     -- Проверяем ProximityPromptB для квеста
                     if promptB and promptB.Enabled then
                         print("ProximityPromptB активен - начинаем квест")
+                        isProcessingQuest = true
                         
+                        -- Принятие квеста
                         if not isQuestAccepted then
                             isQuestAccepted = true
                             ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("AcceptQuest"):FireServer(33)
                             print("Квест принят")
+                            task.wait(0.1)
                         end
                         
                         -- Меняем на Standless для взаимодействия с Roland
                         if getCurrentStand() ~= "Standless" then
+                            print("Меняем стенд на Standless")
                             equipStand("Standless")
+                            if not waitForStandChange("Standless", 30) then
+                                print("Не удалось сменить стенд на Standless")
+                                isProcessingQuest = false
+                                return
+                            end
+                            print("Стенд успешно сменен на Standless")
+                        end
+                        
+                        -- Телепортируемся к спавну и взаимодействуем с промптом
+                        print("Телепортируемся к спавну для взаимодействия с ProximityPromptB")
+                        teleportTo(spawnPoint.Position)
+                        task.wait(0.2)
+                        
+                        -- Взаимодействуем с ProximityPromptB
+                        if promptB.Enabled then
+                            print("Взаимодействуем с ProximityPromptB")
+                            interactWithPrompt(promptB)
                             task.wait(0.3)
                         end
                         
@@ -3568,60 +3594,61 @@ getgenv().UsingDekuFarmAlt = function()
                             task.wait(0.15)
                             
                             -- Идем на позицию ожидания
+                            print("Идем на позицию ожидания")
                             teleportTo(WaitBossDiePos)
                             task.wait(1.25)
                             
                             -- Возвращаемся к Roland для атаки
-                            teleportTo(roland.HumanoidRootPart.Position + Vector3.new(0, 0, -5))
-                            task.wait(0.1)
-                            
-                            -- Атакуем Roland
-                            ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
-                            task.wait(0.1)
-                            ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
-                            print("Атаковали Roland")
-                            
-                            -- Возвращаем One for All
-                            equipStand(RequiredStand)
-                            task.wait(0.2)
-                            
-                            -- Проверяем завершение квеста
-                            task.wait(0.3)
-                            if promptB.Enabled or (prompt and prompt.Enabled) then
-                                ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
-                                isQuestAccepted = false
-                                print("Квест завершен")
+                            print("Возвращаемся к Roland для атаки")
+                            if roland.Parent and roland:FindFirstChild("HumanoidRootPart") then
+                                teleportTo(roland.HumanoidRootPart.Position + Vector3.new(0, 0, -5))
+                                task.wait(0.1)
+                                
+                                -- Атакуем Roland
+                                print("Атакуем Roland")
+                                ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
+                                task.wait(0.1)
+                                ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
+                                task.wait(0.1)
                             end
+                        else
+                            print("Roland не найден")
                         end
-                    else
+                        
+                        -- Возвращаем One for All
+                        print("Возвращаем One for All")
+                        equipStand(RequiredStand)
+                        waitForStandChange(RequiredStand, 30)
+                        task.wait(0.2)
+                        
+                        -- Завершаем квест
+                        print("Пытаемся завершить квест")
+                        task.wait(0.5)
+                        ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
+                        isQuestAccepted = false
+                        print("Квест завершен")
+                        
+                        -- Возвращаемся на позицию ожидания
+                        teleportTo(WaitBossDiePos)
+                        isProcessingQuest = false
+                        
+                    elseif prompt and prompt.Enabled then
                         -- Обычный призыв босса
                         print("Телепортируемся к спавну босса")
                         teleportTo(spawnPoint.Position)
                         task.wait(0.1)
                         
-                        if prompt and prompt.Enabled then
-                            print("Взаимодействуем с ProximityPrompt")
-                            interactWithPrompt(prompt)
-                            task.wait(0.1)
-                            
-                            -- Если промпт стал неактивным, идем ждать
-                            if not prompt.Enabled then
-                                print("Промпт деактивирован, идем ждать босса")
-                                teleportTo(WaitBossDiePos)
-                            end
-                        elseif promptB and promptB.Enabled then
-                            print("Взаимодействуем с ProximityPromptB")
-                            interactWithPrompt(promptB)
-                            task.wait(0.1)
-                            
-                            -- Если промпт стал неактивным, идем ждать
-                            if not promptB.Enabled then
-                                print("PromptB деактивирован, идем ждать босса")
-                                teleportTo(WaitBossDiePos)
-                            end
-                        else
-                            print("Оба промпта неактивны, ждем...")
+                        print("Взаимодействуем с ProximityPrompt")
+                        interactWithPrompt(prompt)
+                        task.wait(0.1)
+                        
+                        -- Если промпт стал неактивным, идем ждать
+                        if not prompt.Enabled then
+                            print("Промпт деактивирован, идем ждать босса")
+                            teleportTo(WaitBossDiePos)
                         end
+                    else
+                        print("Оба промпта неактивны, ждем...")
                     end
                 end)
             end
