@@ -2623,6 +2623,34 @@ getgenv().UsingDekuFarmMain = function()
             local isKillingBoss = false
             local isWaitingForRespawn = false
             
+            -- Функция обработки смерти Деку при появлении OA's Grace
+            local function handleDekuDeath()
+                print("OA's Grace detected! Deku has been killed!")
+                -- Здесь можно добавить дополнительные действия при смерти Деку
+                -- Например, телепорт на позицию ожидания, если нужно
+                if isKillingBoss then
+                    task.spawn(function()
+                        task.wait(1) -- Небольшая задержка для стабильности
+                        teleportToWaitPos()
+                        print("Deku killed! Returned to wait position")
+                        setNoClip(false)
+                        isKillingBoss = false
+                    end)
+                end
+            end
+            
+            -- Подписка на появление объектов в workspace.Item2
+            workspace.Item2.ChildAdded:Connect(function(child)
+                if child.Name == "OA's Grace" then
+                    handleDekuDeath()
+                end
+            end)
+            
+            -- Проверка наличия OA's Grace при запуске скрипта
+            if workspace.Item2:FindFirstChild("OA's Grace") then
+                handleDekuDeath()
+            end
+            
             -- Определение персонажа и его скиллов
             local function detectStand()
                 local standName = player.Data.StandName.Value
@@ -2822,14 +2850,14 @@ getgenv().UsingDekuFarmMain = function()
                 end
             end
             
-            -- Проверка смерти Deku по появлению OA's Grace
+            -- Проверка смерти Deku по появлению OA's Grace (оставлена для совместимости)
             local function checkDekuDeath()
                 return workspace.Item2:FindFirstChild("OA's Grace") ~= nil
             end
             
             -- Проверка смерти Roland по появлению Angelica
             local function checkRolandDeath()
-                return workspace.Living:FindFirstChild("Angelica") ~= nil
+                return workspace.Living:FindFirstChild("AngelicaWeak") ~= nil
             end
             
             -- Отслеживание Roland квеста (исправленная версия)
@@ -2991,7 +3019,7 @@ getgenv().UsingDekuFarmMain = function()
                     -- Специальная логика для Deku
                     if foundBossName == "Deku" then
                         -- Основной цикл атаки Deku
-                        while workspace.Living:FindFirstChild("Deku") and not checkDekuDeath() and getgenv().AutoFarmDekuMainAcc do
+                        while workspace.Living:FindFirstChild("Deku") and getgenv().AutoFarmDekuMainAcc do
                             local currentDeku = workspace.Living:FindFirstChild("Deku")
                             if currentDeku then
                                 -- Постоянно телепортируемся к боссу каждые 0.1 сек
@@ -3018,10 +3046,8 @@ getgenv().UsingDekuFarmMain = function()
                             end
                         end
                         
-                        -- Проверяем появился ли OA's Grace (Deku умер)
-                        if checkDekuDeath() then
-                            print("Deku killed! OA's Grace appeared")
-                        end
+                        -- Для Deku теперь смерть обрабатывается через событие ChildAdded
+                        print("Deku fight ended")
                     else
                         -- Обычная логика для других боссов
                         while workspace.Living:FindFirstChild(foundBossName) and getgenv().AutoFarmDekuMainAcc do
@@ -3052,14 +3078,15 @@ getgenv().UsingDekuFarmMain = function()
                         end
                         
                         print(foundBossName .. " killed!")
+                        
+                        -- После убийства босса возвращаемся на позицию ожидания
+                        teleportToWaitPos()
+                        print(foundBossName .. " sequence completed, returned to wait position")
+                        
+                        setNoClip(false)
+                        isKillingBoss = false
                     end
                     
-                    -- После убийства босса возвращаемся на позицию ожидания
-                    teleportToWaitPos()
-                    print(foundBossName .. " sequence completed, returned to wait position")
-                    
-                    setNoClip(false)
-                    isKillingBoss = false
                     return true
                 end
                 return false
