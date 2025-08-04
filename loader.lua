@@ -3396,7 +3396,7 @@ getgenv().UsingDekuFarmAlt = function()
             pcall(function()
                 ReplicatedStorage:WaitForChild("UseItem"):WaitForChild("OFA"):FireServer()
                 Lplayer.Character.Humanoid:EquipTool(Lplayer.Backpack:FindFirstChild("OA's Grace"))
-                task.wait(0.15)
+                task.wait(0.02)
                 ReplicatedStorage:WaitForChild("UseItem"):WaitForChild("OFA"):FireServer()
                 if Lplayer.Character:FindFirstChild("OA's Grace") then
                     Lplayer.Character:FindFirstChild("OA's Grace"):Activate()
@@ -3495,7 +3495,7 @@ getgenv().UsingDekuFarmAlt = function()
                     if not isWaitingForGrace then
                         isWaitingForGrace = true
                         teleportTo(grace.Position)
-                        task.wait(0.1)
+                        task.wait(0.03)
                         
                         local graceInteraction
                         graceInteraction = RunService.Heartbeat:Connect(function()
@@ -3508,7 +3508,7 @@ getgenv().UsingDekuFarmAlt = function()
                                 interactWithPrompt(grace.ProximityPrompt)
                             else
                                 graceInteraction:Disconnect()
-                                task.wait(0.1)
+                                task.wait(0.04)
                                 useOAGrace()
                                 isWaitingForGrace = false
                             end
