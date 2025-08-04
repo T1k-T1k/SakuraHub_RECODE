@@ -3156,7 +3156,7 @@ getgenv().UsingDekuFarmMain = function()
                     -- Затем ищем обычных боссов
                     handleRegularBosses()
                 end
-                task.wait(0.5) -- Проверяем каждые 0.5 секунд
+                task.wait(0.25) -- Проверяем каждые 0.5 секунд
             end
             
             -- Отключаем NoClip при завершении
