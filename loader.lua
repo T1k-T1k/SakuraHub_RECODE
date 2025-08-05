@@ -2968,11 +2968,14 @@ getgenv().UsingDekuFarmMain = function()
                                     local questRemotes = replicatedStorage:FindFirstChild("QuestRemotes")
                                     if questRemotes and questRemotes:FindFirstChild("ClaimQuest") then
                                         questRemotes.ClaimQuest:FireServer(33)
-                                        print("Claimed Roland quest")
+                                        task.wait(0.5)
+                                        questRemotes.ClaimQuest:FireServer(33)
+                                        task.wait(0.5)
+                                        questRemotes.ClaimQuest:FireServer(33)
+                                        task.wait(0.5)
+                                        questRemotes.ClaimQuest:FireServer(33)
                                     end
                                 end)
-                                
-                                print("Roland died! AngelicaWeak appeared, starting AngelicaWeak fight")
                                 
                                 -- Убиваем AngelicaWeak (не просто Angelica)
                                 while workspace.Living:FindFirstChild("AngelicaWeak") and getgenv().AutoFarmDekuMainAcc do
