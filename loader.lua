@@ -3486,7 +3486,6 @@ getgenv().UsingDekuFarmAlt = function()
         -- Сохраняем оригинальную позицию
         saveOriginalPosition()
         
-        -- Проверяем наличие нужного стенда
         if getCurrentStand() ~= RequiredStand then
             BoredLibrary.prompt("Sakura Hub", "Equipping One for All [Stage 4]...", 1.5)
             
@@ -3497,7 +3496,6 @@ getgenv().UsingDekuFarmAlt = function()
                 return
             end
             
-            -- Ждем экипировки стенда
             if not waitForStandChange(RequiredStand, 50) then
                 BoredLibrary.prompt("Sakura Hub", "Failed to equip One for All [Stage 4] ❌", 2.0)
                 getgenv().AutoFarmDekuAlt = false
@@ -3654,14 +3652,14 @@ getgenv().UsingDekuFarmAlt = function()
                         -- Телепортируемся к спавну и взаимодействуем с промптом
                         print("Телепортируемся к спавну для взаимодействия с ProximityPromptB")
                         teleportTo(spawnPoint.Position)
-                        task.wait(0.2)
+                        task.wait(0.15)
                         teleportTo(WaitBossDiePos)
 
                         -- Взаимодействуем с ProximityPromptB
                         if promptB.Enabled then
                             print("Взаимодействуем с ProximityPromptB")
                             interactWithPrompt(promptB)
-                            task.wait(0.2)
+                            task.wait(0.1)
                         end
                         
                         -- Телепортируемся к Roland
@@ -3671,17 +3669,13 @@ getgenv().UsingDekuFarmAlt = function()
                             teleportTo(roland.HumanoidRootPart.Position)
                             task.wait(0.15)
                             
-                            -- Идем на позицию ожидания
                             print("Идем на позицию ожидания")
                             teleportTo(WaitBossDiePos)
                             task.wait(1.25)
                             
-                            -- Возвращаемся к Roland для атаки
-                            print("Возвращаемся к Roland для атаки")
                             if roland.Parent and roland:FindFirstChild("HumanoidRootPart") then
-                                teleportTo(roland.HumanoidRootPart.Position + Vector3.new(0, 0, -5))
-                                task.wait(0.1)
-                                
+                                teleportTo(roland.HumanoidRootPart.Position + Vector3.new(0, 0, -2.5))
+                                task.wait(0.05)
                                 ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
                                 task.wait(0.1)
                                 ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
