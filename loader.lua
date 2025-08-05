@@ -3471,7 +3471,7 @@ getgenv().UsingDekuFarmAlt = function()
                     Lplayer.Character:FindFirstChild("OA's Grace"):Activate()
                 end
                 ReplicatedStorage:WaitForChild("UseItem"):WaitForChild("OFA"):FireServer()
-                task.wait(4)
+                task.wait(3)
                 teleportTo(WaitBossDiePos)
             end)
         end
@@ -3709,7 +3709,8 @@ getgenv().UsingDekuFarmAlt = function()
                         
                         print("Взаимодействуем с ProximityPrompt")
                         interactWithPrompt(prompt)
-                        task.wait(0.1)
+                        task.wait(1.35)
+                        teleportTo(WaitBossDiePos)
                         
                         -- Если промпт стал неактивным, идем ждать
                         if not prompt.Enabled then
