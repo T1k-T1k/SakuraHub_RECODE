@@ -3471,6 +3471,8 @@ getgenv().UsingDekuFarmAlt = function()
                     Lplayer.Character:FindFirstChild("OA's Grace"):Activate()
                 end
                 ReplicatedStorage:WaitForChild("UseItem"):WaitForChild("OFA"):FireServer()
+                task.wait(4)
+                teleportTo(WaitBossDiePos)
             end)
         end
         
@@ -3653,12 +3655,13 @@ getgenv().UsingDekuFarmAlt = function()
                         print("Телепортируемся к спавну для взаимодействия с ProximityPromptB")
                         teleportTo(spawnPoint.Position)
                         task.wait(0.2)
-                        
+                        teleportTo(WaitBossDiePos)
+
                         -- Взаимодействуем с ProximityPromptB
                         if promptB.Enabled then
                             print("Взаимодействуем с ProximityPromptB")
                             interactWithPrompt(promptB)
-                            task.wait(0.3)
+                            task.wait(0.2)
                         end
                         
                         -- Телепортируемся к Roland
@@ -3679,8 +3682,6 @@ getgenv().UsingDekuFarmAlt = function()
                                 teleportTo(roland.HumanoidRootPart.Position + Vector3.new(0, 0, -5))
                                 task.wait(0.1)
                                 
-                                -- Атакуем Roland
-                                print("Атакуем Roland")
                                 ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
                                 task.wait(0.1)
                                 ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
@@ -3690,7 +3691,6 @@ getgenv().UsingDekuFarmAlt = function()
                             print("Roland не найден")
                         end
                         
-                        -- Возвращаем One for All
                         print("Возвращаем One for All")
                         equipStand(RequiredStand)
                         waitForStandChange(RequiredStand, 30)
@@ -3698,7 +3698,7 @@ getgenv().UsingDekuFarmAlt = function()
                         
                         -- Завершаем квест
                         print("Пытаемся завершить квест")
-                        task.wait(0.5)
+                        task.wait(0.2)
                         ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
                         isQuestAccepted = false
                         print("Квест завершен")
