@@ -3504,37 +3504,57 @@ getgenv().UsingDekuFarmAlt = function()
             end
         end
         
-        -- Телепортируемся на позицию ожидания
         teleportTo(WaitBossDiePos)
         BoredLibrary.prompt("Sakura Hub", "Boss summoning started! 🎯", 1.5)
-        
-        -- Отключаем proximity prompts для предметов
+
         local itemPrompts = {}
+        local items = {"Durandal", "Zelkova", "Allas"}
+        
         local function disableItemPrompts()
-            local items = {"Durandal", "Zelkova", "Allas"}
-            for _, itemName in pairs(items) do
-                pcall(function()
-                    local item = Workspace.Item:FindFirstChild(itemName)
-                    if item and item:FindFirstChild("ProximityPrompt") then
-                        item.ProximityPrompt.Enabled = false
-                        table.insert(itemPrompts, item.ProximityPrompt)
-                    end
-                end)
-            end
+        	for _, itemName in pairs(items) do
+        		local item = workspace:FindFirstChild("Item") and workspace.Item:FindFirstChild(itemName)
+        		if item and item:FindFirstChild("ProximityPrompt") then
+        			local prompt = item.ProximityPrompt
+        			if prompt.Enabled then
+        				pcall(function()
+        					prompt.Enabled = false
+        					table.insert(itemPrompts, prompt)
+        				end)
+        			end
+        		end
+        	end
         end
         
-        -- Включаем proximity prompts обратно при выключении
         local function enableItemPrompts()
-            for _, prompt in pairs(itemPrompts) do
-                pcall(function()
-                    prompt.Enabled = true
-                end)
-            end
+        	for _, prompt in pairs(itemPrompts) do
+        		pcall(function()
+        			prompt.Enabled = true
+        		end)
+        	end
+        	table.clear(itemPrompts)
         end
         
-        disableItemPrompts()
+        task.spawn(function()
+        	local wasEnabled = nil
         
-        -- Настраиваем HoldDuration для спавн промптов
+        	while true do
+        		local current = getgenv().AutoFarmDekuAlt
+        
+        		if current and not wasEnabled then
+        			task.spawn(function()
+        				while getgenv().AutoFarmDekuAlt do
+        					disableItemPrompts()
+        					task.wait(0.1)
+        				end
+        			end)
+        		elseif not current and wasEnabled then
+        			enableItemPrompts()
+        		end
+        		wasEnabled = current
+        		task.wait(0.1)
+        	end
+        end)
+        
         pcall(function()
             local spawnPrompt = Workspace.Map.RuinedCity.Spawn.ProximityPrompt
             local spawnPromptB = Workspace.Map.RuinedCity.Spawn.ProximityPromptB
@@ -3542,13 +3562,11 @@ getgenv().UsingDekuFarmAlt = function()
             if spawnPromptB then spawnPromptB.HoldDuration = 0 end
         end)
         
-        -- Основные циклы
         local connections = {}
         local isQuestAccepted = false
         local isWaitingForGrace = false
         local isProcessingQuest = false
         
-        -- Цикл для мониторинга OA's Grace
         connections.graceMonitor = RunService.Heartbeat:Connect(function()
             if not getgenv().AutoFarmDekuAlt or isProcessingQuest then return end
             
