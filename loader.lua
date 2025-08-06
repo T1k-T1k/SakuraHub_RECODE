@@ -2623,8 +2623,9 @@ getgenv().UsingDekuFarmMain = function()
             local isKillingBoss = false
             local isWaitingForRespawn = false
             
-            -- НОВЫЙ ФЛАГ для отслеживания смерти Deku
+            -- НОВЫЕ ФЛАГИ для отслеживания смерти боссов
             local isDekuDead = false
+            local isRolandDead = false
 
              -- Мониторинг ProximityPrompt для управления AutoOneShotting
             local function monitorProximityPrompt()
@@ -2869,9 +2870,32 @@ getgenv().UsingDekuFarmMain = function()
                 return false
             end
             
-            -- Проверка смерти Roland по появлению AngelicaWeak (не просто Angelica)
+            -- НОВАЯ проверка смерти Roland с флагом
             local function checkRolandDeath()
-                return workspace.Living:FindFirstChild("AngelicaWeak") ~= nil
+                local angelicaWeakExists = workspace.Living:FindFirstChild("AngelicaWeak") ~= nil
+                
+                -- Если AngelicaWeak появилась, устанавливаем флаг и запускаем таймер
+                if angelicaWeakExists and not isRolandDead then
+                    isRolandDead = true
+                    print("Roland died! AngelicaWeak appeared, setting isRolandDead = true")
+                    
+                    -- Запускаем таймер на 40 секунд
+                    task.spawn(function()
+                        task.wait(40)
+                        isRolandDead = false
+                        print("isRolandDead flag reset to false after 40 seconds")
+                    end)
+                    
+                    return true
+                end
+                
+                -- Если флаг активен, считаем что Roland мертв (даже если AngelicaWeak нет)
+                if isRolandDead then
+                    return true
+                end
+                
+                -- Если флаг не активен и AngelicaWeak нет, Roland жив или может появиться
+                return angelicaWeakExists
             end
             
             -- Отслеживание Roland квеста с проверкой HP < 8000
@@ -2889,6 +2913,12 @@ getgenv().UsingDekuFarmMain = function()
                 local proximityPrompt = workspace.Map.RuinedCity.Spawn:FindFirstChild("ProximityPromptB")
                 local rolandExists = workspace.Living:FindFirstChild("Roland")
                 
+                -- НОВАЯ ПРОВЕРКА: Если Roland считается мертвым по флагу, игнорируем его
+                if isRolandDead then
+                    print("Roland is marked as dead (isRolandDead = true), ignoring Roland quest")
+                    return false
+                end
+                
                 -- Проверяем: есть ли проксимити промпт включен ИЛИ уже есть Roland в living
                 if (proximityPrompt and proximityPrompt.Enabled) or rolandExists then
                     -- Принимаем квест (даже если Roland уже есть)
@@ -2902,17 +2932,17 @@ getgenv().UsingDekuFarmMain = function()
                     
                     -- Если Roland еще нет, ждем его появления
                     if not rolandExists then
-                        while not workspace.Living:FindFirstChild("Roland") and getgenv().AutoFarmDekuMainAcc do
+                        while not workspace.Living:FindFirstChild("Roland") and getgenv().AutoFarmDekuMainAcc and not isRolandDead do
                             task.wait(0.5)
                         end
                     end
                     
                     local roland = workspace.Living:FindFirstChild("Roland")
-                    if roland then
+                    if roland and not isRolandDead then
                         print("Roland spawned, waiting for HP < 8000...")
                         
                         -- Ждем пока Roland HP не станет меньше 8000
-                        while workspace.Living:FindFirstChild("Roland") and not checkRolandDamaged() and getgenv().AutoFarmDekuMainAcc do
+                        while workspace.Living:FindFirstChild("Roland") and not checkRolandDamaged() and getgenv().AutoFarmDekuMainAcc and not isRolandDead do
                             task.wait(0.1)
                             local currentRoland = workspace.Living:FindFirstChild("Roland")
                             if currentRoland and currentRoland:FindFirstChild("Humanoid") then
@@ -2920,8 +2950,8 @@ getgenv().UsingDekuFarmMain = function()
                             end
                         end
                         
-                        -- Проверяем что Roland все еще жив и его HP < 8000
-                        if workspace.Living:FindFirstChild("Roland") and checkRolandDamaged() then
+                        -- Проверяем что Roland все еще жив и его HP < 8000 и флаг не активен
+                        if workspace.Living:FindFirstChild("Roland") and checkRolandDamaged() and not isRolandDead then
                             print("Roland HP < 8000! Starting fight")
                             isKillingBoss = true
                             setNoClip(true)
@@ -3030,6 +3060,12 @@ getgenv().UsingDekuFarmMain = function()
                 for _, bossName in pairs(targetBosses) do
                     local boss = workspace.Living:FindFirstChild(bossName)
                     if boss and boss:FindFirstChild("Humanoid") then
+                        -- НОВАЯ ПРОВЕРКА: Игнорируем Roland если он помечен как мертвый
+                        if bossName == "Roland" and isRolandDead then
+                            print("Found Roland but isRolandDead = true, skipping")
+                            continue
+                        end
+                        
                         foundBoss = boss
                         foundBossName = bossName
                         break
@@ -3164,6 +3200,10 @@ getgenv().UsingDekuFarmMain = function()
                     
                     for _, bossName in pairs(targetBosses) do
                         if workspace.Living:FindFirstChild(bossName) then
+                            -- Игнорируем Roland если он помечен как мертвый
+                            if bossName == "Roland" and isRolandDead then
+                                continue
+                            end
                             anyBossExists = true
                             break
                         end
@@ -3181,10 +3221,8 @@ getgenv().UsingDekuFarmMain = function()
                     -- Затем ищем обычных боссов
                     handleRegularBosses()
                 end
-                task.wait(0.25) -- Проверяем каждые 0.5 секунд
+                task.wait(0.25) -- Проверяем каждые 0.25 секунд
             end
-            
-            -- Отключаем NoClip при завершении
             setNoClip(false)
         end)
     end
