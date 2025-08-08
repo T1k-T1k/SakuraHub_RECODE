@@ -3007,7 +3007,7 @@ getgenv().UsingDekuFarmMain = function()
                                     end
                                 end)
                                 
-                                -- Убиваем AngelicaWeak (не просто Angelica)
+                                -- Убиваем AngelicaWeak
                                 while workspace.Living:FindFirstChild("AngelicaWeak") and getgenv().AutoFarmDekuMainAcc do
                                     local currentAngelica = workspace.Living:FindFirstChild("AngelicaWeak")
                                     if currentAngelica then
@@ -3705,10 +3705,14 @@ getgenv().UsingDekuFarmAlt = function()
                         
                         local angelicaConnection
                         angelicaConnection = LivingFolder.ChildAdded:Connect(function(child)
-                            if child.Name == "AngelicaWeak" or "Angelica" then
+                            if child.Name == "AngelicaWeak" then
                                 print("kaka quest calaimed")
                                 isRolandDeadForQuest = true
                                 task.wait(1)
+                                ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
+                                task.wait(0.5)
+                                ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
+                                task.wait(0.5)
                                 ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
                                 isQuestAccepted = false
                                 angelicaConnection:Disconnect()
