@@ -3706,6 +3706,7 @@ getgenv().UsingDekuFarmAlt = function()
                         local angelicaConnection
                         angelicaConnection = LivingFolder.ChildAdded:Connect(function(child)
                             if child.Name == "AngelicaWeak" or "Angelica" then
+                                print("kaka quest calaimed")
                                 isRolandDeadForQuest = true
                                 task.wait(1)
                                 ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
