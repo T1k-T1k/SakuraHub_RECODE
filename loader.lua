@@ -3535,7 +3535,7 @@ getgenv().UsingDekuFarmAlt = function()
                     Lplayer.Character:FindFirstChild("OA's Grace"):Activate()
                 end
                 ReplicatedStorage:WaitForChild("UseItem"):WaitForChild("OFA"):FireServer()
-                task.wait(3)
+                task.wait(5)
                 teleportTo(WaitBossDiePos)
             end)
         end
@@ -3730,13 +3730,18 @@ getgenv().UsingDekuFarmAlt = function()
                         end
                         
                         if isRolandOnMap() then
+                            teleportTo(WaitBossDiePos)
                             print("Roland появился, ждем 5 секунд перед телепортацией")
                             task.wait(5) -- Исправлено: добавлена задержка перед телепортацией
                             
                             local roland = Workspace.Living:FindFirstChild("Roland")
                             if roland and roland:FindFirstChild("HumanoidRootPart") then
                                 teleportTo(roland.HumanoidRootPart.Position + Vector3.new(0, 0, -2.5))
-                                task.wait(0.1)
+                                task.wait(0.15)
+                                teleportTo(WaitBossDiePos)
+                                task.wait(1.25)
+                                teleportTo(roland.HumanoidRootPart.Position + Vector3.new(0, 0, -2.5))
+                                task.wait(0.075)
                                 ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
                                 task.wait(0.1)
                                 ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
