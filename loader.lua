@@ -3695,7 +3695,7 @@ getgenv().UsingDekuFarmAlt = function()
                         if promptB.Enabled then
                             print("Активируем ProximityPromptB")
                             interactWithPrompt(promptB)
-                            task.wait(0.3)
+                            task.wait(0.7)
                             teleportTo(WaitBossDiePos)
                         end
 
