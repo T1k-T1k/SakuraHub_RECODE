@@ -1,4 +1,4 @@
- -- // Sakura Hub 🌸 \\ -- | ( Legacy Version: 1.31 | Recode Version: 1.23 ) [ Made by Mommy Flames :3 / Recoded by T1k ^^ ]
+ -- // Sakura Hub 🌸 \\ -- | ( Legacy Version: 1.31 | Recode Version: 1.65 ) [ Made by Mommy Flames :3 / Recoded by T1k ^^ ]
 
 --[[---------------------------------------------------------------------------------------------------
 -- This script updates a lot, Use this loadstring to be in the latest version:
@@ -3454,6 +3454,10 @@ getgenv().UsingDekuFarmAlt = function()
                 OriginalPosition = Lplayer.Character.HumanoidRootPart.Position
             end
         end
+
+        -- Сохраняем оригинальную позицию
+        saveOriginalPosition()
+        task.wait(0.1)
         
         -- Функция для телепортации
         local function teleportTo(position)
@@ -3481,10 +3485,8 @@ getgenv().UsingDekuFarmAlt = function()
                                 local slotName = "Slot"..i
                                 if i <= 3 and ReplicatedStorage.StorageRemote:FindFirstChild(slotName) then
                                     ReplicatedStorage.StorageRemote[slotName]:FireServer()
-                                    print("FireServer отправлен для", slotName)
                                 else
                                     ReplicatedStorage.StorageRemote.UseStorageExtra:FireServer(slotName)
-                                    print("UseStorageExtra вызван с аргументом", slotName)
                                 end
                                 found = true
                                 break
@@ -3546,9 +3548,6 @@ getgenv().UsingDekuFarmAlt = function()
                 fireproximityprompt(prompt)
             end
         end
-        
-        -- Сохраняем оригинальную позицию
-        saveOriginalPosition()
         
         local correctStand = getCorrectStand()
         if getCurrentStand() ~= correctStand then
