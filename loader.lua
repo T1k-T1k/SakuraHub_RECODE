@@ -3768,6 +3768,7 @@ getgenv().UsingDekuFarmAlt = function()
                         -- Если промпт стал неактивным, идем ждать
                         if not prompt.Enabled then
                             print("Промпт деактивирован, идем ждать босса")
+                            wait(4)
                             teleportTo(WaitBossDiePos)
                         end
                     end
