@@ -3689,14 +3689,14 @@ getgenv().UsingDekuFarmAlt = function()
                         
                         -- Телепортируемся и активируем ProximityPromptB
                         teleportTo(spawnPoint.Position)
-                        task.wait(0.2)
-                        teleportTo(WaitBossDiePos)
+                        task.wait(0.1)
                         
                         -- Активируем prompt немедленно
                         if promptB.Enabled then
                             print("Активируем ProximityPromptB")
                             interactWithPrompt(promptB)
                             task.wait(0.1)
+                            teleportTo(WaitBossDiePos)
                         end
 
                         -- Система отслеживания смерти Roland через появление AngelicaWeak
