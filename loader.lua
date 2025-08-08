@@ -2964,11 +2964,11 @@ getgenv().UsingDekuFarmMain = function()
                                     -- Постоянно телепортируемся к боссу каждые 0.1 сек
                                     teleportToBoss(currentRoland)
                                     
-                                    -- НОВАЯ ЛОГИКА: Включаем AutoOneShotting через 1.1 сек после телепорта к Roland
+                                    -- НОВАЯ ЛОГИКА: Включаем AutoOneShotting через 1.5 сек после телепорта к Roland
                                     task.spawn(function()
-                                        task.wait(1.1)
+                                        task.wait(1.5)
                                         getgenv().AutoOneShotting = true
-                                        print("Teleported to Roland - AutoOneShotting enabled after 1.1s")
+                                        print("Teleported to Roland - AutoOneShotting enabled after 1.5s")
                                     end)
 
                                     -- Выполняем комбо атаку
