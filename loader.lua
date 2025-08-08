@@ -3690,12 +3690,13 @@ getgenv().UsingDekuFarmAlt = function()
                         -- Телепортируемся и активируем ProximityPromptB
                         teleportTo(spawnPoint.Position)
                         task.wait(0.2)
+                        teleportTo(WaitBossDiePos)
                         
                         -- Активируем prompt немедленно
                         if promptB.Enabled then
                             print("Активируем ProximityPromptB")
                             interactWithPrompt(promptB)
-                            task.wait(0.3)
+                            task.wait(0.1)
                         end
 
                         -- Система отслеживания смерти Roland через появление AngelicaWeak
@@ -3704,10 +3705,9 @@ getgenv().UsingDekuFarmAlt = function()
                         
                         local angelicaConnection
                         angelicaConnection = LivingFolder.ChildAdded:Connect(function(child)
-                            if child.Name == "AngelicaWeak" then
-                                print("AngelicaWeak появился - Roland мертв, забираем квест")
+                            if child.Name == "AngelicaWeak" or "Angelica" then
                                 isRolandDeadForQuest = true
-                                task.wait(0.2)
+                                task.wait(1)
                                 ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
                                 isQuestAccepted = false
                                 angelicaConnection:Disconnect()
@@ -3751,9 +3751,7 @@ getgenv().UsingDekuFarmAlt = function()
                         waitForStandChange(RequiredStand, 30)
                         task.wait(0.3)
                         
-                        -- Возвращаемся на позицию ожидания
                         teleportTo(WaitBossDiePos)
-                        isProcessingQuest = false
                         
                     elseif prompt and prompt.Enabled then
                         -- Обычный призыв босса
@@ -3763,7 +3761,7 @@ getgenv().UsingDekuFarmAlt = function()
                         
                         print("Взаимодействуем с ProximityPrompt")
                         interactWithPrompt(prompt)
-                        task.wait(1.35)
+                        task.wait(0.2)
                         teleportTo(WaitBossDiePos)
                         
                         -- Если промпт стал неактивным, идем ждать
