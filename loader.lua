@@ -3545,23 +3545,9 @@ getgenv().UsingDekuFarmAlt = function()
             end
         end
         
-        -- Функция для телепорта к боссу Roland
-        local function teleportToRoland()
-            local roland = Workspace.Living:FindFirstChild("Roland")
-            if roland and roland:FindFirstChild("HumanoidRootPart") then
-                print("Телепортируемся к Roland")
-                local rolandPos = roland.HumanoidRootPart.Position
-                -- Телепортируемся немного в стороне от Roland
-                teleportTo(rolandPos + Vector3.new(0, 2, -3))
-                return true
-            end
-            return false
-        end
-        
         -- Сохраняем оригинальную позицию
         saveOriginalPosition()
         
-        -- Начальная проверка стенда
         local correctStand = getCorrectStand()
         if getCurrentStand() ~= correctStand then
             BoredLibrary.prompt("Sakura Hub", "Equipping " .. correctStand .. "...", 1.5)
@@ -3583,54 +3569,6 @@ getgenv().UsingDekuFarmAlt = function()
         
         teleportTo(WaitBossDiePos)
         BoredLibrary.prompt("Sakura Hub", "Boss summoning started! 🎯", 1.5)
-
-        local itemPrompts = {}
-        local items = {"Durandal", "Zelkova", "Allas"}
-        
-        local function disableItemPrompts()
-        	for _, itemName in pairs(items) do
-        		local item = workspace:FindFirstChild("Item") and workspace.Item:FindFirstChild(itemName)
-        		if item and item:FindFirstChild("ProximityPrompt") then
-        			local prompt = item.ProximityPrompt
-        			if prompt.Enabled then
-        				pcall(function()
-        					prompt.Enabled = false
-        					table.insert(itemPrompts, prompt)
-        				end)
-        			end
-        		end
-        	end
-        end
-        
-        local function enableItemPrompts()
-        	for _, prompt in pairs(itemPrompts) do
-        		pcall(function()
-        			prompt.Enabled = true
-        		end)
-        	end
-        	table.clear(itemPrompts)
-        end
-        
-        task.spawn(function()
-        	local wasEnabled = nil
-        
-        	while true do
-        		local current = getgenv().AutoFarmDekuAlt
-        
-        		if current and not wasEnabled then
-        			task.spawn(function()
-        				while getgenv().AutoFarmDekuAlt do
-        					disableItemPrompts()
-        					task.wait(0.1)
-        				end
-        			end)
-        		elseif not current and wasEnabled then
-        			enableItemPrompts()
-        		end
-        		wasEnabled = current
-        		task.wait(0.1)
-        	end
-        end)
         
         pcall(function()
             local spawnPrompt = Workspace.Map.RuinedCity.Spawn.ProximityPrompt
@@ -3652,7 +3590,6 @@ getgenv().UsingDekuFarmAlt = function()
                 local correctStand = getCorrectStand()
                 local currentStand = getCurrentStand()
                 
-                -- Если у нас неправильный стенд, меняем его
                 if currentStand ~= correctStand then
                     print("Roland статус изменился, меняем стенд на:", correctStand)
                     equipStand(correctStand)
@@ -3699,34 +3636,27 @@ getgenv().UsingDekuFarmAlt = function()
             if not getgenv().AutoFarmDekuAlt then return end
             if isWaitingForGrace or isProcessingQuest then return end
             
-            -- Проверяем, есть ли Roland на карте и телепортируемся к нему
             if isRolandOnMap() then
                 local roland = Workspace.Living:FindFirstChild("Roland")
                 if roland and roland:FindFirstChild("HumanoidRootPart") then
-                    -- Убеждаемся, что у нас Standless
                     if getCurrentStand() ~= "Standless" then
                         print("Roland обнаружен, меняем стенд на Standless")
                         equipStand("Standless")
                         waitForStandChange("Standless", 30)
                     end
-                    
-                    -- Телепортируемся к Roland
-                    teleportToRoland()
                 end
-                return -- Выходим из функции, так как Roland на карте
+                return
             end
             
             -- Проверяем текущий стенд
             if not hasCorrectStand() then
-                -- Ищем OA's Grace для восстановления стенда
                 pcall(function()
                     local grace = Workspace.Item2:FindFirstChild("OA's Grace")
                     if grace then
-                        return -- Пусть graceMonitor обработает это
+                        return
                     end
                 end)
             else
-                -- У нас правильный стенд, можем призывать босса
                 pcall(function()
                     local spawnPoint = Workspace.Map.RuinedCity.Spawn
                     if not spawnPoint then return end
@@ -3734,46 +3664,53 @@ getgenv().UsingDekuFarmAlt = function()
                     local promptB = spawnPoint:FindFirstChild("ProximityPromptB")
                     local prompt = spawnPoint:FindFirstChild("ProximityPrompt")
                     
-                    -- Проверяем ProximityPromptB для квеста
                     if promptB and promptB.Enabled then
-                        print("ProximityPromptB активен - начинаем квест")
                         isProcessingQuest = true
                         
-                        -- Принятие квеста
                         if not isQuestAccepted then
                             isQuestAccepted = true
                             ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("AcceptQuest"):FireServer(33)
-                            print("Квест принят")
                             task.wait(0.1)
                         end
                         
-                        -- Меняем на Standless для взаимодействия с Roland
                         if getCurrentStand() ~= "Standless" then
-                            print("Меняем стенд на Standless")
                             equipStand("Standless")
                             if not waitForStandChange("Standless", 30) then
-                                print("Не удалось сменить стенд на Standless")
                                 isProcessingQuest = false
                                 return
                             end
-                            print("Стенд успешно сменен на Standless")
                         end
                         
-                        -- Телепортируемся к спавну и взаимодействуем с промптом
-                        print("Телепортируемся к спавну для взаимодействия с ProximityPromptB")
                         teleportTo(spawnPoint.Position)
                         task.wait(0.15)
 
-                        -- Взаимодействуем с ProximityPromptB
                         if promptB.Enabled then
-                            print("Взаимодействуем с ProximityPromptB")
                             interactWithPrompt(promptB)
-                            task.wait(0.2) -- Увеличиваем время ожидания появления Roland
+                            task.wait(0.2)
+                        end
+
+                        local isRolandDeadForQuest = false
+                        local function checkRolandDeadFromAngelicaSpawn()
+                        	if isRolandDeadForQuest then
+                        		task.wait(0.1)
+                        		ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
+                        		isQuestAccepted = false
+                        	end
                         end
                         
-                        -- Ждем появления Roland и телепортируемся к нему
+                        LivingFolder.ChildAdded:Connect(function(child)
+                        	if child.Name == "AngelicaWeak" then
+                        		isRolandDeadForQuest = true
+                        		checkRolandDeadFromAngelicaSpawn()
+                        		
+                        		task.delay(40, function()
+                        			isRolandDeadForQuest = false
+                        		end)
+                        	end
+                        end)
+                        
                         local waitTime = 0
-                        local maxWaitTime = 10 -- Максимальное время ожидания в секундах
+                        local maxWaitTime = 10
                         
                         while not isRolandOnMap() and waitTime < maxWaitTime do
                             task.wait(0.1)
@@ -3781,20 +3718,13 @@ getgenv().UsingDekuFarmAlt = function()
                         end
                         
                         if isRolandOnMap() then
-                            if teleportToRoland() then 
-                                local roland = Workspace.Living:FindFirstChild("Roland")
-                                if roland and roland:FindFirstChild("HumanoidRootPart") then
-                                    print("Атакуем Roland")
-                                    task.wait(1.45)
-                                    teleportTo(roland.HumanoidRootPart.Position + Vector3.new(0, 0, -2.5))
-                                    task.wait(0.15)
-                                    teleportTo(WaitBossDiePos)
-                                    task.wait(1.25)
-                                    ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
-                                    task.wait(0.1)
-                                    ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
-                                    task.wait(0.1)
-                                end
+                            local roland = Workspace.Living:FindFirstChild("Roland")
+                            if roland and roland:FindFirstChild("HumanoidRootPart") then
+                                teleportTo(roland.HumanoidRootPart.Position + Vector3.new(0, 0, -2.5))
+                                ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
+                                task.wait(0.1)
+                                ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
+                                task.wait(0.1)
                             end
                         else
                             print("Roland не появился в течение", maxWaitTime, "секунд")
@@ -3804,13 +3734,6 @@ getgenv().UsingDekuFarmAlt = function()
                         equipStand(RequiredStand)
                         waitForStandChange(RequiredStand, 30)
                         task.wait(0.2)
-                        
-                        -- Завершаем квест
-                        print("Пытаемся завершить квест")
-                        task.wait(0.2)
-                        ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
-                        isQuestAccepted = false
-                        print("Квест завершен")
                         
                         -- Возвращаемся на позицию ожидания
                         teleportTo(WaitBossDiePos)
@@ -3852,7 +3775,6 @@ getgenv().UsingDekuFarmAlt = function()
             for _, connection in pairs(connections) do
                 connection:Disconnect()
             end
-            enableItemPrompts()
             teleportTo(OriginalPosition)
             BoredLibrary.prompt("Sakura Hub", "Boss summoning stopped! 🛑", 1.5)
         end)
