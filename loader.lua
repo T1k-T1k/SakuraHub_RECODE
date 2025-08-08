@@ -3730,8 +3730,8 @@ getgenv().UsingDekuFarmAlt = function()
                         end
                         
                         if isRolandOnMap() then
-                            print("Roland появился, ждем 1.45 секунд перед телепортацией")
-                            task.wait(1.45) -- Исправлено: добавлена задержка перед телепортацией
+                            print("Roland появился, ждем 5 секунд перед телепортацией")
+                            task.wait(5) -- Исправлено: добавлена задержка перед телепортацией
                             
                             local roland = Workspace.Living:FindFirstChild("Roland")
                             if roland and roland:FindFirstChild("HumanoidRootPart") then
