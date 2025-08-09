@@ -3653,27 +3653,25 @@ getgenv().UsingDekuFarmAlt = function()
                     rolandTeleportConnection:Disconnect()
                     teleportTo(WaitBossDiePos)
                     mainAttackInProgress = false
-                    
-                    -- Запускаем проверку завершения квеста
-                    local questCheckConnection
-                    questCheckConnection = RunService.Heartbeat:Connect(function()
-                        local angelicaWeak = workspace:FindFirstChild("AngelicaWeak")
-                        if angelicaWeak then
-                            print("Roland defeated! AngelicaWeak appeared, completing quest...")
-                            task.wait(1)
-                            -- Выполняем квест без дополнительных переменных
-                            game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
-                            task.wait(0.5)
-                            game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
-                            task.wait(0.5)
-                            game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
-                            isRolandActive = false
-                            questCheckConnection:Disconnect()
-                            print("Roland sequence completed!")
-                        end
-                    end)
-                    return
                 end
+
+                -- Запускаем проверку завершения квеста
+                local questCheckConnection
+                questCheckConnection = RunService.Heartbeat:Connect(function()
+                    local angelicaWeak = workspace:FindFirstChild("AngelicaWeak")
+                    if angelicaWeak then
+                        print("Roland defeated! AngelicaWeak appeared, completing quest...")
+                        task.wait(1)
+                        game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
+                        task.wait(0.5)
+                        game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
+                        task.wait(0.5)
+                        game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
+                        isRolandActive = false
+                        questCheckConnection:Disconnect()
+                        print("Roland sequence completed!")
+                    end
+                end)
                 
                 -- Телепортация к Roland каждые 0.1 секунды и атака
                 if rolandPos then
