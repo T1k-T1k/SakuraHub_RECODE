@@ -3603,9 +3603,9 @@ getgenv().UsingDekuFarmAlt = function()
                     questCheckConnection:Disconnect()
                     return
                 end
-                
-                local angelicaWeak = workspace:FindFirstChild("AngelicaWeak")
-                if angelicaWeak then
+
+                local isAngelicaWeakExists = workspace.Living:FindFirstChild("AngelicaWeak") ~= nil
+                if isAngelicaWeakExists then
                     print("Roland defeated! AngelicaWeak appeared, completing quest...")
                     
                     -- Отключаем все соединения
