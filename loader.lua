@@ -3438,6 +3438,7 @@ getgenv().UsingDekuFarmAlt = function()
         local baitInProgress = false
         local mainAttackInProgress = false
         local questCheckConnection = nil
+        local rolandSequenceCompleted = false -- НОВЫЙ ФЛАГ
         
         -- Проверка урона по HP в workspace.Living
         local maxHP = nil
@@ -3579,7 +3580,7 @@ getgenv().UsingDekuFarmAlt = function()
             return currentStand == correctStand
         end
         
-        -- Функция основной атаки Roland (ИСПРАВЛЕННАЯ)
+        -- ИСПРАВЛЕННАЯ функция основной атаки Roland
         local function startMainRolandAttack()
             print("Starting main Roland attack...")
             mainAttackInProgress = true
@@ -3623,12 +3624,24 @@ getgenv().UsingDekuFarmAlt = function()
                     task.wait(0.5)
                     game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
                     
-                    -- Сбрасываем флаги
+                    -- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: После завершения Roland возвращаемся к основному циклу
+                    print("Roland sequence completed! Switching back to OFA and resuming main farm cycle...")
+                    
+                    -- Сбрасываем флаги Roland
                     isRolandActive = false
                     mainAttackInProgress = false
                     baitInProgress = false
+                    rolandSequenceCompleted = true
                     
-                    print("Roland sequence completed!")
+                    -- Переключаемся на OFA для продолжения основного цикла
+                    isUsingStandless = false
+                    equipStand(RequiredStand)
+                    waitForStandChange(RequiredStand, 30)
+                    
+                    -- Телепортируемся на позицию ожидания
+                    teleportTo(WaitBossDiePos)
+                    
+                    print("Resumed main boss farming cycle with OFA!")
                 end
             end)
             
@@ -3701,7 +3714,7 @@ getgenv().UsingDekuFarmAlt = function()
             end)
         end
         
-        -- Функция байта первой атаки Roland (ИСПРАВЛЕННАЯ)
+        -- Функция байта первой атаки Roland
         local function baitRolandFirstSkill()
             print("Starting Roland bait sequence...")
             baitInProgress = true
@@ -3731,7 +3744,7 @@ getgenv().UsingDekuFarmAlt = function()
                     
                     baitInProgress = false
                     
-                    -- ИСПРАВЛЕНИЕ: Проверяем, что Roland все еще на карте перед запуском атаки
+                    -- Проверяем, что Roland все еще на карте перед запуском атаки
                     if isRolandOnMap() and getgenv().AutoFarmDekuAlt then
                         print("Roland still on map, starting main attack...")
                         startMainRolandAttack()
@@ -3751,7 +3764,7 @@ getgenv().UsingDekuFarmAlt = function()
             end)
         end
         
-        -- Функция запуска всей последовательности Roland (ИСПРАВЛЕННАЯ)
+        -- Функция запуска всей последовательности Roland
         local function startRolandSequence()
             if isRolandActive then
                 print("Roland sequence already active, skipping...")
@@ -3759,6 +3772,7 @@ getgenv().UsingDekuFarmAlt = function()
             end
             
             isRolandActive = true
+            rolandSequenceCompleted = false -- Сброс флага при новой последовательности
             print("Starting Roland sequence...")
             
             -- 1. Сменить персонажа на Standless
@@ -3789,7 +3803,7 @@ getgenv().UsingDekuFarmAlt = function()
             local promptB = spawnPoint:FindFirstChild("ProximityPromptB")
             if promptB and promptB.Enabled then
                 print("Summoning Roland via ProximityPromptB...")
-                for i = 1, 10 do -- Увеличиваем количество попыток
+                for i = 1, 10 do
                     pcall(function()
                         fireproximityprompt(promptB)
                     end)
@@ -3804,7 +3818,7 @@ getgenv().UsingDekuFarmAlt = function()
             
             -- 4. Ждем появления Roland
             local waitTime = 0
-            local maxWaitTime = 20 -- Увеличиваем время ожидания
+            local maxWaitTime = 20
             
             while not isRolandOnMap() and waitTime < maxWaitTime and getgenv().AutoFarmDekuAlt do
                 task.wait(0.5)
@@ -3814,7 +3828,7 @@ getgenv().UsingDekuFarmAlt = function()
             
             if isRolandOnMap() and getgenv().AutoFarmDekuAlt then
                 print("Roland appeared! Starting bait sequence in 3 seconds...")
-                task.wait(3) -- Увеличиваем задержку перед байтом
+                task.wait(3)
                 
                 if isRolandOnMap() and getgenv().AutoFarmDekuAlt then
                     baitRolandFirstSkill()
@@ -3886,7 +3900,7 @@ getgenv().UsingDekuFarmAlt = function()
         local isWaitingForGrace = false
         local isProcessingQuest = false
         
-        -- Улучшенный мониторинг Roland с одним переключением на Standless
+        -- ИСПРАВЛЕННЫЙ мониторинг Roland с правильным возвратом к основному циклу
         connections.rolandMonitor = RunService.Heartbeat:Connect(function()
             if not getgenv().AutoFarmDekuAlt or isProcessingQuest or isRolandActive then return end
             
@@ -3894,16 +3908,20 @@ getgenv().UsingDekuFarmAlt = function()
                 local rolandExists = isRolandOnMap()
                 local currentStand = getCurrentStand()
                 
+                -- Если Roland появился и мы не используем Standless
                 if rolandExists and currentStand ~= "Standless" and not isUsingStandless then
                     print("Roland обнаружен, переключаемся на Standless")
                     isUsingStandless = true
                     equipStand("Standless")
                     waitForStandChange("Standless", 30)
-                elseif not rolandExists and currentStand ~= RequiredStand and isUsingStandless then
-                    print("Roland исчез, возвращаем OFA")
+                -- Если Roland исчез и нужно вернуться к OFA (КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ)
+                elseif not rolandExists and currentStand ~= RequiredStand and isUsingStandless and rolandSequenceCompleted then
+                    print("Roland исчез после завершения квеста, возвращаем OFA для продолжения фарма")
                     isUsingStandless = false
+                    rolandSequenceCompleted = false -- Сброс флага
                     equipStand(RequiredStand)
                     waitForStandChange(RequiredStand, 30)
+                    print("Возвращены к основному циклу с OFA!")
                 end
             end)
         end)
@@ -3983,7 +4001,7 @@ getgenv().UsingDekuFarmAlt = function()
                         end)
                         
                     elseif prompt and prompt.Enabled then
-                        -- Обычный призыв босса
+                        -- Обычный призыв босса (Deku)
                         print("Телепортируемся к спавну босса")
                         teleportTo(spawnPoint.Position)
                         task.wait(0.1)
@@ -4033,6 +4051,7 @@ getgenv().UsingDekuFarmAlt = function()
             isRolandActive = false
             baitInProgress = false
             mainAttackInProgress = false
+            rolandSequenceCompleted = false
             
             teleportTo(OriginalPosition)
             BoredLibrary.prompt("Sakura Hub", "Boss summoning stopped! 🛑", 1.5)
