@@ -3731,6 +3731,7 @@ getgenv().UsingDekuFarmAlt = function()
                     fireproximityprompt(promptB)
                     task.wait(0.1)
                 end
+                teleportTo(WaitBossDiePos)
             end
             
             -- 4. Ждем появления Roland
