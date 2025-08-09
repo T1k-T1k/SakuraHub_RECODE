@@ -2616,7 +2616,7 @@ getgenv().UsingDekuFarmMain = function()
             
             -- Переменные
             local BossWaitPos = CFrame.new(-1212, -150, -324)
-            local VoidPos = CFrame.new(0, -1000, 0)
+            local VoidPos = CFrame.new(0, -1125, 0)
             local character = player.Character or player.CharacterAdded:Wait()
             local currentStand = ""
             local standSkills = {}
@@ -3428,7 +3428,7 @@ getgenv().UsingDekuFarmAlt = function()
         local Lplayer = game:GetService("Players").LocalPlayer
         
         local WaitBossDiePos = Vector3.new(-1252, -150, -320)
-        local voidPos = Vector3.new(0, -1000, 0)
+        local voidPos = Vector3.new(0, -1125, 0)
         local OriginalPosition = Lplayer.Character.HumanoidRootPart.Position
         local RequiredStand = "One for All [Stage 4]"
         
