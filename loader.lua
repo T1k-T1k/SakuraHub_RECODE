@@ -3679,7 +3679,23 @@ getgenv().UsingDekuFarmAlt = function()
                     
                     -- Атакуем Roland
                     pcall(function()
-                        ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
+                    local Event = game:GetService("ReplicatedStorage")["ABC - First Priority"].Utility.Modules.Warp.Index.Event.Reliable
+                    Event:FireServer(
+                        (function(bytes)
+                            local b = buffer.create(#bytes)
+                            for i = 1, #bytes do
+                                buffer.writeu8(b, i - 1, bytes[i])
+                            end
+                            return b
+                        end)({ 11 }),
+                        (function(bytes)
+                            local b = buffer.create(#bytes)
+                            for i = 1, #bytes do
+                                buffer.writeu8(b, i - 1, bytes[i])
+                            end
+                            return b
+                        end)({ 254, 1, 0, 6, 1, 84 })
+                    )
                     end)
                 end
             end)
