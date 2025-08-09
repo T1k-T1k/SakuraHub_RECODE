@@ -3437,7 +3437,6 @@ getgenv().UsingDekuFarmAlt = function()
         local rolandTeleportConnection = nil
         local baitInProgress = false
         local mainAttackInProgress = false
-        local questTaken = false
         
         -- Проверка урона по HP в workspace.Living
         local maxHP = nil
@@ -3659,15 +3658,15 @@ getgenv().UsingDekuFarmAlt = function()
                     local questCheckConnection
                     questCheckConnection = RunService.Heartbeat:Connect(function()
                         local angelicaWeak = workspace:FindFirstChild("AngelicaWeak")
-                        if angelicaWeak and questTaken then
+                        if angelicaWeak then
                             print("Roland defeated! AngelicaWeak appeared, completing quest...")
                             task.wait(1)
-                            ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
+                            -- Выполняем квест без дополнительных переменных
+                            game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
                             task.wait(0.5)
-                            ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
+                            game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
                             task.wait(0.5)
-                            ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
-                            questTaken = false
+                            game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
                             isRolandActive = false
                             questCheckConnection:Disconnect()
                             print("Roland sequence completed!")
@@ -3711,13 +3710,10 @@ getgenv().UsingDekuFarmAlt = function()
                 return
             end
             
-            -- 2. Взять квест
-            if not questTaken then
-                print("Taking quest 33...")
-                ReplicatedStorage:WaitForChild("QuestRemotes"):WaitForChild("AcceptQuest"):FireServer(33)
-                questTaken = true
-                task.wait(0.2)
-            end
+            -- 2. Взять квест без дополнительных переменных
+            print("Taking quest 33...")
+            game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("AcceptQuest"):FireServer(33)
+            task.wait(0.2)
             
             -- 3. Телепортироваться к спавну босса и призвать его
             local spawnPoint = Workspace.Map.RuinedCity.Spawn
@@ -3750,7 +3746,6 @@ getgenv().UsingDekuFarmAlt = function()
             else
                 print("Roland did not appear in time!")
                 isRolandActive = false
-                questTaken = false
             end
         end
         
@@ -3807,7 +3802,6 @@ getgenv().UsingDekuFarmAlt = function()
         end)
         
         local connections = {}
-        local isQuestAccepted = false
         local isWaitingForGrace = false
         local isProcessingQuest = false
         
@@ -3891,10 +3885,13 @@ getgenv().UsingDekuFarmAlt = function()
                     local promptB = spawnPoint:FindFirstChild("ProximityPromptB")
                     local prompt = spawnPoint:FindFirstChild("ProximityPrompt")
                     
-                    -- Приоритет ProximityPromptB для Roland - ПОЛНОСТЬЮ ПЕРЕДЕЛАННАЯ ЛОГИКА
+                    -- Приоритет ProximityPromptB для Roland - берем квест и запускаем последовательность
                     if promptB and promptB.Enabled then
                         isProcessingQuest = true
                         print("ProximityPromptB enabled! Starting Roland sequence...")
+                        
+                        -- Берем квест сразу когда promptB стал Enabled
+                        game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("AcceptQuest"):FireServer(33)
                         
                         -- Запускаем последовательность Roland
                         startRolandSequence()
@@ -3945,7 +3942,6 @@ getgenv().UsingDekuFarmAlt = function()
             isRolandActive = false
             baitInProgress = false
             mainAttackInProgress = false
-            questTaken = false
             
             teleportTo(OriginalPosition)
             BoredLibrary.prompt("Sakura Hub", "Boss summoning stopped! 🛑", 1.5)
