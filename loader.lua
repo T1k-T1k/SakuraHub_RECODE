@@ -101,7 +101,8 @@ getgenv().Configurations = function()
         getgenv().AutoFarmDekuMainAcc = false;
         getgenv().AutoFarmDekuAlt = false;
         -- getgenv().AutoFarmDekuSolo = false;
-
+        
+        getgenv().RemoveAnnoyingItems = false;
         getgenv().AutoEquipWeapon = false;
         getgenv().AutoRollDeaths = false;
         getgenv().AutoRollArcade = false;
@@ -299,18 +300,17 @@ getgenv().LoadConfigurations = function()
         task.spawn(getgenv().StartLoading("AutoStoreStageOne")("StoredOFA"));
         task.spawn(getgenv().StartLoading("AutoAltFarming")("UsingAltFarming"));
         task.spawn(getgenv().StartLoading("AutoMainFarming")("UsingMainAccountFarming"));
-        -- Deku
-        -- Old
+        -- Deku Old
         task.spawn(getgenv().StartLoading("AutofarmOnDeku1")("UsingDekuAutofarm1"));
         task.spawn(getgenv().StartLoading("AutofarmOnDeku2")("UsingDekuAutofarm2"));
         task.spawn(getgenv().StartLoading("AutofarmOnDeku3")("UsingDekuAutofarm3"));
 
-        -- New
+        -- Deku New
         task.spawn(getgenv().StartLoading("AutoFarmDekuMainAcc")("UsingDekuFarmMain"));
         task.spawn(getgenv().StartLoading("AutoFarmDekuAlt")("UsingDekuFarmAlt"));
-
         -- task.spawn(getgenv().StartLoading("AutoFarmDekuSolo")("UsingDekuFarmSolo"));
 
+        task.spawn(getgenv().StartLoading("RemoveAnnoyingItems")("UsingRemoveAnnoyingItems"));
         task.spawn(getgenv().StartLoading("AutoConvertTokens")("UsingTokensToCash"));
         --task.spawn(getgenv().StartLoading("AutoStealingOfa")("StealingOneForAll"));
         task.spawn(getgenv().StartLoading("AutoStealingItems")("StealingAnyItem"));
@@ -542,6 +542,23 @@ getgenv().EspOnPlayers = function()
     Folder.ChildAdded:Connect(function(v)
         task.wait(0.5);XAdded(v);
     end)
+end
+
+getgenv().UsingRemoveAnnoyingItems = function()
+    while getgenv().RemoveAnnoyingItems == true do
+        local items = {"Durandal", "Zelkova", "Allas"}
+        
+        for _, itemName in pairs(items) do
+            local item = workspace:FindFirstChild("Item") and workspace.Item:FindFirstChild(itemName)
+            if item then
+                pcall(function()
+                    item:Destroy()
+                end)
+            end
+        end
+        
+        task.wait(0.1)
+    end
 end
 
 getgenv().EspOnEntities = function()
@@ -5110,7 +5127,7 @@ HomeTab.newButton("Reset Character (Dialogue Method)","",function()
     game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("SukunaDialogue"):FireServer(unpack(args));
 end)
 
-HomeTab.newButton("Respawn Character (Clan method)","",function()
+HomeTab.newButton("Respawn Character (Guild Method)","",function()
     getgenv().GuildName = "Szechuan";
     getgenv().Password = "pepper";
 
@@ -5129,6 +5146,11 @@ HomeTab.newButton("Respawn Character (Clan method)","",function()
             Lplayer.Character.HumanoidRootPart.CFrame = Location;
         end)
     end)
+end)
+
+HomeTab.newToggle("Remove Annoying Items","This will remove items such as ( Durandal | Allas ... etc. )",getgenv().RemoveAnnoyingItems or false,function(Value)
+    getgenv().RemoveAnnoyingItems = Value
+    getgenv().UsingRemoveAnnoyingItems();
 end)
 
 HomeTab.newLabel("Visual Scripts   👁️");
