@@ -3437,6 +3437,7 @@ getgenv().UsingDekuFarmAlt = function()
         local rolandTeleportConnection = nil
         local baitInProgress = false
         local mainAttackInProgress = false
+        local questCheckConnection = nil
         
         -- Проверка урона по HP в workspace.Living
         local maxHP = nil
@@ -3578,7 +3579,113 @@ getgenv().UsingDekuFarmAlt = function()
             return currentStand == correctStand
         end
         
-        -- Функция байта первой атаки Roland
+        -- Функция основной атаки Roland (ИСПРАВЛЕННАЯ)
+        local function startMainRolandAttack()
+            print("Starting main Roland attack...")
+            mainAttackInProgress = true
+            
+            -- Отключаем предыдущее соединение если есть
+            if rolandTeleportConnection then
+                rolandTeleportConnection:Disconnect()
+                rolandTeleportConnection = nil
+            end
+            
+            -- Отключаем предыдущую проверку квеста если есть
+            if questCheckConnection then
+                questCheckConnection:Disconnect()
+                questCheckConnection = nil
+            end
+            
+            -- Запускаем проверку завершения квеста
+            questCheckConnection = RunService.Heartbeat:Connect(function()
+                if not getgenv().AutoFarmDekuAlt then
+                    questCheckConnection:Disconnect()
+                    return
+                end
+                
+                local angelicaWeak = workspace:FindFirstChild("AngelicaWeak")
+                if angelicaWeak then
+                    print("Roland defeated! AngelicaWeak appeared, completing quest...")
+                    
+                    -- Отключаем все соединения
+                    if rolandTeleportConnection then
+                        rolandTeleportConnection:Disconnect()
+                        rolandTeleportConnection = nil
+                    end
+                    questCheckConnection:Disconnect()
+                    questCheckConnection = nil
+                    
+                    -- Завершаем квест
+                    task.wait(1)
+                    game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
+                    task.wait(0.5)
+                    game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
+                    task.wait(0.5)
+                    game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
+                    
+                    -- Сбрасываем флаги
+                    isRolandActive = false
+                    mainAttackInProgress = false
+                    baitInProgress = false
+                    
+                    print("Roland sequence completed!")
+                end
+            end)
+            
+            -- Основной цикл атаки
+            rolandTeleportConnection = RunService.Heartbeat:Connect(function()
+                if not getgenv().AutoFarmDekuAlt or not mainAttackInProgress then
+                    if rolandTeleportConnection then
+                        rolandTeleportConnection:Disconnect()
+                        rolandTeleportConnection = nil
+                    end
+                    return
+                end
+                
+                local rolandHP = getRolandHP()
+                local rolandPos = getRolandPosition()
+                
+                -- Проверяем, существует ли еще Roland
+                if not isRolandOnMap() then
+                    print("Roland disappeared, stopping attack...")
+                    rolandTeleportConnection:Disconnect()
+                    rolandTeleportConnection = nil
+                    mainAttackInProgress = false
+                    return
+                end
+                
+                -- Проверяем урон игрока
+                if checkPlayerDamage() then
+                    print("Player damaged! Teleporting to void...")
+                    teleportTo(voidPos)
+                    task.wait(2) -- Ждем в войде
+                    maxHP = nil -- Сбрасываем проверку HP
+                end
+                
+                -- Если HP Roland меньше 8000, прекращаем атаку
+                if rolandHP and rolandHP < 8000 then
+                    print("Roland HP below 8000, moving to wait position...")
+                    rolandTeleportConnection:Disconnect()
+                    rolandTeleportConnection = nil
+                    teleportTo(WaitBossDiePos)
+                    mainAttackInProgress = false
+                    return
+                end
+                
+                -- Телепортация к Roland и атака
+                if rolandPos then
+                    local offset = Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
+                    teleportTo(rolandPos + offset)
+                    
+                    -- Атакуем Roland
+                    pcall(function()
+                        ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
+                    end)
+                end
+            end)
+        end
+        
+        -- Функция байта первой атаки Roland (ИСПРАВЛЕННАЯ)
         local function baitRolandFirstSkill()
             print("Starting Roland bait sequence...")
             baitInProgress = true
@@ -3607,88 +3714,31 @@ getgenv().UsingDekuFarmAlt = function()
                     task.wait(1.75)
                     
                     baitInProgress = false
-                    -- Запускаем основную атаку
-                    startMainRolandAttack()
+                    
+                    -- ИСПРАВЛЕНИЕ: Проверяем, что Roland все еще на карте перед запуском атаки
+                    if isRolandOnMap() and getgenv().AutoFarmDekuAlt then
+                        print("Roland still on map, starting main attack...")
+                        startMainRolandAttack()
+                    else
+                        print("Roland disappeared or script stopped during bait")
+                        isRolandActive = false
+                    end
                 else
                     -- Телепортируемся к Roland каждые 0.1 секунды
-                    local timeDiff = currentTime - baitStartTime
-                    if math.floor(timeDiff / 0.1) ~= math.floor((timeDiff - 0.016) / 0.1) then
-                        local rolandPos = getRolandPosition()
-                        if rolandPos then
-                            -- Телепортируемся вплотную к Roland
-                            local offset = Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
-                            teleportTo(rolandPos + offset)
-                        end
+                    local rolandPos = getRolandPosition()
+                    if rolandPos then
+                        -- Телепортируемся вплотную к Roland
+                        local offset = Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
+                        teleportTo(rolandPos + offset)
                     end
                 end
             end)
         end
         
-        -- Функция основной атаки Roland
-        local function startMainRolandAttack()
-            print("Starting main Roland attack...")
-            mainAttackInProgress = true
-            
-            -- Основной цикл атаки
-            rolandTeleportConnection = RunService.Heartbeat:Connect(function()
-                if not getgenv().AutoFarmDekuAlt then
-                    rolandTeleportConnection:Disconnect()
-                    return
-                end
-                
-                local rolandHP = getRolandHP()
-                local rolandPos = getRolandPosition()
-                
-                -- Проверяем урон игрока
-                if checkPlayerDamage() then
-                    print("Player damaged! Teleporting to void...")
-                    teleportTo(voidPos)
-                    task.wait(2) -- Ждем в войде
-                    maxHP = nil -- Сбрасываем проверку HP
-                end
-                
-                -- Если HP Roland меньше 8000, прекращаем атаку
-                if rolandHP and rolandHP < 8000 then
-                    print("Roland HP below 8000, moving to wait position...")
-                    rolandTeleportConnection:Disconnect()
-                    teleportTo(WaitBossDiePos)
-                    mainAttackInProgress = false
-                end
-
-                -- Запускаем проверку завершения квеста
-                local questCheckConnection
-                questCheckConnection = RunService.Heartbeat:Connect(function()
-                    local angelicaWeak = workspace:FindFirstChild("AngelicaWeak")
-                    if angelicaWeak then
-                        print("Roland defeated! AngelicaWeak appeared, completing quest...")
-                        task.wait(1)
-                        game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
-                        task.wait(0.5)
-                        game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
-                        task.wait(0.5)
-                        game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
-                        isRolandActive = false
-                        questCheckConnection:Disconnect()
-                        print("Roland sequence completed!")
-                    end
-                end)
-                
-                -- Телепортация к Roland каждые 0.1 секунды и атака
-                if rolandPos then
-                    local offset = Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
-                    teleportTo(rolandPos + offset)
-                    
-                    -- Атакуем Roland
-                    ReplicatedStorage:WaitForChild("StandlessRemote"):WaitForChild("Punch"):FireServer()
-                end
-                
-                task.wait(0.1) -- Телепорт каждые 0.1 секунды
-            end)
-        end
-        
-        -- Функция запуска всей последовательности Roland
+        -- Функция запуска всей последовательности Roland (ИСПРАВЛЕННАЯ)
         local function startRolandSequence()
             if isRolandActive then
+                print("Roland sequence already active, skipping...")
                 return
             end
             
@@ -3708,41 +3758,56 @@ getgenv().UsingDekuFarmAlt = function()
                 return
             end
             
-            -- 2. Взять квест без дополнительных переменных
+            -- 2. Взять квест
             print("Taking quest 33...")
-            game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("AcceptQuest"):FireServer(33)
-            task.wait(0.2)
+            pcall(function()
+                game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("AcceptQuest"):FireServer(33)
+            end)
+            task.wait(0.5)
             
             -- 3. Телепортироваться к спавну босса и призвать его
             local spawnPoint = Workspace.Map.RuinedCity.Spawn
             teleportTo(spawnPoint.Position)
-            task.wait(0.1)
+            task.wait(0.2)
             
             local promptB = spawnPoint:FindFirstChild("ProximityPromptB")
             if promptB and promptB.Enabled then
                 print("Summoning Roland via ProximityPromptB...")
-                for i = 1, 5 do
-                    fireproximityprompt(promptB)
+                for i = 1, 10 do -- Увеличиваем количество попыток
+                    pcall(function()
+                        fireproximityprompt(promptB)
+                    end)
                     task.wait(0.1)
                 end
                 teleportTo(WaitBossDiePos)
+            else
+                print("ProximityPromptB not found or not enabled!")
+                isRolandActive = false
+                return
             end
             
             -- 4. Ждем появления Roland
             local waitTime = 0
-            local maxWaitTime = 15
+            local maxWaitTime = 20 -- Увеличиваем время ожидания
             
             while not isRolandOnMap() and waitTime < maxWaitTime and getgenv().AutoFarmDekuAlt do
-                task.wait(0.1)
-                waitTime = waitTime + 0.1
+                task.wait(0.5)
+                waitTime = waitTime + 0.5
+                print("Waiting for Roland to appear... (" .. waitTime .. "/" .. maxWaitTime .. ")")
             end
             
-            if isRolandOnMap() then
-                print("Roland appeared! Starting bait sequence...")
-                task.wait(2) -- Небольшая задержка перед байтом
-                baitRolandFirstSkill()
+            if isRolandOnMap() and getgenv().AutoFarmDekuAlt then
+                print("Roland appeared! Starting bait sequence in 3 seconds...")
+                task.wait(3) -- Увеличиваем задержку перед байтом
+                
+                if isRolandOnMap() and getgenv().AutoFarmDekuAlt then
+                    baitRolandFirstSkill()
+                else
+                    print("Roland disappeared before bait could start!")
+                    isRolandActive = false
+                end
             else
-                print("Roland did not appear in time!")
+                print("Roland did not appear in time or script was stopped!")
                 isRolandActive = false
             end
         end
@@ -3766,7 +3831,9 @@ getgenv().UsingDekuFarmAlt = function()
         -- Функция для взаимодействия с proximity prompt
         local function interactWithPrompt(prompt)
             if prompt and prompt.Enabled then
-                fireproximityprompt(prompt)
+                pcall(function()
+                    fireproximityprompt(prompt)
+                end)
             end
         end
         
@@ -3885,14 +3952,19 @@ getgenv().UsingDekuFarmAlt = function()
                     
                     -- Приоритет ProximityPromptB для Roland - берем квест и запускаем последовательность
                     if promptB and promptB.Enabled then
-                        isProcessingQuest = true
                         print("ProximityPromptB enabled! Starting Roland sequence...")
+                        isProcessingQuest = true
                         
-                        -- Берем квест сразу когда promptB стал Enabled
-                        game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("AcceptQuest"):FireServer(33)
+                        -- Небольшая задержка перед запуском последовательности
+                        task.wait(0.5)
                         
                         -- Запускаем последовательность Roland
-                        startRolandSequence()
+                        spawn(function()
+                            startRolandSequence()
+                            -- Через некоторое время разрешаем снова обрабатывать квесты
+                            task.wait(30)
+                            isProcessingQuest = false
+                        end)
                         
                     elseif prompt and prompt.Enabled then
                         -- Обычный призыв босса
@@ -3908,7 +3980,7 @@ getgenv().UsingDekuFarmAlt = function()
                         -- Если промпт стал неактивным, идем ждать
                         if not prompt.Enabled then
                             print("Промпт деактивирован, идем ждать босса")
-                            wait(4)
+                            task.wait(4)
                             teleportTo(WaitBossDiePos)
                         end
                     end
@@ -3935,6 +4007,11 @@ getgenv().UsingDekuFarmAlt = function()
             if rolandTeleportConnection then
                 rolandTeleportConnection:Disconnect()
                 rolandTeleportConnection = nil
+            end
+            
+            if questCheckConnection then
+                questCheckConnection:Disconnect()
+                questCheckConnection = nil
             end
             
             isRolandActive = false
