@@ -3617,15 +3617,7 @@ getgenv().UsingDekuFarmAlt = function()
                     questCheckConnection = nil
                     
                     -- Завершаем квест
-                    task.wait(1)
                     game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
-                    task.wait(0.5)
-                    game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
-                    task.wait(0.5)
-                    game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
-                    
-                    -- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: После завершения Roland возвращаемся к основному циклу
-                    print("Roland sequence completed! Switching back to OFA and resuming main farm cycle...")
                     
                     -- Сбрасываем флаги Roland
                     isRolandActive = false
@@ -3640,8 +3632,6 @@ getgenv().UsingDekuFarmAlt = function()
                     
                     -- Телепортируемся на позицию ожидания
                     teleportTo(WaitBossDiePos)
-                    
-                    print("Resumed main boss farming cycle with OFA!")
                 end
             end)
             
@@ -3671,7 +3661,7 @@ getgenv().UsingDekuFarmAlt = function()
                 if checkPlayerDamage() then
                     print("Player damaged! Teleporting to void...")
                     teleportTo(voidPos)
-                    task.wait(2) -- Ждем в войде
+                    task.wait(0.1) -- Ждем в войде
                     maxHP = nil -- Сбрасываем проверку HP
                 end
                 
@@ -3756,7 +3746,7 @@ getgenv().UsingDekuFarmAlt = function()
                     -- Телепортируемся к Roland каждые 0.1 секунды
                     local rolandPos = getRolandPosition()
                     if rolandPos then
-                        -- Телепортируемся вплотную к Roland
+                        task.wait(0.35)
                         local offset = Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
                         teleportTo(rolandPos + offset)
                     end
