@@ -102,6 +102,8 @@ getgenv().Configurations = function()
         getgenv().AutoFarmDekuAlt = false;
         -- getgenv().AutoFarmDekuSolo = false;
         
+        getgenv().AutoSummonToji = false;
+        
         getgenv().RemoveAnnoyingItems = false;
         getgenv().AutoEquipWeapon = false;
         getgenv().AutoRollDeaths = false;
@@ -309,6 +311,8 @@ getgenv().LoadConfigurations = function()
         task.spawn(getgenv().StartLoading("AutoFarmDekuMainAcc")("UsingDekuFarmMain"));
         task.spawn(getgenv().StartLoading("AutoFarmDekuAlt")("UsingDekuFarmAlt"));
         -- task.spawn(getgenv().StartLoading("AutoFarmDekuSolo")("UsingDekuFarmSolo"));
+
+        task.spawn(getgenv().StartLoading("AutoSummonToji")("UsingAutoSummonToji"));
 
         task.spawn(getgenv().StartLoading("RemoveAnnoyingItems")("UsingRemoveAnnoyingItems"));
         task.spawn(getgenv().StartLoading("AutoConvertTokens")("UsingTokensToCash"));
@@ -4107,6 +4111,129 @@ getgenv().UsingDekuFarmAlt = function()
     end
 end
 
+-- Toji Summon
+
+getgenv().UsingAutoSummonToji = function()
+    while getgenv().AutoSummonToji == true do
+        local platform
+        local Players = game:GetService("Players")
+        local Workspace = game:GetService("Workspace")
+        local UserInputService = game:GetService("UserInputService")
+        local VirtualInputManager = game:GetService("VirtualInputManager")
+        local GuiService = game:GetService("GuiService")
+
+        local LocalPlayer = Players.LocalPlayer
+
+        -- Функция создания платформы
+        local function createPlatform(mainPart)
+            if platform then
+                platform:Destroy()
+            end
+
+            platform = Instance.new("Part")
+            platform.Name = "TojiSummonPlatform"
+            platform.Size = Vector3.new(4, 1, 4)
+            platform.Material = Enum.Material.ForceField
+            platform.BrickColor = BrickColor.new("Bright blue")
+            platform.Transparency = 0.65
+            platform.Anchored = true
+            platform.CanCollide = true
+            platform.TopSurface = Enum.SurfaceType.Smooth
+            platform.BottomSurface = Enum.SurfaceType.Smooth
+
+            local mainPosition = mainPart.Position
+            platform.Position = Vector3.new(mainPosition.X, mainPosition.Y + 25, mainPosition.Z)
+            platform.Parent = Workspace
+
+            return platform
+        end
+
+        -- Телепортация игрока
+        local function teleportPlayer(position)
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(position)
+            end
+        end
+
+        -- Телепорт на платформу
+        local function teleportToPlatform()
+            if platform then
+                local platformTop = platform.Position + Vector3.new(0, platform.Size.Y/2 + 3, 0)
+                teleportPlayer(platformTop)
+            end
+        end
+
+        -- Взаимодействие с BriefCase (ProximityPrompt + UI)
+        local function interactWithBriefcase(mainPart)
+            local proximityPrompt = mainPart:FindFirstChildOfClass("ProximityPrompt")
+            if proximityPrompt then
+                proximityPrompt.HoldDuration = 0
+                task.wait(0.5)
+                pcall(function()
+                    fireproximityprompt(proximityPrompt)
+                end)
+                task.wait(1)
+
+                local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+                local tojiConfirmation = playerGui:FindFirstChild("TojiConfirmation")
+                if tojiConfirmation then
+                    local outer = tojiConfirmation:FindFirstChild("Outer")
+                    if outer then
+                        local tokensButton = outer:FindFirstChild("Tokens")
+                        if tokensButton then
+                            GuiService.SelectedObject = tokensButton
+                            task.wait(0.2)
+
+                            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+                            task.wait(0.1)
+                            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+
+                            task.wait(0.5)
+                            teleportToPlatform()
+                        end
+                    end
+                end
+            end
+        end
+
+        -- Основная логика поиска BriefCase и спавна Toji
+        local living = Workspace:FindFirstChild("Living")
+        if living then
+            local capoExists = living:FindFirstChild("The Capo")
+            local tojiExists = living:FindFirstChild("Toji")
+
+            if not capoExists and not tojiExists then
+                local map = Workspace:FindFirstChild("Map")
+                if map then
+                    local newSakura = map:FindFirstChild("NewSakura")
+                    if newSakura then
+                        local tojiArena = newSakura:FindFirstChild("TojiArena")
+                        if tojiArena then
+                            local briefCase = tojiArena:FindFirstChild("BriefCase")
+                            if briefCase then
+                                local mainPart = briefCase:FindFirstChild("Main")
+                                if mainPart then
+                                    createPlatform(mainPart)
+                                    teleportPlayer(mainPart.Position + Vector3.new(0, 5, 0))
+                                    task.wait(1)
+                                    interactWithBriefcase(mainPart)
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        task.wait(2)
+    end
+
+    -- Очистка платформы после выхода из цикла
+    if platform then
+        platform:Destroy()
+    end
+end
+
 -- Deku Farm Logic
 
 getgenv().UsingDekuAutofarm1 = function()
@@ -5976,6 +6103,13 @@ end)
 --     getgenv().AutofarmOnDeku3 = Value
 --     getgenv().UsingDekuAutofarm3();
 -- end)
+
+FarmingTab.newLabel("Toji Spawner");
+
+FarmingTab.newToggle("Start Summoning","Will summon Toji",getgenv().AutoSummonToji or false,function(Value)
+    getgenv().AutoSummonToji = Value
+    getgenv().UsingAutoSummonToji();
+end)
 
 FarmingTab.newLabel("Auto Tokens Converter");
 FarmingTab.newToggle("Auto Exchange Tokens To Cash (When Broke)","",getgenv().AutoConvertTokens or false,function(Value)
