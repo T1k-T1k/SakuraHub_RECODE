@@ -3293,7 +3293,7 @@ getgenv().UsingDekuFarmAlt = function()
     Instance.new("UICorner", killerTitleFrame).CornerRadius = UDim.new(0, 12)
 
     local killerTitle = Instance.new("TextLabel")
-    killerTitle.Text = "🌸 Select Killer"
+    killerTitle.Text = "🌸 Select Boss Killer"
     killerTitle.Size = UDim2.new(1, -20, 1, 0)
     killerTitle.Position = UDim2.new(0, 10, 0, 0)
     killerTitle.BackgroundTransparency = 1
@@ -3520,6 +3520,7 @@ getgenv().UsingDekuFarmAlt = function()
                     if not isSelectedPlayerInGame() then
                         if not isWaitingForPlayerReturn then
                             isWaitingForPlayerReturn = true
+                            task.wait(0.5)
                             stopAllProcesses("⚠️ Selected player left the game! Stopping farm...")
                             
                             -- Ждем возвращения игрока
