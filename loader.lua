@@ -3554,46 +3554,9 @@ getgenv().UsingDekuFarmAlt = function()
             if graceCollectionInProgress then return end
             graceCollectionInProgress = true
             
-            local ItemToStore = "OA's Grace"
-            
             task.spawn(function()
                 pcall(function()
-                    print("Attempting to store OA's Grace...")
-                    
-                    -- Находим пустой слот в хранилище
-                    for _, k in pairs(game:GetService("Players").LocalPlayer.PlayerGui.ItemStorage.Outer.Inner.Inner:GetChildren()) do
-                        if k:IsA("ImageButton") and k.Visible then
-                            if k.Text.Text == "None" then
-                                -- Ищем OA's Grace в инвентаре
-                                for _, x in ipairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
-                                    if x.Name:lower():find(ItemToStore:lower()) then
-                                        print("Found OA's Grace in backpack, storing it...")
-                                        
-                                        -- Экипируем предмет
-                                        game:GetService("Players").LocalPlayer.Character:FindFirstChild("Humanoid"):EquipTool(x)
-                                        
-                                        -- Получаем номер слота и сохраняем предмет
-                                        local args = {tonumber(k.Name:match("%d+"))}
-                                        game:GetService("ReplicatedStorage"):WaitForChild("ItemStorageRemote"):WaitForChild("UseItemStorage"):FireServer(unpack(args))
-                                        
-                                        task.wait(1.15)
-                                        
-                                        -- Убираем предмет из рук
-                                        game:GetService("Players").LocalPlayer.Character:FindFirstChild("Humanoid"):UnequipTools()
-                                        
-                                        print("OA's Grace successfully stored!")
-                                        graceCollectedSuccessfully = true
-                                        
-                                        -- ОСТАНАВЛИВАЕМ ВЕСЬ ФАРМ после успешного сбора OA's Grace
-                                        stopAllProcesses("✅ OA's Grace collected and stored! Farm stopped.")
-                                        
-                                        break
-                                    end
-                                end
-                                break
-                            end
-                        end
-                    end
+                    useOAGrace()
                 end)
                 
                 task.wait(1.75)
