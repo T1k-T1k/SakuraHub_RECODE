@@ -3444,7 +3444,7 @@ getgenv().UsingDekuFarmAlt = function()
 
     killerSelectionCompletedEvent.Event:Wait()
 
-    -- Основной код фарма начинается здесь (призыв боссов)
+    -- Основной код фарма начинается здесь
     if killerSelectionCompleted and getgenv().AutoFarmDekuAlt and getgenv().ThePlayerWhoKills then
         local Lplayer = game:GetService("Players").LocalPlayer
         
@@ -3461,9 +3461,145 @@ getgenv().UsingDekuFarmAlt = function()
         local questCheckConnection = nil
         local rolandSequenceCompleted = false
         local questClaimConnection = nil
+        local playerMonitorConnection = nil
         
         -- Флаг для предотвращения множественного переключения на Standless
         local isUsingStandless = false
+        
+        -- НОВЫЕ ФЛАГИ для OA Grace
+        local isWaitingForPlayerReturn = false
+        local graceCollectedSuccessfully = false
+        local graceCollectionInProgress = false
+        
+        -- Функция для проверки наличия выбранного игрока в игре
+        local function isSelectedPlayerInGame()
+            if not getgenv().ThePlayerWhoKills then return false end
+            return game:GetService("Players"):FindFirstChild(getgenv().ThePlayerWhoKills.Name) ~= nil
+        end
+        
+        -- Функция для остановки всех процессов при отключении игрока
+        local function stopAllProcesses(reason)
+            print("Stopping all processes. Reason: " .. reason)
+            
+            -- Останавливаем все флаги
+            isRolandActive = false
+            baitInProgress = false
+            mainAttackInProgress = false
+            rolandSequenceCompleted = false
+            graceCollectionInProgress = false
+            
+            -- Отключаем все соединения
+            if rolandTeleportConnection then
+                rolandTeleportConnection:Disconnect()
+                rolandTeleportConnection = nil
+            end
+            
+            if questClaimConnection then
+                questClaimConnection:Disconnect()
+                questClaimConnection = nil
+            end
+            
+            if playerMonitorConnection then
+                playerMonitorConnection:Disconnect()
+                playerMonitorConnection = nil
+            end
+            
+            -- Отключаем основные циклы
+            getgenv().AutoFarmDekuAlt = false
+            
+            BoredLibrary.prompt("Sakura Hub", reason, 3.0)
+            
+            -- Возвращаемся на оригинальную позицию
+            teleportTo(OriginalPosition)
+        end
+        
+        -- Функция для мониторинга выбранного игрока
+        local function startPlayerMonitoring()
+            playerMonitorConnection = spawn(function()
+                while getgenv().AutoFarmDekuAlt do
+                    if not isSelectedPlayerInGame() then
+                        if not isWaitingForPlayerReturn then
+                            isWaitingForPlayerReturn = true
+                            stopAllProcesses("⚠️ Selected player left the game! Stopping farm...")
+                            
+                            -- Ждем возвращения игрока
+                            print("Waiting for selected player to return...")
+                            while not isSelectedPlayerInGame() do
+                                task.wait(2)
+                                if not getgenv().AutoFarmDekuAlt then
+                                    return
+                                end
+                            end
+                            
+                            -- Игрок вернулся
+                            print("Selected player returned! Resuming farm...")
+                            BoredLibrary.prompt("Sakura Hub", "✅ Selected player returned! Resuming farm...", 2.0)
+                            isWaitingForPlayerReturn = false
+                            
+                            -- Перезапускаем нужные процессы
+                            task.wait(2)
+                            if getgenv().AutoFarmDekuAlt then
+                                startQuestClaiming()
+                                teleportTo(WaitBossDiePos)
+                            end
+                        end
+                    end
+                    task.wait(3) -- Проверяем каждые 3 секунды
+                end
+            end)
+        end
+        
+        -- Функция для автоматического сбора и хранения OA's Grace
+        local function storeOAGrace()
+            if graceCollectionInProgress then return end
+            graceCollectionInProgress = true
+            
+            local ItemToStore = "OA's Grace"
+            
+            task.spawn(function()
+                pcall(function()
+                    print("Attempting to store OA's Grace...")
+                    
+                    -- Находим пустой слот в хранилище
+                    for _, k in pairs(game:GetService("Players").LocalPlayer.PlayerGui.ItemStorage.Outer.Inner.Inner:GetChildren()) do
+                        if k:IsA("ImageButton") and k.Visible then
+                            if k.Text.Text == "None" then
+                                -- Ищем OA's Grace в инвентаре
+                                for _, x in ipairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
+                                    if x.Name:lower():find(ItemToStore:lower()) then
+                                        print("Found OA's Grace in backpack, storing it...")
+                                        
+                                        -- Экипируем предмет
+                                        game:GetService("Players").LocalPlayer.Character:FindFirstChild("Humanoid"):EquipTool(x)
+                                        
+                                        -- Получаем номер слота и сохраняем предмет
+                                        local args = {tonumber(k.Name:match("%d+"))}
+                                        game:GetService("ReplicatedStorage"):WaitForChild("ItemStorageRemote"):WaitForChild("UseItemStorage"):FireServer(unpack(args))
+                                        
+                                        task.wait(1.15)
+                                        
+                                        -- Убираем предмет из рук
+                                        game:GetService("Players").LocalPlayer.Character:FindFirstChild("Humanoid"):UnequipTools()
+                                        
+                                        print("OA's Grace successfully stored!")
+                                        graceCollectedSuccessfully = true
+                                        
+                                        -- ОСТАНАВЛИВАЕМ ВЕСЬ ФАРМ после успешного сбора OA's Grace
+                                        stopAllProcesses("✅ OA's Grace collected and stored! Farm stopped.")
+                                        
+                                        break
+                                    end
+                                end
+                                break
+                            end
+                        end
+                    end
+                end)
+                
+                task.wait(1.75)
+                graceCollectionInProgress = false
+            end)
+        end
         
         -- Функция для проверки наличия Roland на карте
         local function isRolandOnMap()
@@ -3612,7 +3748,7 @@ getgenv().UsingDekuFarmAlt = function()
             end)
         end
         
-        -- ИСПРАВЛЕННАЯ функция основной атаки Roland
+        -- Функция основной атаки Roland
         local function startMainRolandAttack()
             print("Starting main Roland attack...")
             mainAttackInProgress = true
@@ -3625,7 +3761,7 @@ getgenv().UsingDekuFarmAlt = function()
             
             -- Основной цикл атаки
             rolandTeleportConnection = RunService.Heartbeat:Connect(function()
-                if not getgenv().AutoFarmDekuAlt or not mainAttackInProgress then
+                if not getgenv().AutoFarmDekuAlt or not mainAttackInProgress or isWaitingForPlayerReturn then
                     if rolandTeleportConnection then
                         rolandTeleportConnection:Disconnect()
                         rolandTeleportConnection = nil
@@ -3655,7 +3791,6 @@ getgenv().UsingDekuFarmAlt = function()
                     return
                 end
                 
-                -- ИСПРАВЛЕННАЯ ЛОГИКА: сначала скилл, потом телепорт через 1 секунду
                 if rolandPos then
                     -- Сначала используем скилл
                     useRolandAttackSkill()
@@ -3690,7 +3825,7 @@ getgenv().UsingDekuFarmAlt = function()
             -- Телепортация к Roland каждые 0.1 секунды в течение 0.7 секунд
             local baitConnection
             baitConnection = RunService.Heartbeat:Connect(function()
-                if not getgenv().AutoFarmDekuAlt then
+                if not getgenv().AutoFarmDekuAlt or isWaitingForPlayerReturn then
                     baitConnection:Disconnect()
                     return
                 end
@@ -3729,10 +3864,15 @@ getgenv().UsingDekuFarmAlt = function()
             end)
         end
         
-        -- УЛУЧШЕННАЯ функция для мониторинга появления Анделики
+        -- Функция для мониторинга появления Анделики
         local function startAngelicaMonitoring()
             spawn(function()
                 while getgenv().AutoFarmDekuAlt and isRolandActive do
+                    if isWaitingForPlayerReturn then
+                        task.wait(1)
+                        continue
+                    end
+                    
                     local isAngelicaWeakExists = workspace.Living:FindFirstChild("AngelicaWeak") ~= nil
                     if isAngelicaWeakExists then
                         print("Roland defeated! AngelicaWeak appeared!")
@@ -3793,11 +3933,11 @@ getgenv().UsingDekuFarmAlt = function()
             end)
         end
         
-        -- НОВАЯ функция для автоматического взятия квестов каждые 5 секунд
+        -- Функция для автоматического взятия квестов каждые 5 секунд
         local function startQuestClaiming()
             questClaimConnection = spawn(function()
                 while getgenv().AutoFarmDekuAlt do
-                    if isRolandActive then
+                    if isRolandActive and not isWaitingForPlayerReturn then
                         pcall(function()
                             print("Auto claiming quest 33...")
                             game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
@@ -3810,8 +3950,8 @@ getgenv().UsingDekuFarmAlt = function()
         
         -- Функция запуска всей последовательности Roland
         local function startRolandSequence()
-            if isRolandActive then
-                print("Roland sequence already active, skipping...")
+            if isRolandActive or isWaitingForPlayerReturn then
+                print("Roland sequence already active or waiting for player, skipping...")
                 return
             end
             
@@ -3944,6 +4084,9 @@ getgenv().UsingDekuFarmAlt = function()
             if spawnPromptB then spawnPromptB.HoldDuration = 0 end
         end)
         
+        -- Запускаем мониторинг выбранного игрока
+        startPlayerMonitoring()
+        
         -- Запускаем автоматическое взятие квестов
         startQuestClaiming()
         
@@ -3951,34 +4094,11 @@ getgenv().UsingDekuFarmAlt = function()
         local isWaitingForGrace = false
         local isProcessingQuest = false
         
-        -- ИСПРАВЛЕННЫЙ мониторинг Roland с правильным возвратом к основному циклу
-        connections.rolandMonitor = RunService.Heartbeat:Connect(function()
-            if not getgenv().AutoFarmDekuAlt or isProcessingQuest or isRolandActive then return end
-            
-            pcall(function()
-                local rolandExists = isRolandOnMap()
-                local currentStand = getCurrentStand()
-                
-                -- Если Roland появился и мы не используем Standless
-                if rolandExists and currentStand ~= "Standless" and not isUsingStandless then
-                    print("Roland обнаружен, переключаемся на Standless")
-                    isUsingStandless = true
-                    equipStand("Standless")
-                    waitForStandChange("Standless", 30)
-                -- Если Roland исчез и нужно вернуться к OFA (КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ)
-                elseif not rolandExists and currentStand ~= RequiredStand and isUsingStandless and rolandSequenceCompleted then
-                    print("Roland исчез после завершения квеста, возвращаем OFA для продолжения фарма")
-                    isUsingStandless = false
-                    rolandSequenceCompleted = false -- Сброс флага
-                    equipStand(RequiredStand)
-                    waitForStandChange(RequiredStand, 30)
-                    print("Возвращены к основному циклу с OFA!")
-                end
-            end)
-        end)
-        
+        -- УЛУЧШЕННЫЙ мониторинг OA's Grace с автоматическим сбором и хранением
         connections.graceMonitor = RunService.Heartbeat:Connect(function()
-            if not getgenv().AutoFarmDekuAlt or isProcessingQuest or isRolandActive then return end
+            if not getgenv().AutoFarmDekuAlt or isProcessingQuest or isRolandActive or isWaitingForPlayerReturn or graceCollectedSuccessfully then 
+                return 
+            end
             
             pcall(function()
                 local grace = Workspace.Item2:FindFirstChild("OA's Grace")
@@ -3986,6 +4106,9 @@ getgenv().UsingDekuFarmAlt = function()
                     grace.ProximityPrompt.HoldDuration = 0
                     if not isWaitingForGrace then
                         isWaitingForGrace = true
+                        print("OA's Grace detected! Teleporting and collecting...")
+                        BoredLibrary.prompt("Sakura Hub", "🎯 OA's Grace detected! Collecting...", 2.0)
+                        
                         teleportTo(grace.Position)
                         task.wait(0.03)
                         
@@ -4001,7 +4124,14 @@ getgenv().UsingDekuFarmAlt = function()
                             else
                                 graceInteraction:Disconnect()
                                 task.wait(0.04)
+                                
+                                -- Используем Grace
                                 useOAGrace()
+                                
+                                -- Затем автоматически сохраняем его в хранилище
+                                task.wait(1)
+                                storeOAGrace()
+                                
                                 isWaitingForGrace = false
                             end
                         end)
@@ -4010,10 +4140,42 @@ getgenv().UsingDekuFarmAlt = function()
             end)
         end)
         
+        -- ИСПРАВЛЕННЫЙ мониторинг Roland с правильным возвратом к основному циклу
+        connections.rolandMonitor = RunService.Heartbeat:Connect(function()
+            if not getgenv().AutoFarmDekuAlt or isProcessingQuest or isRolandActive or isWaitingForPlayerReturn or graceCollectedSuccessfully then 
+                return 
+            end
+            
+            pcall(function()
+                local rolandExists = isRolandOnMap()
+                local currentStand = getCurrentStand()
+                
+                -- Если Roland появился и мы не используем Standless
+                if rolandExists and currentStand ~= "Standless" and not isUsingStandless then
+                    print("Roland обнаружен, переключаемся на Standless")
+                    isUsingStandless = true
+                    equipStand("Standless")
+                    waitForStandChange("Standless", 30)
+                -- Если Roland исчез и нужно вернуться к OFA
+                elseif not rolandExists and currentStand ~= RequiredStand and isUsingStandless and rolandSequenceCompleted then
+                    print("Roland исчез после завершения квеста, возвращаем OFA для продолжения фарма")
+                    isUsingStandless = false
+                    rolandSequenceCompleted = false -- Сброс флага
+                    equipStand(RequiredStand)
+                    waitForStandChange(RequiredStand, 30)
+                    print("Возвращены к основному циклу с OFA!")
+                end
+            end)
+        end)
+        
         -- Улучшенный цикл для мониторинга стенда и призыва боссов
         connections.bossSpawner = RunService.Heartbeat:Connect(function()
-            if not getgenv().AutoFarmDekuAlt then return end
-            if isWaitingForGrace or isProcessingQuest or isRolandActive then return end
+            if not getgenv().AutoFarmDekuAlt or isWaitingForPlayerReturn or graceCollectedSuccessfully then 
+                return 
+            end
+            if isWaitingForGrace or isProcessingQuest or isRolandActive then 
+                return 
+            end
             
             if isRolandOnMap() then
                 return -- Roland мониторится отдельно
@@ -4099,10 +4261,18 @@ getgenv().UsingDekuFarmAlt = function()
                 questClaimConnection = nil
             end
             
+            if playerMonitorConnection then
+                playerMonitorConnection:Disconnect()
+                playerMonitorConnection = nil
+            end
+            
             isRolandActive = false
             baitInProgress = false
             mainAttackInProgress = false
             rolandSequenceCompleted = false
+            isWaitingForPlayerReturn = false
+            graceCollectedSuccessfully = false
+            graceCollectionInProgress = false
             
             teleportTo(OriginalPosition)
             BoredLibrary.prompt("Sakura Hub", "Boss summoning stopped! 🛑", 1.5)
