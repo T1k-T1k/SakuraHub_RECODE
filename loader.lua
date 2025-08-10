@@ -3676,10 +3676,10 @@ getgenv().UsingDekuFarmAlt = function()
                 
                 -- Проверяем урон игрока
                 if checkPlayerDamage() then
-                    print("Player damaged! Teleporting to void...")
+                    print("Player damaged! Teleporting to void instantly...")
+                    maxHP = nil
                     teleportTo(voidPos)
-                    task.wait(0.1) -- Ждем в войде
-                    maxHP = nil -- Сбрасываем проверку HP
+                    return
                 end
                 
                 -- Если HP Roland меньше 8000, прекращаем атаку
