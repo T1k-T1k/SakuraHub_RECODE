@@ -3476,10 +3476,35 @@ getgenv().UsingDekuFarmAlt = function()
             if not getgenv().ThePlayerWhoKills then return false end
             return game:GetService("Players"):FindFirstChild(getgenv().ThePlayerWhoKills.Name) ~= nil
         end
-        
+
+        -- Функция для автоматического сбора и хранения OA's Grace
+        local function storeOAGrace()
+            if graceCollectionInProgress then return end
+            graceCollectionInProgress = true
+            
+            task.spawn(function()
+                pcall(function()
+                    ReplicatedStorage:WaitForChild("UseItem"):WaitForChild("OFA"):FireServer()
+                    Lplayer.Character.Humanoid:EquipTool(Lplayer.Backpack:FindFirstChild("OA's Grace"))
+                    task.wait(0.02)
+                    ReplicatedStorage:WaitForChild("UseItem"):WaitForChild("OFA"):FireServer()
+                    if Lplayer.Character:FindFirstChild("OA's Grace") then
+                        Lplayer.Character:FindFirstChild("OA's Grace"):Activate()
+                    end
+                    ReplicatedStorage:WaitForChild("UseItem"):WaitForChild("OFA"):FireServer()
+                    task.wait(5)
+                    teleportTo(WaitBossDiePos)
+                end)
+                
+                task.wait(1.75)
+                graceCollectionInProgress = false
+            end)
+        end
+
         -- Функция для остановки всех процессов при отключении игрока
         local function stopAllProcesses(reason)
             print("Stopping all processes. Reason: " .. reason)
+            task.wait(0.5)
             
             -- Останавливаем все флаги
             isRolandActive = false
@@ -3547,21 +3572,6 @@ getgenv().UsingDekuFarmAlt = function()
                     end
                     task.wait(3) -- Проверяем каждые 3 секунды
                 end
-            end)
-        end
-        
-        -- Функция для автоматического сбора и хранения OA's Grace
-        local function storeOAGrace()
-            if graceCollectionInProgress then return end
-            graceCollectionInProgress = true
-            
-            task.spawn(function()
-                pcall(function()
-                    useOAGrace()
-                end)
-                
-                task.wait(1.75)
-                graceCollectionInProgress = false
             end)
         end
         
