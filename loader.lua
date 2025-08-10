@@ -3455,10 +3455,16 @@ getgenv().UsingDekuFarmAlt = function()
         local baitInProgress = false
         local mainAttackInProgress = false
         local questCheckConnection = nil
-        local rolandSequenceCompleted = false -- НОВЫЙ ФЛАГ
+        local rolandSequenceCompleted = false
+        local questClaimConnection = nil -- НОВЫЙ флаг для взятия квестов
         
-        -- Проверка урона по HP в workspace.Living
+        -- Переменные для системы урона
         local maxHP = nil
+        local damageTime = nil -- Время получения урона
+        local isDamaged = false -- Флаг получения урона
+        local damageCheckConnection = nil
+        
+        -- Функция проверки урона по HP в workspace.Living
         local function checkPlayerDamage()
             local playerName = Lplayer.Name
             local playerModel = workspace.Living:FindFirstChild(playerName)
@@ -3475,13 +3481,48 @@ getgenv().UsingDekuFarmAlt = function()
                 
                 -- Если HP меньше максимального, значит получили урон
                 if currentHP < maxHP then
-                    print("Player took damage! HP:", currentHP, "/", maxHP)
+                    if not isDamaged then
+                        print("Player took damage! HP:", currentHP, "/", maxHP)
+                        isDamaged = true
+                        damageTime = tick()
+                    end
                     return true -- Получили урон
                 end
                 
                 return false -- Урона нет
             end
             return false
+        end
+        
+        -- Функция для запуска мониторинга урона с задержкой
+        local function startDamageMonitoring()
+            if damageCheckConnection then
+                damageCheckConnection:Disconnect()
+            end
+            
+            damageCheckConnection = RunService.Heartbeat:Connect(function()
+                if not getgenv().AutoFarmDekuAlt then
+                    damageCheckConnection:Disconnect()
+                    return
+                end
+                
+                if isDamaged and damageTime then
+                    local currentTime = tick()
+                    -- Проверяем, прошло ли 5 секунд с момента получения урона
+                    if currentTime - damageTime >= 5 then
+                        print("5 seconds passed since damage, teleporting to void...")
+                        teleportTo(voidPos)
+                        
+                        -- Сбрасываем состояние урона
+                        isDamaged = false
+                        damageTime = nil
+                        maxHP = nil
+                        
+                        damageCheckConnection:Disconnect()
+                        damageCheckConnection = nil
+                    end
+                end
+            end)
         end
         
         -- Флаг для предотвращения множественного переключения на Standless
@@ -3597,6 +3638,29 @@ getgenv().UsingDekuFarmAlt = function()
             return currentStand == correctStand
         end
         
+        -- Функция для использования скилла через байты
+        local function useRolandAttackSkill()
+            pcall(function()
+                local Event = game:GetService("ReplicatedStorage")["ABC - First Priority"].Utility.Modules.Warp.Index.Event.Reliable
+                Event:FireServer(
+                    (function(bytes)
+                        local b = buffer.create(#bytes)
+                        for i = 1, #bytes do
+                            buffer.writeu8(b, i - 1, bytes[i])
+                        end
+                        return b
+                    end)({ 11 }),
+                    (function(bytes)
+                        local b = buffer.create(#bytes)
+                        for i = 1, #bytes do
+                            buffer.writeu8(b, i - 1, bytes[i])
+                        end
+                        return b
+                    end)({ 254, 1, 0, 6, 1, 84 })
+                )
+            end)
+        end
+        
         -- ИСПРАВЛЕННАЯ функция основной атаки Roland
         local function startMainRolandAttack()
             print("Starting main Roland attack...")
@@ -3608,49 +3672,8 @@ getgenv().UsingDekuFarmAlt = function()
                 rolandTeleportConnection = nil
             end
             
-            -- Отключаем предыдущую проверку квеста если есть
-            if questCheckConnection then
-                questCheckConnection:Disconnect()
-                questCheckConnection = nil
-            end
-            
-            -- Запускаем проверку завершения квеста
-            questCheckConnection = RunService.Heartbeat:Connect(function()
-                if not getgenv().AutoFarmDekuAlt then
-                    questCheckConnection:Disconnect()
-                    return
-                end
-
-                local isAngelicaWeakExists = workspace.Living:FindFirstChild("AngelicaWeak") ~= nil
-                if isAngelicaWeakExists then
-                    print("Roland defeated! AngelicaWeak appeared, completing quest...")
-                    
-                    -- Отключаем все соединения
-                    if rolandTeleportConnection then
-                        rolandTeleportConnection:Disconnect()
-                        rolandTeleportConnection = nil
-                    end
-                    questCheckConnection:Disconnect()
-                    questCheckConnection = nil
-                    
-                    -- Завершаем квест
-                    game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
-                    
-                    -- Сбрасываем флаги Roland
-                    isRolandActive = false
-                    mainAttackInProgress = false
-                    baitInProgress = false
-                    rolandSequenceCompleted = true
-                    
-                    -- Переключаемся на OFA для продолжения основного цикла
-                    isUsingStandless = false
-                    equipStand(RequiredStand)
-                    waitForStandChange(RequiredStand, 30)
-                    
-                    -- Телепортируемся на позицию ожидания
-                    teleportTo(WaitBossDiePos)
-                end
-            end)
+            -- Запускаем мониторинг урона
+            startDamageMonitoring()
             
             -- Основной цикл атаки
             rolandTeleportConnection = RunService.Heartbeat:Connect(function()
@@ -3674,13 +3697,8 @@ getgenv().UsingDekuFarmAlt = function()
                     return
                 end
                 
-                -- Проверяем урон игрока
-                if checkPlayerDamage() then
-                    print("Player damaged! Teleporting to void instantly...")
-                    maxHP = nil
-                    teleportTo(voidPos)
-                    return
-                end
+                -- Проверяем урон игрока (но не телепортируем сразу)
+                checkPlayerDamage()
                 
                 -- Если HP Roland меньше 8000, прекращаем атаку
                 if rolandHP and rolandHP < 8000 then
@@ -3692,31 +3710,17 @@ getgenv().UsingDekuFarmAlt = function()
                     return
                 end
                 
-                -- Телепортация к Roland и атака
+                -- Сначала используем скилл, потом телепортируемся к Roland
                 if rolandPos then
+                    -- Используем скилл
+                    useRolandAttackSkill()
+                    
+                    -- Ждем 1 секунду перед телепортацией
+                    task.wait(1)
+                    
+                    -- Телепортируемся к Roland
                     local offset = Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
                     teleportTo(rolandPos + offset)
-                    
-                    -- Атакуем Roland
-                    pcall(function()
-                    local Event = game:GetService("ReplicatedStorage")["ABC - First Priority"].Utility.Modules.Warp.Index.Event.Reliable
-                    Event:FireServer(
-                        (function(bytes)
-                            local b = buffer.create(#bytes)
-                            for i = 1, #bytes do
-                                buffer.writeu8(b, i - 1, bytes[i])
-                            end
-                            return b
-                        end)({ 11 }),
-                        (function(bytes)
-                            local b = buffer.create(#bytes)
-                            for i = 1, #bytes do
-                                buffer.writeu8(b, i - 1, bytes[i])
-                            end
-                            return b
-                        end)({ 254, 1, 0, 6, 1, 84 })
-                    )
-                    end)
                 end
             end)
         end
@@ -3767,6 +3771,67 @@ getgenv().UsingDekuFarmAlt = function()
                         local offset = Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
                         teleportTo(rolandPos + offset)
                     end
+                end
+            end)
+        end
+        
+        -- НОВАЯ функция для мониторинга появления Анделики
+        local function startAngelicaMonitoring()
+            spawn(function()
+                while getgenv().AutoFarmDekuAlt and isRolandActive do
+                    local isAngelicaWeakExists = workspace.Living:FindFirstChild("AngelicaWeak") ~= nil
+                    if isAngelicaWeakExists then
+                        print("Roland defeated! AngelicaWeak appeared!")
+                        
+                        -- Отключаем все соединения Roland
+                        if rolandTeleportConnection then
+                            rolandTeleportConnection:Disconnect()
+                            rolandTeleportConnection = nil
+                        end
+                        if damageCheckConnection then
+                            damageCheckConnection:Disconnect()
+                            damageCheckConnection = nil
+                        end
+                        
+                        -- СНАЧАЛА телепортируем в войд
+                        print("Teleporting to void before changing stand...")
+                        teleportTo(voidPos)
+                        task.wait(2) -- Даем время на телепортацию
+                        
+                        -- ПОТОМ меняем персонажа на OFA
+                        print("Switching back to OFA...")
+                        isUsingStandless = false
+                        equipStand(RequiredStand)
+                        waitForStandChange(RequiredStand, 30)
+                        
+                        -- Сбрасываем флаги Roland
+                        isRolandActive = false
+                        mainAttackInProgress = false
+                        baitInProgress = false
+                        rolandSequenceCompleted = true
+                        
+                        -- Телепортируемся на позицию ожидания
+                        teleportTo(WaitBossDiePos)
+                        
+                        print("Roland sequence completed!")
+                        break
+                    end
+                    task.wait(1)
+                end
+            end)
+        end
+        
+        -- НОВАЯ функция для автоматического взятия квестов каждые 5 секунд
+        local function startQuestClaiming()
+            questClaimConnection = spawn(function()
+                while getgenv().AutoFarmDekuAlt do
+                    if isRolandActive then
+                        pcall(function()
+                            print("Auto claiming quest 33...")
+                            game:GetService("ReplicatedStorage"):WaitForChild("QuestRemotes"):WaitForChild("ClaimQuest"):FireServer(33)
+                        end)
+                    end
+                    task.wait(5) -- Каждые 5 секунд
                 end
             end)
         end
@@ -3834,7 +3899,11 @@ getgenv().UsingDekuFarmAlt = function()
             end
             
             if isRolandOnMap() and getgenv().AutoFarmDekuAlt then
-                print("Roland appeared! Starting bait sequence in 3 seconds...")
+                print("Roland appeared! Starting monitoring and bait sequence...")
+                
+                -- Запускаем мониторинг Анделики
+                startAngelicaMonitoring()
+                
                 task.wait(3)
                 
                 if isRolandOnMap() and getgenv().AutoFarmDekuAlt then
@@ -3902,6 +3971,9 @@ getgenv().UsingDekuFarmAlt = function()
             if spawnPrompt then spawnPrompt.HoldDuration = 0 end
             if spawnPromptB then spawnPromptB.HoldDuration = 0 end
         end)
+        
+        -- Запускаем автоматическое взятие квестов
+        startQuestClaiming()
         
         local connections = {}
         local isWaitingForGrace = false
@@ -4050,15 +4122,23 @@ getgenv().UsingDekuFarmAlt = function()
                 rolandTeleportConnection = nil
             end
             
-            if questCheckConnection then
-                questCheckConnection:Disconnect()
-                questCheckConnection = nil
+            if questClaimConnection then
+                questClaimConnection:Disconnect()
+                questClaimConnection = nil
+            end
+            
+            if damageCheckConnection then
+                damageCheckConnection:Disconnect()
+                damageCheckConnection = nil
             end
             
             isRolandActive = false
             baitInProgress = false
             mainAttackInProgress = false
             rolandSequenceCompleted = false
+            isDamaged = false
+            damageTime = nil
+            maxHP = nil
             
             teleportTo(OriginalPosition)
             BoredLibrary.prompt("Sakura Hub", "Boss summoning stopped! 🛑", 1.5)
