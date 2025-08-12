@@ -5055,7 +5055,7 @@ getgenv().UsingSafeZone = function()
     task.spawn(function()
         while getgenv().AutoSafeZone == true do
             pcall(function()
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-9037, 804, 8927);
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-8817, 785.94, 8837);
             end)
             task.wait(2.35);
         end
