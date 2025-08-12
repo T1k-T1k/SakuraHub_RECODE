@@ -2429,7 +2429,8 @@ getgenv().UsingMainAccountFarming = function()
         while getgenv().AutoMainFarming == true do
             pcall(function()           
                 game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-87.23579406738281,-116.3696060180664,318.3973693847656);
-                game:GetService("VirtualUser"):Button1Down(Vector2.new());
+                -- game:GetService("VirtualUser"):Button1Down(Vector2.new());
+                game:GetService("ReplicatedStorage").STWRemote.Punch:FireServer()
             end)
             task.wait(0.015);
         end
