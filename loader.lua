@@ -3769,8 +3769,8 @@ getgenv().UsingDekuFarmAlt = function()
                 if rolandPos then
                     -- Сначала используем скилл
                     useRolandAttackSkill()
-                    print("Used skill, waiting 1 second before teleport...")
                     
+                    task.wait(1)
                     -- Ждем 1 секунду, затем телепортируемся
                     spawn(function()
                         task.wait(1)
