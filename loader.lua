@@ -4877,7 +4877,7 @@ getgenv().UsingTokensToCash = function()
     task.spawn(function()
         while getgenv().AutoConvertTokens == true do
             pcall(function()
-                if game:GetService("Players").LocalPlayer.Data.Token.Value > 500 and game:GetService("Players").LocalPlayer.Data.Cash.Value < 500 then
+                if game:GetService("Players").LocalPlayer.Data.Token.Value >= 500 and game:GetService("Players").LocalPlayer.Data.Cash.Value <= 500 then
                     for i = 1,2 do
                         local args = {[1] = "T4C"};
                         game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("TokenExchange"):FireServer(unpack(args));
@@ -6270,7 +6270,7 @@ FarmingTab.newToggle("Start Summoning","Will summon Toji",getgenv().AutoSummonTo
 end)
 
 FarmingTab.newLabel("Auto Tokens Converter");
-FarmingTab.newToggle("Auto Exchange Tokens To Cash (When Broke)","",getgenv().AutoConvertTokens or false,function(Value)
+FarmingTab.newToggle("Auto Exchange Tokens To Cash","",getgenv().AutoConvertTokens or false,function(Value)
     getgenv().AutoConvertTokens = Value
     getgenv().UsingTokensToCash();
 end)
