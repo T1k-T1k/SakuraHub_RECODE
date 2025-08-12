@@ -3774,7 +3774,7 @@ getgenv().UsingDekuFarmAlt = function()
                     task.wait(1)
                     -- Ждем 1 секунду, затем телепортируемся
                     spawn(function()
-                        task.wait(1)
+                        task.wait(0.2)
                         if isRolandOnMap() and mainAttackInProgress then
                             local currentRolandPos = getRolandPosition()
                             if currentRolandPos then
@@ -3786,7 +3786,7 @@ getgenv().UsingDekuFarmAlt = function()
                     end)
                 end
                 
-                task.wait(2) -- Пауза между циклами атак
+                task.wait(0.1) -- Пауза между циклами атак
             end)
         end
         
