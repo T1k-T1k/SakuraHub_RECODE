@@ -6328,7 +6328,7 @@ end)
 
 FarmingTab.newToggle("Auto Roll Death Animations Banner","",getgenv().AutoRollDeaths or false,function(Value)
     getgenv().AutoRollDeaths = Value
-    getgenv().RollDeathBanne();
+    getgenv().RollDeathBanner();
 end)
 
 FarmingTab.newToggle("Auto Roll Arcade Banner (Uses Cash)","",getgenv().AutoRollArcade or false,function(Value)
