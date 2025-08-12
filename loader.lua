@@ -1271,8 +1271,8 @@ end
 
 getgenv().AutoGodModding = function()
     getgenv().HealthRespawn = 195;
-    getgenv().GuildName = "Szechuan";
-    getgenv().Password = "pepper";
+    getgenv().GuildName = "LOLSOTIRED"; -- legacy: Szechuan
+    getgenv().Password = "3949s7jMtGW^G[04D$4\^8@C05!J06C0722q4Ab0em2&!=F7qq1!/+0h4$o[/9791$K}}g7VvcW18T682N5/Ok7&951^8&+\№e}v\a=H@1Ie=0?5P@3:a6[a]^№7NKd№[/7R5\t1kdev.com@d6&h8({O3!T|e~9@LEy2P390\(UtR1]Xw8|4!:QA?-87&}:9#}{b3|+3S20mw0h]!nu76rH№!zsrq!Z1z~"; -- legacy: pepper
 
     task.spawn(function()
         while getgenv().AutoRespawning == true do
@@ -5440,8 +5440,8 @@ HomeTab.newButton("Reset Character (Dialogue Method)","",function()
 end)
 
 HomeTab.newButton("Respawn Character (Guild Method)","",function()
-    getgenv().GuildName = "Szechuan";
-    getgenv().Password = "pepper";
+    getgenv().GuildName = "LOLSOTIRED"; -- legacy: Szechuan
+    getgenv().Password = "3949s7jMtGW^G[04D$4\^8@C05!J06C0722q4Ab0em2&!=F7qq1!/+0h4$o[/9791$K}}g7VvcW18T682N5/Ok7&951^8&+\№e}v\a=H@1Ie=0?5P@3:a6[a]^№7NKd№[/7R5\t1kdev.com@d6&h8({O3!T|e~9@LEy2P390\(UtR1]Xw8|4!:QA?-87&}:9#}{b3|+3S20mw0h]!nu76rH№!zsrq!Z1z~"; -- legacy: pepper
 
     task.spawn(function()
         pcall(function()
