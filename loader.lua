@@ -325,6 +325,7 @@ getgenv().LoadConfigurations = function()
         task.spawn(getgenv().StartLoading("AutoRollBanner")("BannerRolling"));
         task.spawn(getgenv().StartLoading("AutoRollCidBanner")("CidBannerRolling"));
         task.spawn(getgenv().StartLoading("AutoRollKaijuBanner")("KaijuBannerRolling"));
+        task.spawn(getgenv().StartLoading("AutoRollEgoistBanner")("EgoistBannerRolling"));
         task.spawn(getgenv().StartLoading("AutoRollDeaths")("RollDeathBanner"));
         task.spawn(getgenv().StartLoading("AutoRollArcade")("RollArcadeBanner"));
         task.spawn(getgenv().StartLoading("AutoB4T")("BreakthroughForToken"));
@@ -5153,6 +5154,18 @@ getgenv().KaijuBannerRolling = function()
     end)
 end
 
+getgenv().EgoistBannerRolling = function()
+    task.spawn(function()
+        while getgenv().AutoRollEgoistBanner == true do
+            pcall(function()
+                local args = {getgenv().WhichType,"Egoist"};
+                game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("BannerPull"):FireServer(unpack(args));
+            end)
+            task.wait(1.25);
+        end
+    end)
+end
+
 getgenv().RollDeathBanner = function()
     task.spawn(function()
         while getgenv().AutoRollDeaths == true do
@@ -6318,6 +6331,11 @@ end)
 FarmingTab.newToggle("Auto Roll Kaiju Banner","",getgenv().AutoRollKaijuBanner or false,function(Value)
     getgenv().AutoRollKaijuBanner = Value
     getgenv().KaijuBannerRolling();
+end)
+
+FarmingTab.newToggle("Auto Roll Egoist Banner","",getgenv().AutoRollEgoistBanner or false,function(Value)
+    getgenv().AutoRollEgoistBanner = Value
+    getgenv().EgoistBannerRolling();
 end)
 
 FarmingTab.newDropdown("Types Of Payments","Death Animations",{"Cash","Token"},function(Value)
