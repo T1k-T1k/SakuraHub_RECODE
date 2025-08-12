@@ -4877,14 +4877,12 @@ getgenv().UsingTokensToCash = function()
     task.spawn(function()
         while getgenv().AutoConvertTokens == true do
             pcall(function()
-                if game:GetService("Players").LocalPlayer.Data.Token.Value >= 500 and game:GetService("Players").LocalPlayer.Data.Cash.Value <= 500 then
-                    for i = 1,2 do
-                        local args = {[1] = "T4C"};
-                        game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("TokenExchange"):FireServer(unpack(args));
-                    end
+                local player = game:GetService("Players").LocalPlayer
+                if player.Data.Token.Value >= 500 then
+                    game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("TokenExchange"):FireServer("T4C")
                 end
             end)
-            task.wait(0.35);
+            task.wait(0.35)
         end
     end)
 end
