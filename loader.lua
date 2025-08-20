@@ -3703,6 +3703,8 @@ getgenv().UsingDekuFarmAlt = function()
         
         -- Функция для использования скилла через байты
         local function useRolandAttackSkill()
+            if baitInProgress then return end
+            
             pcall(function()
                 local Event = game:GetService("ReplicatedStorage")["ABC - First Priority"].Utility.Modules.Warp.Index.Event.Reliable
                 Event:FireServer(
@@ -3723,7 +3725,7 @@ getgenv().UsingDekuFarmAlt = function()
                 )
             end)
         end
-        
+
         -- Функция основной атаки Roland
         local function startMainRolandAttack()
             print("Starting main Roland attack...")
