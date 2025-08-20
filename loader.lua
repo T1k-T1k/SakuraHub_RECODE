@@ -551,7 +551,7 @@ end
 
 getgenv().UsingRemoveAnnoyingItems = function()
     while getgenv().RemoveAnnoyingItems == true do
-        local items = {"Durandal", "Zelkova", "Allas" "Gloves"}
+        local items = {"Durandal", "Zelkova", "Allas"}
         
         for _, itemName in pairs(items) do
             local item = workspace:FindFirstChild("Item") and workspace.Item:FindFirstChild(itemName)
