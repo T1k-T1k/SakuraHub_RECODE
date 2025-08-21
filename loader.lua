@@ -3771,9 +3771,10 @@ getgenv().UsingDekuFarmAlt = function()
                 
                 if rolandPos then
                     teleportTo(WaitBossDiePos)
-                    task.wait(2.25)
+                    task.wait(1.5)
 
                     useRolandAttackSkill()
+                    task.wait(1)
                 
                     -- Ждем 1 секунду, затем телепортируемся
                     spawn(function()
