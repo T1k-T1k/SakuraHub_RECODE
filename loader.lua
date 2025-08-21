@@ -3770,10 +3770,11 @@ getgenv().UsingDekuFarmAlt = function()
                 end
                 
                 if rolandPos then
-                    -- Сначала используем скилл
+                    teleportTo(WaitBossDiePos)
+                    task.wait(2.25)
+
                     useRolandAttackSkill()
-                    
-                    task.wait(1)
+                
                     -- Ждем 1 секунду, затем телепортируемся
                     spawn(function()
                         task.wait(0.2)
@@ -3818,7 +3819,7 @@ getgenv().UsingDekuFarmAlt = function()
                     teleportTo(WaitBossDiePos)
                     
                     baitInProgress = false
-                    task.wait(3)
+                    task.wait(0.5)
                     
                     -- Проверяем, что Roland все еще на карте перед запуском атаки
                     if isRolandOnMap() and getgenv().AutoFarmDekuAlt then
