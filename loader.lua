@@ -5678,7 +5678,7 @@ HomeTab.newButton("Infinite Yield","",function()
 end)
 
 HomeTab.newButton("Remote Spy","",function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/78n/SimpleSpy/main/SimpleSpySource.lua"))();
+    loadstring(game:HttpGet("https://github.com/notpoiu/cobalt/releases/latest/download/Cobalt.luau"))();
 end)
 
 HomeTab.newButton("Dark Explorer","",function()
