@@ -3817,10 +3817,8 @@ getgenv().UsingDekuFarmAlt = function()
                     -- Телепортируемся на позицию ожидания
                     teleportTo(WaitBossDiePos)
                     
-                    -- Ждем 1.75 секунды
-                    task.wait(1.75)
-                    
                     baitInProgress = false
+                    task.wait(3)
                     
                     -- Проверяем, что Roland все еще на карте перед запуском атаки
                     if isRolandOnMap() and getgenv().AutoFarmDekuAlt then
@@ -3994,7 +3992,7 @@ getgenv().UsingDekuFarmAlt = function()
                 -- Запускаем мониторинг Анделики
                 startAngelicaMonitoring()
                 
-                task.wait(3)
+                task.wait(2)
                 
                 if isRolandOnMap() and getgenv().AutoFarmDekuAlt then
                     baitRolandFirstSkill()
