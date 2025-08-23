@@ -5472,7 +5472,7 @@ HomeTab.newButton("Respawn Character (Guild Method)","Dont work when you're in c
     end)
 end)
 
-HomeTab.newButton("Respawn Character (Void Method)","Dont work when you're in combat",function()
+HomeTab.newButton("Respawn Character (Void Method)","Gets rid of combat mark",function()
     pcall(function()
         local Lplayer = game.Players.LocalPlayer
         local HRP = Lplayer.Character and Lplayer.Character:FindFirstChild("HumanoidRootPart")
