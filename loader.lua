@@ -5239,26 +5239,57 @@ end
 
 getgenv().QuestParryDamage = function()
     if getgenv().AutoParryingDamage == true then
-        game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat,false);
-    else
-        game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat,true);
-    end
-
     task.spawn(function()local Blocking = false;
         while getgenv().AutoParryingDamage == true do
             pcall(function()
                 local AttackingDummy = game.Workspace.Living["Attacking Dummy"];
                 local BlockBar = tonumber(game.Players.LocalPlayer.PlayerGui.Stats.BG.BlockBG.BlockBar.BlockN.Text);
                 local ParryCooldown = game.Workspace.Living[game.Players.LocalPlayer.Name].CDValues:FindFirstChild("Parry_Cooldown");
-
+                
                 if BlockBar == 30 and not Blocking and not ParryCooldown then
-                    game.VirtualInputManager:SendKeyEvent(true,"F",false,game);task.wait(0.5);game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(AttackingDummy.HumanoidRootPart.Position - AttackingDummy.HumanoidRootPart.CFrame.LookVector * -5,AttackingDummy.HumanoidRootPart.Position);Blocking = true
-                elseif BlockBar < 30 and Blocking and not ParryCooldown then
-                    game.VirtualInputManager:SendKeyEvent(false,"F",false,game);Blocking = false
+                    Event:FireServer(
+					    (function(bytes) --[[Type: buffer]]
+					        local b = buffer.create(#bytes)
+					        for i = 1, #bytes do
+					            buffer.writeu8(b, i - 1, bytes[i])
+					        end
+					        return b
+					    end)({ 11 }),
+					    (function(bytes) --[[Type: buffer]]
+					        local b = buffer.create(#bytes)
+					        for i = 1, #bytes do
+					            buffer.writeu8(b, i - 1, bytes[i])
+					        end
+					        return b
+					    end)({ 254, 2, 0, 6, 1, 70, 5, 1 })
+					);
+					task.wait(0.5);
+					Blocking = true
+                elseif BlockBar == 1 and Blocking and not ParryCooldown then
+                    Event:FireServer(
+					    (function(bytes) --[[Type: buffer]]
+					        local b = buffer.create(#bytes)
+					        for i = 1, #bytes do
+					            buffer.writeu8(b, i - 1, bytes[i])
+					        end
+					        return b
+					    end)({ 11 }),
+					    (function(bytes) --[[Type: buffer]]
+					        local b = buffer.create(#bytes)
+					        for i = 1, #bytes do
+					            buffer.writeu8(b, i - 1, bytes[i])
+					        end
+					        return b
+					    end)({ 254, 2, 0, 6, 1, 70, 5, 0 })
+					)
+					Blocking = false
+					local escapePosition = AttackingDummy.HumanoidRootPart.Position + AttackingDummy.HumanoidRootPart.CFrame.LookVector * 10;
+					game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(escapePosition, AttackingDummy.HumanoidRootPart.Position);
                 end
-
-                if ParryCooldown then
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-2122.210693359375,-113.98542022705078,-4635.59130859375);
+                
+                if Blocking and not ParryCooldown then
+                    local targetPosition = AttackingDummy.HumanoidRootPart.Position + AttackingDummy.HumanoidRootPart.CFrame.LookVector * 8.6;
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition, AttackingDummy.HumanoidRootPart.Position);
                 end
             end)
             task.wait(0.15);
@@ -5268,10 +5299,6 @@ end
 
 getgenv().QuestBlockDamage = function()
     if getgenv().AutoBlockingDamage == true then
-        game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat,false);
-    else
-        game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat,true);
-    end
 
     task.spawn(function()local Blocking = false;
         while getgenv().AutoBlockingDamage == true do
@@ -5310,10 +5337,6 @@ end
 
 getgenv().QuestTakeDamage = function()
     if getgenv().AutoTakingDamage == true then
-        game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat,false);
-    else
-        game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat,true);
-    end
 
     task.spawn(function()
         while getgenv().AutoTakingDamage == true do
@@ -5333,11 +5356,7 @@ end
 
 getgenv().QuestDealDamage = function()
     if getgenv().AutoDealingDamage == true then
-        game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat,false);
-    else
-        game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat,true);
-    end
-
+	
     task.spawn(function()
         while getgenv().AutoDealingDamage == true do
             pcall(function()
