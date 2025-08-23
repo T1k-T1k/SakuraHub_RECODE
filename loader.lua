@@ -42,19 +42,19 @@ task.spawn(function()
 end)
 
 -- // Anti Fall Fixer \\ --
-task.spawn(function()
-    pcall(function()if not getgenv().AntiFallLoaded == true then getgenv().AntiFallLoaded = true;
-        local Base1 = Instance.new("Part");
-        Base1.Size = Vector3.new(9999999999,150,9999999999);
-        Base1.Position = Vector3.new(-521.1619262695312,-390.18596839904785,1644.64208984375);
-        Base1.Anchored = true;Base1.Transparency = 0.5;Base1.Name = "AntiFall1";Base1.Parent = workspace;
-        local Base2 = Instance.new("Part");
-        Base2.Size = Vector3.new(9999999999,150,9999999999);
-        Base2.Position = Vector3.new(-9307.4345703125,110.1080627441406,1495.1046142578125);
-        Base2.Anchored = true;Base2.Transparency = 0.5;Base2.Name = "AntiFall2";Base2.Parent = workspace;
-        end
-    end)
-end)
+-- task.spawn(function()
+--     pcall(function()if not getgenv().AntiFallLoaded == true then getgenv().AntiFallLoaded = true;
+--         local Base1 = Instance.new("Part");
+--         Base1.Size = Vector3.new(9999999999,150,9999999999);
+--         Base1.Position = Vector3.new(-521.1619262695312,-390.18596839904785,1644.64208984375);
+--         Base1.Anchored = true;Base1.Transparency = 0.5;Base1.Name = "AntiFall1";Base1.Parent = workspace;
+--         local Base2 = Instance.new("Part");
+--         Base2.Size = Vector3.new(9999999999,150,9999999999);
+--         Base2.Position = Vector3.new(-9307.4345703125,110.1080627441406,1495.1046142578125);
+--         Base2.Anchored = true;Base2.Transparency = 0.5;Base2.Name = "AntiFall2";Base2.Parent = workspace;
+--         end
+--     end)
+-- end)
 
 -- // Anti AFK \\ --
 task.spawn(function()
