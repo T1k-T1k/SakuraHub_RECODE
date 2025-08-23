@@ -5451,7 +5451,7 @@ HomeTab.newButton("Reset Character (Dialogue Method)","",function()
     game:GetService("ReplicatedStorage"):WaitForChild("GlobalUsedRemotes"):WaitForChild("SukunaDialogue"):FireServer(unpack(args));
 end)
 
-HomeTab.newButton("Respawn Character (Guild Method)","",function()
+HomeTab.newButton("Respawn Character (Guild Method)","Dont work when you're in combat",function()
     getgenv().GuildName = "LOLSOTIRED"; -- legacy: Szechuan
     getgenv().Password = "3949s7jMtGW^G[04D$4\^8@C05!J06C0722q4Ab0em2&!=F7qq1!/+0h4$o[/9791$K}}g7VvcW18T682N5/Ok7&951^8&+\№e}v\a=H@1Ie=0?5P@3:a6[a]^№7NKd№[/7R5\t1kdev.com@d6&h8({O3!T|e~9@LEy2P390\(UtR1]Xw8|4!:QA?-87&}:9#}{b3|+3S20mw0h]!nu76rH№!zsrq!Z1z~"; -- legacy: pepper
 
@@ -5469,6 +5469,28 @@ HomeTab.newButton("Respawn Character (Guild Method)","",function()
 
             Lplayer.Character.HumanoidRootPart.CFrame = Location;
         end)
+    end)
+end)
+
+HomeTab.newButton("Respawn Character (Void Method)","Dont work when you're in combat",function()
+    pcall(function()
+        local Lplayer = game.Players.LocalPlayer
+        local HRP = Lplayer.Character and Lplayer.Character:FindFirstChild("HumanoidRootPart")
+        if not HRP then return end
+
+        local Location = HRP.CFrame
+        local pos = Location.Position
+
+        HRP.CFrame = CFrame.new(pos.X, -1160, pos.Z)
+
+        Lplayer.CharacterAdded:Wait()
+        repeat task.wait(0.015) until Lplayer.Character and Lplayer.Character:FindFirstChild("HumanoidRootPart")
+        task.wait(0.35)
+
+        HRP = Lplayer.Character:FindFirstChild("HumanoidRootPart")
+        if HRP then
+            HRP.CFrame = Location
+        end
     end)
 end)
 
