@@ -5480,13 +5480,11 @@ HomeTab.newButton("Respawn Character (Void Method)","Gets rid of combat mark",fu
 
         local Location = HRP.CFrame
         local pos = Location.Position
-
-        HRP.CFrame = CFrame.new(pos.X, -1160, pos.Z)
-
+        HRP.CFrame = CFrame.new(pos.X, -1147, pos.Z)
+		task.wait(0.15)
         Lplayer.CharacterAdded:Wait()
         repeat task.wait(0.015) until Lplayer.Character and Lplayer.Character:FindFirstChild("HumanoidRootPart")
         task.wait(0.35)
-
         HRP = Lplayer.Character:FindFirstChild("HumanoidRootPart")
         if HRP then
             HRP.CFrame = Location
