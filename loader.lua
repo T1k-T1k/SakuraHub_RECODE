@@ -5840,7 +5840,7 @@ local StorageTab = DrRayLibrary.newTab("Storage","http://www.roblox.com/asset/?i
 StorageTab.newLabel("Storage Stuff   📁");
 StorageTab.newButton("Close / Open Stand Storage","",function()
     pcall(function()
-        game:GetService("Players").LocalPlayer.PlayerGui.StandStorage.Enabled = not game:GetService("Players").LocalPlayer.PlayerGui.StandStorage.Enabled;
+        game:GetService("Players").LocalPlayer.PlayerGui.MenuHolder.Menu.Storage.Visible = not game:GetService("Players").LocalPlayer.PlayerGui.MenuHolder.Menu.Storage.Visible;
     end)
 end)
 
