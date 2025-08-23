@@ -5237,65 +5237,65 @@ getgenv().BreakthroughForCapacity = function()
     end)
 end
 
-getgenv().QuestParryDamage = function()
-    if getgenv().AutoParryingDamage == true then
-    task.spawn(function()local Blocking = false;
-        while getgenv().AutoParryingDamage == true do
-            pcall(function()
-                local AttackingDummy = game.Workspace.Living["Attacking Dummy"];
-                local BlockBar = tonumber(game.Players.LocalPlayer.PlayerGui.Stats.BG.BlockBG.BlockBar.BlockN.Text);
-                local ParryCooldown = game.Workspace.Living[game.Players.LocalPlayer.Name].CDValues:FindFirstChild("Parry_Cooldown");
+-- getgenv().QuestParryDamage = function()
+--     if getgenv().AutoParryingDamage == true then
+--     task.spawn(function()local Blocking = false;
+--         while getgenv().AutoParryingDamage == true do
+--             pcall(function()
+--                 local AttackingDummy = game.Workspace.Living["Attacking Dummy"];
+--                 local BlockBar = tonumber(game.Players.LocalPlayer.PlayerGui.Stats.BG.BlockBG.BlockBar.BlockN.Text);
+--                 local ParryCooldown = game.Workspace.Living[game.Players.LocalPlayer.Name].CDValues:FindFirstChild("Parry_Cooldown");
                 
-                if BlockBar == 30 and not Blocking and not ParryCooldown then
-                    Event:FireServer(
-					    (function(bytes) --[[Type: buffer]]
-					        local b = buffer.create(#bytes)
-					        for i = 1, #bytes do
-					            buffer.writeu8(b, i - 1, bytes[i])
-					        end
-					        return b
-					    end)({ 11 }),
-					    (function(bytes) --[[Type: buffer]]
-					        local b = buffer.create(#bytes)
-					        for i = 1, #bytes do
-					            buffer.writeu8(b, i - 1, bytes[i])
-					        end
-					        return b
-					    end)({ 254, 2, 0, 6, 1, 70, 5, 1 })
-					);
-					task.wait(0.5);
-					Blocking = true
-                elseif BlockBar == 1 and Blocking and not ParryCooldown then
-                    Event:FireServer(
-					    (function(bytes) --[[Type: buffer]]
-					        local b = buffer.create(#bytes)
-					        for i = 1, #bytes do
-					            buffer.writeu8(b, i - 1, bytes[i])
-					        end
-					        return b
-					    end)({ 11 }),
-					    (function(bytes) --[[Type: buffer]]
-					        local b = buffer.create(#bytes)
-					        for i = 1, #bytes do
-					            buffer.writeu8(b, i - 1, bytes[i])
-					        end
-					        return b
-					    end)({ 254, 2, 0, 6, 1, 70, 5, 0 })
-					)
-					Blocking = false
-					local escapePosition = AttackingDummy.HumanoidRootPart.Position + AttackingDummy.HumanoidRootPart.CFrame.LookVector * 10;
-					game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(escapePosition, AttackingDummy.HumanoidRootPart.Position);
-                end
+--                 if BlockBar == 30 and not Blocking and not ParryCooldown then
+--                     Event:FireServer(
+-- 					    (function(bytes) --[[Type: buffer]]
+-- 					        local b = buffer.create(#bytes)
+-- 					        for i = 1, #bytes do
+-- 					            buffer.writeu8(b, i - 1, bytes[i])
+-- 					        end
+-- 					        return b
+-- 					    end)({ 11 }),
+-- 					    (function(bytes) --[[Type: buffer]]
+-- 					        local b = buffer.create(#bytes)
+-- 					        for i = 1, #bytes do
+-- 					            buffer.writeu8(b, i - 1, bytes[i])
+-- 					        end
+-- 					        return b
+-- 					    end)({ 254, 2, 0, 6, 1, 70, 5, 1 })
+-- 					);
+-- 					task.wait(0.5);
+-- 					Blocking = true
+--                 elseif BlockBar == 1 and Blocking and not ParryCooldown then
+--                     Event:FireServer(
+-- 					    (function(bytes) --[[Type: buffer]]
+-- 					        local b = buffer.create(#bytes)
+-- 					        for i = 1, #bytes do
+-- 					            buffer.writeu8(b, i - 1, bytes[i])
+-- 					        end
+-- 					        return b
+-- 					    end)({ 11 }),
+-- 					    (function(bytes) --[[Type: buffer]]
+-- 					        local b = buffer.create(#bytes)
+-- 					        for i = 1, #bytes do
+-- 					            buffer.writeu8(b, i - 1, bytes[i])
+-- 					        end
+-- 					        return b
+-- 					    end)({ 254, 2, 0, 6, 1, 70, 5, 0 })
+-- 					)
+-- 					Blocking = false
+-- 					local escapePosition = AttackingDummy.HumanoidRootPart.Position + AttackingDummy.HumanoidRootPart.CFrame.LookVector * 10;
+-- 					game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(escapePosition, AttackingDummy.HumanoidRootPart.Position);
+--                 end
                 
-                if Blocking and not ParryCooldown then
-                    local targetPosition = AttackingDummy.HumanoidRootPart.Position + AttackingDummy.HumanoidRootPart.CFrame.LookVector * 8.6;
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition, AttackingDummy.HumanoidRootPart.Position);
-                end
-            end)
-            task.wait(0.15);
-        end
-    end)
-end
+--                 if Blocking and not ParryCooldown then
+--                     local targetPosition = AttackingDummy.HumanoidRootPart.Position + AttackingDummy.HumanoidRootPart.CFrame.LookVector * 8.6;
+--                     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition, AttackingDummy.HumanoidRootPart.Position);
+--                 end
+--             end)
+--             task.wait(0.15);
+--         end
+--     end)
+-- end
 
 getgenv().QuestBlockDamage = function()
     if getgenv().AutoBlockingDamage == true then
