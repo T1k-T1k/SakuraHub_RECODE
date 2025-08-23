@@ -36,7 +36,6 @@ task.spawn(function()
             workspace.CurrentCamera.CameraType = "Custom";game:GetService("Players").LocalPlayer.PlayerGui.MainMenu:Destroy();
             game.Players.LocalPlayer.CameraMinZoomDistance = 0.5;game.Players.LocalPlayer.CameraMaxZoomDistance = 400;
             game.Players.LocalPlayer.CameraMode = "Classic";game.Players.LocalPlayer.Character.Head.Anchored = false;
-            game:GetService("Players").LocalPlayer.PlayerGui.ItemStorage.Enabled = true;
             getgenv().CanLoadIntoSakuraStand = true;
         end
     end)
