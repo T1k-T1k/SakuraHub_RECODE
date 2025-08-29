@@ -2653,9 +2653,9 @@ getgenv().UsingDekuFarmMain = function()
             local function monitorProximityPrompt()
                 task.spawn(function()
                     while getgenv().AutoFarmDekuMainAcc do
-                        local proximityPrompt = workspace.Map.RuinedCity.Spawn:FindFirstChild("ProximityPromptB")
+                        local BossKakos = workspace.Living:FindFirstChild("Roland")
                         
-                        if proximityPrompt and proximityPrompt.Enabled then
+                        if BossKakos then
                             getgenv().AutoOneShotting = false
                             print("ProximityPrompt enabled - AutoOneShotting disabled")
                         end
@@ -2986,11 +2986,10 @@ getgenv().UsingDekuFarmMain = function()
                                     -- Постоянно телепортируемся к боссу каждые 0.1 сек
                                     teleportToBoss(currentRoland)
                                     
-                                    -- НОВАЯ ЛОГИКА: Включаем AutoOneShotting через 3.5 сек после телепорта к Roland
+                                    -- НОВАЯ ЛОГИКА: Включаем AutoOneShotting через 4.25 сек после телепорта к Roland
                                     task.spawn(function()
-                                        task.wait(3.5)
+                                        task.wait(4.25)
                                         getgenv().AutoOneShotting = true
-                                        print("Teleported to Roland - AutoOneShotting enabled after 3.5s")
                                     end)
 
                                     -- Выполняем комбо атаку
