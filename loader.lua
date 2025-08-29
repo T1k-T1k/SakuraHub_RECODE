@@ -3769,57 +3769,69 @@ getgenv().UsingDekuFarmAlt = function()
                 end
                 
                 if rolandPos then
+                    -- Телепортируемся на позицию ожидания
                     teleportTo(WaitBossDiePos)
-                    task.wait(1.5)
-
+                    task.wait(0.5)
+                    
+                    -- Используем скилл
                     useRolandAttackSkill()
+                    print("Used Roland attack skill")
+                    
+                    -- Ждем 1 секунду, затем телепортируемся к боссу
                     task.wait(1)
-                
-                    -- Ждем 1 секунду, затем телепортируемся
-                    spawn(function()
-                        task.wait(0.2)
-                        if isRolandOnMap() and mainAttackInProgress then
-                            local currentRolandPos = getRolandPosition()
-                            if currentRolandPos then
-                                local offset = Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
-                                teleportTo(currentRolandPos + offset)
-                                print("Teleported to Roland after skill use")
-                            end
+                    
+                    if isRolandOnMap() and mainAttackInProgress then
+                        local currentRolandPos = getRolandPosition()
+                        if currentRolandPos then
+                            local offset = Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
+                            teleportTo(currentRolandPos + offset)
+                            print("Teleported to Roland after skill use")
                         end
-                    end)
+                    end
                 end
                 
                 task.wait(0.1) -- Пауза между циклами атак
             end)
         end
         
-        -- Функция байта первой атаки Roland
+        -- Функция байта первой атаки Roland (исправленная)
         local function baitRolandFirstSkill()
             print("Starting Roland bait sequence...")
             baitInProgress = true
             
             local baitStartTime = tick()
             local baitDuration = 0.7
+            local lastTeleportTime = 0
+            local teleportInterval = 0.35
             
-            -- Телепортация к Roland каждые 0.1 секунды в течение 0.7 секунд
+            -- Телепортация к Roland каждые 0.35 секунды в течение 0.7 секунд
             local baitConnection
             baitConnection = RunService.Heartbeat:Connect(function()
                 if not getgenv().AutoFarmDekuAlt or isWaitingForPlayerReturn then
                     baitConnection:Disconnect()
+                    baitInProgress = false
                     return
                 end
                 
                 local currentTime = tick()
+                
+                -- Проверяем завершение байта
                 if currentTime - baitStartTime >= baitDuration then
-                    -- Завершаем байт
                     baitConnection:Disconnect()
                     print("Bait completed, moving to wait position...")
                     
                     -- Телепортируемся на позицию ожидания
                     teleportTo(WaitBossDiePos)
+                    task.wait(0.5)
+                    
+                    -- Используем скилл после байта
+                    useRolandAttackSkill()
+                    print("Used skill after bait completion")
+                    
+                    -- Ждем 1 секунду после использования скилла
+                    task.wait(1)
                     
                     baitInProgress = false
-                    task.wait(0.5)
                     
                     -- Проверяем, что Roland все еще на карте перед запуском атаки
                     if isRolandOnMap() and getgenv().AutoFarmDekuAlt then
@@ -3829,13 +3841,17 @@ getgenv().UsingDekuFarmAlt = function()
                         print("Roland disappeared or script stopped during bait")
                         isRolandActive = false
                     end
-                else
-                    -- Телепортируемся к Roland каждые 0.35 секунды
+                    return
+                end
+                
+                -- Телепортируемся к Roland с интервалом
+                if currentTime - lastTeleportTime >= teleportInterval then
                     local rolandPos = getRolandPosition()
                     if rolandPos then
-                        task.wait(0.35)
                         local offset = Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
                         teleportTo(rolandPos + offset)
+                        lastTeleportTime = currentTime
+                        print("Baiting Roland... Time left: " .. string.format("%.1f", baitDuration - (currentTime - baitStartTime)))
                     end
                 end
             end)
