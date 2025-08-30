@@ -2994,16 +2994,16 @@ getgenv().UsingDekuFarmMain = function()
                                     end)
 									
 									task.spawn(function()
-									    while task.wait(0.5) do
-									        local roland = workspace:FindFirstChild("Living") and workspace.Living:FindFirstChild("Roland")
-									        if roland and roland:FindFirstChild("Humanoid") then
-									            local humanoid = roland.Humanoid
-									            if humanoid.Health < 7990 then
-									                getgenv().AutoOneShotting = true
-													print("Kaka Oneshot lena xxx porno hub protogen cum")
-									            end
-									        end
-									    end
+										while task.wait(0.5) do
+											local roland = workspace:FindFirstChild("Living") and workspace.Living:FindFirstChild("Roland")
+											if roland and roland:FindFirstChild("Humanoid") then
+												local humanoid = roland.Humanoid
+												if humanoid.Health < 7990 then
+													getgenv().AutoOneShotting = true
+													print("Oneshot Kakaka and protogen CUM in me!!!")
+												end
+											end
+										end
 									end)
                                     
                                     -- Проверяем урон
