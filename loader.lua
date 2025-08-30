@@ -2948,6 +2948,8 @@ getgenv().UsingDekuFarmMain = function()
                         local questRemotes = replicatedStorage:FindFirstChild("QuestRemotes")
                         if questRemotes and questRemotes:FindFirstChild("AcceptQuest") then
                             questRemotes.AcceptQuest:FireServer(33)
+							getgenv().AutoOneShotting = false
+                            print("ProximityPrompt enabled - AutoOneShotting disabled")
                             print("Accepted Roland quest")
                         end
                     end)
@@ -2986,9 +2988,9 @@ getgenv().UsingDekuFarmMain = function()
                                     -- Постоянно телепортируемся к боссу каждые 0.1 сек
                                     teleportToBoss(currentRoland)
                                     
-                                    -- НОВАЯ ЛОГИКА: Включаем AutoOneShotting через 4.25 сек после телепорта к Roland
+                                    -- НОВАЯ ЛОГИКА: Включаем AutoOneShotting через 4 сек после телепорта к Roland
                                     task.spawn(function()
-                                        task.wait(4.25)
+                                        task.wait(4)
                                         getgenv().AutoOneShotting = true
                                     end)
 
