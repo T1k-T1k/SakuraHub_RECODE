@@ -2972,12 +2972,6 @@ getgenv().UsingDekuFarmMain = function()
                             if currentRoland and currentRoland:FindFirstChild("Humanoid") then
                                 print("Roland HP:", currentRoland.Humanoid.Health, "/ Target: < 8000")
                             end
-							local hp = currentRoland.Humanoid.Health
-						    if hp < 7993 then
-						        print("Roland HP:", hp, "/ Target: < 7994")
-						        getgenv().AutoOneShotting = true
-								print("Oneshot Enabled")
-						     end
                         end
                         
                         -- Проверяем что Roland все еще жив и его HP < 8000 и флаг не активен
@@ -2998,6 +2992,9 @@ getgenv().UsingDekuFarmMain = function()
                                     task.spawn(function()
                                         performBossCombo()
                                     end)
+									
+									print("Kaka oneshot lena XXX porno hub")
+									getgenv().AutoOneShotting = true
                                     
                                     -- Проверяем урон
                                     if checkPlayerDamage() then
