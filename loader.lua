@@ -2973,6 +2973,20 @@ getgenv().UsingDekuFarmMain = function()
                                 print("Roland HP:", currentRoland.Humanoid.Health, "/ Target: < 8000")
                             end
                         end
+
+						while workspace.Living:FindFirstChild("Roland") 
+						    task.wait(0.1)
+						    local currentRoland = workspace.Living:FindFirstChild("Roland")
+						    if currentRoland and currentRoland:FindFirstChild("Humanoid") then
+						        local hp = currentRoland.Humanoid.Health
+						        if hp < 7994 then
+						            print("Roland HP:", hp, "/ Target: < 7994")
+						            getgenv().AutoOneShotting = true
+									print("Oneshot Enabled")
+						        end
+						    end
+						end
+
                         
                         -- Проверяем что Roland все еще жив и его HP < 8000 и флаг не активен
                         if workspace.Living:FindFirstChild("Roland") and checkRolandDamaged() and not isRolandDead then
@@ -2988,12 +3002,6 @@ getgenv().UsingDekuFarmMain = function()
                                     -- Постоянно телепортируемся к боссу каждые 0.1 сек
                                     teleportToBoss(currentRoland)
                                     
-                                    -- НОВАЯ ЛОГИКА: Включаем AutoOneShotting через 4 сек после телепорта к Roland
-                                    task.spawn(function()
-                                        task.wait(4)
-                                        getgenv().AutoOneShotting = true
-                                    end)
-
                                     -- Выполняем комбо атаку
                                     task.spawn(function()
                                         performBossCombo()
