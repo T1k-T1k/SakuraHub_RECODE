@@ -2653,9 +2653,9 @@ getgenv().UsingDekuFarmMain = function()
             local function monitorProximityPrompt()
                 task.spawn(function()
                     while getgenv().AutoFarmDekuMainAcc do
-                        local BossKakos = workspace.Living:FindFirstChild("Roland")
+                        local ProxPromptB = workspace.Map.RuinedCity.Spawn.ProximityPromptB
                         
-                        if BossKakos then
+                        if ProxPromptB and ProxPromptB.Enabled then
                             getgenv().AutoOneShotting = false
                             print("ProximityPrompt enabled - AutoOneShotting disabled")
                         end
