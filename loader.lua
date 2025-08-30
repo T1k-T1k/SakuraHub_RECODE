@@ -3704,23 +3704,74 @@ getgenv().UsingDekuFarmAlt = function()
             if baitInProgress then return end
             
             pcall(function()
-                local Event = game:GetService("ReplicatedStorage")["ABC - First Priority"].Utility.Modules.Warp.Index.Event.Reliable
-                Event:FireServer(
-                    (function(bytes)
-                        local b = buffer.create(#bytes)
-                        for i = 1, #bytes do
-                            buffer.writeu8(b, i - 1, bytes[i])
-                        end
-                        return b
-                    end)({ 11 }),
-                    (function(bytes)
-                        local b = buffer.create(#bytes)
-                        for i = 1, #bytes do
-                            buffer.writeu8(b, i - 1, bytes[i])
-                        end
-                        return b
-                    end)({ 254, 1, 0, 6, 1, 84 })
-                )
+				local Event = game:GetService("ReplicatedStorage")["ABC - First Priority"].Utility.Modules.Warp.Index.Event.Reliable
+				Event:FireServer(
+				    (function(bytes) --[[Type: buffer]]
+				        local b = buffer.create(#bytes)
+				        for i = 1, #bytes do
+				            buffer.writeu8(b, i - 1, bytes[i])
+				        end
+				        return b
+				    end)({ 11 }),
+				    (function(bytes) --[[Type: buffer]]
+				        local b = buffer.create(#bytes)
+				        for i = 1, #bytes do
+				            buffer.writeu8(b, i - 1, bytes[i])
+				        end
+				        return b
+				    end)({ 254, 1, 0, 6, 3, 76, 77, 66 })
+				)
+				task.wait(0.5)
+				Event:FireServer(
+				    (function(bytes) --[[Type: buffer]]
+				        local b = buffer.create(#bytes)
+				        for i = 1, #bytes do
+				            buffer.writeu8(b, i - 1, bytes[i])
+				        end
+				        return b
+				    end)({ 11 }),
+				    (function(bytes) --[[Type: buffer]]
+				        local b = buffer.create(#bytes)
+				        for i = 1, #bytes do
+				            buffer.writeu8(b, i - 1, bytes[i])
+				        end
+				        return b
+				    end)({ 254, 1, 0, 6, 3, 76, 77, 66 })
+				)
+				task.wait(0.5)
+				Event:FireServer(
+				    (function(bytes) --[[Type: buffer]]
+				        local b = buffer.create(#bytes)
+				        for i = 1, #bytes do
+				            buffer.writeu8(b, i - 1, bytes[i])
+				        end
+				        return b
+				    end)({ 11 }),
+				    (function(bytes) --[[Type: buffer]]
+				        local b = buffer.create(#bytes)
+				        for i = 1, #bytes do
+				            buffer.writeu8(b, i - 1, bytes[i])
+				        end
+				        return b
+				    end)({ 254, 1, 0, 6, 3, 76, 77, 66 })
+				)
+				task.wait(0.5)
+				Event:FireServer(
+				    (function(bytes) --[[Type: buffer]]
+				        local b = buffer.create(#bytes)
+				        for i = 1, #bytes do
+				            buffer.writeu8(b, i - 1, bytes[i])
+				        end
+				        return b
+				    end)({ 11 }),
+				    (function(bytes) --[[Type: buffer]]
+				        local b = buffer.create(#bytes)
+				        for i = 1, #bytes do
+				            buffer.writeu8(b, i - 1, bytes[i])
+				        end
+				        return b
+				    end)({ 254, 1, 0, 6, 3, 76, 77, 66 })
+				)
             end)
         end
 
