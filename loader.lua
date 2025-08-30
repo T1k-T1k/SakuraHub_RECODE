@@ -3126,16 +3126,16 @@ getgenv().UsingDekuFarmMain = function()
                                 teleportToBoss(currentDeku)
 
 								task.spawn(function()
-								    while task.wait(0.5) do
-								        local roland = workspace:FindFirstChild("Living") and workspace.Living:FindFirstChild("Roland")
-								        if roland and roland:FindFirstChild("Humanoid") then
-								            local humanoid = roland.Humanoid
-								            if humanoid.Health < 7990 then
-								                getgenv().AutoOneShotting = true
+									while task.wait(0.5) do
+										local roland = workspace:FindFirstChild("Living") and workspace.Living:FindFirstChild("Roland")
+										if roland and roland:FindFirstChild("Humanoid") then
+											local humanoid = roland.Humanoid
+											if humanoid.Health < 7990 then
+												getgenv().AutoOneShotting = true
 												print("One shot lena XXX porno hub s protogen cum")
-								            end
-								        end
-								    end
+											end
+										end
+									end
 								end)
 		
                                 -- Выполняем комбо атаку
