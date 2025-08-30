@@ -1,4 +1,4 @@
- -- // Sakura Hub 🌸 \\ -- | ( Legacy Version: 1.31 | Recode Version: 1.70 ) [ Made by Mommy Flames :3 / Recoded by T1k ^^ ]
+ -- // Sakura Hub 🌸 \\ -- | ( Legacy Version: 1.31 | Recode Version: 1.71 ) [ Made by Mommy Flames :3 / Recoded by T1k ^^ ]
 
 --[[---------------------------------------------------------------------------------------------------
 -- This script updates a lot, Use this loadstring to be in the latest version:
@@ -3118,46 +3118,46 @@ getgenv().UsingDekuFarmMain = function()
                             return false
                         end
                         
-                        -- Основной цикл атаки Deku
-                        while workspace.Living:FindFirstChild("Deku") and not checkDekuDeath() and getgenv().AutoFarmDekuMainAcc do
-                            local currentDeku = workspace.Living:FindFirstChild("Deku")
-                            if currentDeku then
-                                -- Постоянно телепортируемся к боссу каждые 0.1 сек
-                                teleportToBoss(currentDeku)
-
-								task.spawn(function()
-									while task.wait(0.5) do
-										local roland = workspace:FindFirstChild("Living") and workspace.Living:FindFirstChild("Roland")
-										if roland and roland:FindFirstChild("Humanoid") then
-											local humanoid = roland.Humanoid
-											if humanoid.Health < 7990 then
-												getgenv().AutoOneShotting = true
-												print("One shot lena XXX porno hub s protogen cum")
-											end
-										end
-									end
-								end)
-		
-                                -- Выполняем комбо атаку
-                                task.spawn(function()
-                                    performBossCombo()
-                                end)
-                                
-                                -- Проверяем урон
-                                if checkPlayerDamage() then
-                                    teleportToVoid()
-                                    -- Ждем респавна
-                                    while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
-                                        task.wait(0.1)
-                                    end
-                                    updateMaxHP() -- Обновляем HP после респавна
-                                end
-                                
-                                task.wait(0.1) -- Повторяем каждые 0.1 секунды
-                            else
-                                break -- Deku пропал
-                            end
-                        end
+						-- Основной цикл атаки Deku
+						while workspace.Living:FindFirstChild("Deku") and not checkDekuDeath() and getgenv().AutoFarmDekuMainAcc do
+						    local currentDeku = workspace.Living:FindFirstChild("Deku")
+						    if currentDeku then
+						        -- Постоянно телепортируемся к боссу каждые 0.1 сек
+						        teleportToBoss(currentDeku)
+						        
+						        task.spawn(function()
+						            while task.wait(0.5) do
+						                local roland = workspace:FindFirstChild("Living") and workspace.Living:FindFirstChild("Roland")
+						                if roland and roland:FindFirstChild("Humanoid") then
+						                    local humanoid = roland.Humanoid
+						                    if humanoid.Health < 7990 then
+						                        getgenv().AutoOneShotting = true
+						                        print("One shot lena XXX porno hub s protogen cum")
+						                    end
+						                end
+						            end
+						        end)
+						
+						        -- Выполняем комбо атаку
+						        task.spawn(function()
+						            performBossCombo()
+						        end)
+						        
+						        -- Проверяем урон
+						        if checkPlayerDamage() then
+						            teleportToVoid()
+						            -- Ждем респавна
+						            while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
+						                task.wait(0.1)
+						            end
+						            updateMaxHP() -- Обновляем HP после респавна
+						        end
+						        
+						        task.wait(0.1) -- Повторяем каждые 0.1 секунды
+						    else
+						        break -- Deku пропал
+						    end
+						end
                         
                         -- Проверяем появился ли OA's Grace (Deku умер)
                         if checkDekuDeath() then
