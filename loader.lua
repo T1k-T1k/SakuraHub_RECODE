@@ -1,4 +1,4 @@
- -- // Sakura Hub 🌸 \\ -- | ( Legacy Version: 1.31 | Recode Version: 1.65 ) [ Made by Mommy Flames :3 / Recoded by T1k ^^ ]
+ -- // Sakura Hub 🌸 \\ -- | ( Legacy Version: 1.31 | Recode Version: 1.70 ) [ Made by Mommy Flames :3 / Recoded by T1k ^^ ]
 
 --[[---------------------------------------------------------------------------------------------------
 -- This script updates a lot, Use this loadstring to be in the latest version:
