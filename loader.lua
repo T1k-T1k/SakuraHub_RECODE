@@ -2972,21 +2972,13 @@ getgenv().UsingDekuFarmMain = function()
                             if currentRoland and currentRoland:FindFirstChild("Humanoid") then
                                 print("Roland HP:", currentRoland.Humanoid.Health, "/ Target: < 8000")
                             end
+							local hp = currentRoland.Humanoid.Health
+						    if hp < 7993 then
+						        print("Roland HP:", hp, "/ Target: < 7994")
+						        getgenv().AutoOneShotting = true
+								print("Oneshot Enabled")
+						     end
                         end
-
-						while workspace.Living:FindFirstChild("Roland") 
-						    task.wait(0.1)
-						    local currentRoland = workspace.Living:FindFirstChild("Roland")
-						    if currentRoland and currentRoland:FindFirstChild("Humanoid") then
-						        local hp = currentRoland.Humanoid.Health
-						        if hp < 7994 then
-						            print("Roland HP:", hp, "/ Target: < 7994")
-						            getgenv().AutoOneShotting = true
-									print("Oneshot Enabled")
-						        end
-						    end
-						end
-
                         
                         -- Проверяем что Roland все еще жив и его HP < 8000 и флаг не активен
                         if workspace.Living:FindFirstChild("Roland") and checkRolandDamaged() and not isRolandDead then
