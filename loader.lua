@@ -2994,23 +2994,16 @@ getgenv().UsingDekuFarmMain = function()
                                 if currentRoland then
                                     -- Постоянно телепортируемся к боссу каждые 0.1 сек
                                     teleportToBoss(currentRoland)
+
+									task.spawn(function()
+										task.wait(5)
+										getgenv().AutoOneShotting = true
+										print("Protogen Sucessfully cummed :3")
+                                    end)
                                     
                                     -- Выполняем комбо атаку
                                     task.spawn(function()
                                         performBossCombo()
-                                    end)
-                                    
-                                    task.spawn(function()
-                                        while task.wait(0.5) do
-                                            local roland = workspace:FindFirstChild("Living") and workspace.Living:FindFirstChild("Roland")
-                                            if roland and roland:FindFirstChild("Humanoid") then
-                                                local humanoid = roland.Humanoid
-                                                if humanoid.Health < 7990 then
-                                                    getgenv().AutoOneShotting = true
-                                                    print("Oneshot Kakaka and protogen CUM in me!!!")
-                                                end
-                                            end
-                                        end
                                     end)
                                     
                                     -- Проверяем урон
@@ -3131,19 +3124,6 @@ getgenv().UsingDekuFarmMain = function()
                             if currentDeku then
                                 -- Постоянно телепортируемся к боссу каждые 0.1 сек
                                 teleportToBoss(currentDeku)
-                                
-                                task.spawn(function()
-                                    while task.wait(0.5) do
-                                        local roland = workspace:FindFirstChild("Living") and workspace.Living:FindFirstChild("Roland")
-                                        if roland and roland:FindFirstChild("Humanoid") then
-                                            local humanoid = roland.Humanoid
-                                            if humanoid.Health < 7990 then
-                                                getgenv().AutoOneShotting = true
-                                                print("One shot lena XXX porno hub s protogen cum")
-                                            end
-                                        end
-                                    end
-                                end)
 
                                 -- Выполняем комбо атаку
                                 task.spawn(function()
