@@ -2998,8 +2998,8 @@ getgenv().UsingDekuFarmMain = function()
 									task.spawn(function()
 										task.wait(5)
 										getgenv().AutoOneShotting = true
-										print("Protogen Sucessfully cummed :3")
-                                    end)
+										print("Protogen Sucessfully Cummed :3")
+									end
                                     
                                     -- Выполняем комбо атаку
                                     task.spawn(function()
