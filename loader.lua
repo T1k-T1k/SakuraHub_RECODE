@@ -2563,8 +2563,11 @@ getgenv().UsingDekuFarmMain = function()
 
     local function updatePlayerList()
         for _, child in ipairs(scrollFrame:GetChildren()) do
-            if child:IsA("TextButton") then child:Destroy() end
+            if child:IsA("TextButton") then 
+                child:Destroy() 
+            end
         end
+        
         for _, player in ipairs(Players:GetPlayers()) do
             if player ~= Players.LocalPlayer then
                 local playerButton = Instance.new("TextButton")
@@ -2587,7 +2590,9 @@ getgenv().UsingDekuFarmMain = function()
                             selectedButton = nil
                         end
                     else
-                        if selectedLine then animateLineCollapse(selectedLine) end
+                        if selectedLine then 
+                            animateLineCollapse(selectedLine) 
+                        end
                         selectedPlayer = player
                         selectedButton = playerButton
                         selectedLine = createLine(playerButton)
@@ -2609,7 +2614,9 @@ getgenv().UsingDekuFarmMain = function()
             BoredLibrary.prompt("Sakura Hub", "Preparation Step Completed 1/1", 1.5)
             BoredLibrary.prompt("Sakura Hub", "✅ Summoner selected!", 1.0)
             local root = Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if root then root.CFrame = CFrame.new(-1212, -150, -324) end
+            if root then 
+                root.CFrame = CFrame.new(-1212, -150, -324) 
+            end
             completed = true
             selectionCompletedEvent:Fire()
         else
@@ -2649,7 +2656,7 @@ getgenv().UsingDekuFarmMain = function()
             local isDekuDead = false
             local isRolandDead = false
 
-             -- Мониторинг ProximityPrompt для управления AutoOneShotting
+            -- Мониторинг ProximityPrompt для управления AutoOneShotting
             local function monitorProximityPrompt()
                 task.spawn(function()
                     while getgenv().AutoFarmDekuMainAcc do
@@ -2948,7 +2955,7 @@ getgenv().UsingDekuFarmMain = function()
                         local questRemotes = replicatedStorage:FindFirstChild("QuestRemotes")
                         if questRemotes and questRemotes:FindFirstChild("AcceptQuest") then
                             questRemotes.AcceptQuest:FireServer(33)
-							getgenv().AutoOneShotting = false
+                            getgenv().AutoOneShotting = false
                             print("ProximityPrompt enabled - AutoOneShotting disabled")
                             print("Accepted Roland quest")
                         end
@@ -2992,19 +2999,19 @@ getgenv().UsingDekuFarmMain = function()
                                     task.spawn(function()
                                         performBossCombo()
                                     end)
-									
-									task.spawn(function()
-										while task.wait(0.5) do
-											local roland = workspace:FindFirstChild("Living") and workspace.Living:FindFirstChild("Roland")
-											if roland and roland:FindFirstChild("Humanoid") then
-												local humanoid = roland.Humanoid
-												if humanoid.Health < 7990 then
-													getgenv().AutoOneShotting = true
-													print("Oneshot Kakaka and protogen CUM in me!!!")
-												end
-											end
-										end
-									end)
+                                    
+                                    task.spawn(function()
+                                        while task.wait(0.5) do
+                                            local roland = workspace:FindFirstChild("Living") and workspace.Living:FindFirstChild("Roland")
+                                            if roland and roland:FindFirstChild("Humanoid") then
+                                                local humanoid = roland.Humanoid
+                                                if humanoid.Health < 7990 then
+                                                    getgenv().AutoOneShotting = true
+                                                    print("Oneshot Kakaka and protogen CUM in me!!!")
+                                                end
+                                            end
+                                        end
+                                    end)
                                     
                                     -- Проверяем урон
                                     if checkPlayerDamage() then
@@ -3118,46 +3125,46 @@ getgenv().UsingDekuFarmMain = function()
                             return false
                         end
                         
-						-- Основной цикл атаки Deku
-						while workspace.Living:FindFirstChild("Deku") and not checkDekuDeath() and getgenv().AutoFarmDekuMainAcc do
-						    local currentDeku = workspace.Living:FindFirstChild("Deku")
-						    if currentDeku then
-						        -- Постоянно телепортируемся к боссу каждые 0.1 сек
-						        teleportToBoss(currentDeku)
-						        
-						        task.spawn(function()
-						            while task.wait(0.5) do
-						                local roland = workspace:FindFirstChild("Living") and workspace.Living:FindFirstChild("Roland")
-						                if roland and roland:FindFirstChild("Humanoid") then
-						                    local humanoid = roland.Humanoid
-						                    if humanoid.Health < 7990 then
-						                        getgenv().AutoOneShotting = true
-						                        print("One shot lena XXX porno hub s protogen cum")
-						                    end
-						                end
-						            end
-						        end)
-						
-						        -- Выполняем комбо атаку
-						        task.spawn(function()
-						            performBossCombo()
-						        end)
-						        
-						        -- Проверяем урон
-						        if checkPlayerDamage() then
-						            teleportToVoid()
-						            -- Ждем респавна
-						            while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
-						                task.wait(0.1)
-						            end
-						            updateMaxHP() -- Обновляем HP после респавна
-						        end
-						        
-						        task.wait(0.1) -- Повторяем каждые 0.1 секунды
-						    else
-						        break -- Deku пропал
-						    end
-						end
+                        -- Основной цикл атаки Deku
+                        while workspace.Living:FindFirstChild("Deku") and not checkDekuDeath() and getgenv().AutoFarmDekuMainAcc do
+                            local currentDeku = workspace.Living:FindFirstChild("Deku")
+                            if currentDeku then
+                                -- Постоянно телепортируемся к боссу каждые 0.1 сек
+                                teleportToBoss(currentDeku)
+                                
+                                task.spawn(function()
+                                    while task.wait(0.5) do
+                                        local roland = workspace:FindFirstChild("Living") and workspace.Living:FindFirstChild("Roland")
+                                        if roland and roland:FindFirstChild("Humanoid") then
+                                            local humanoid = roland.Humanoid
+                                            if humanoid.Health < 7990 then
+                                                getgenv().AutoOneShotting = true
+                                                print("One shot lena XXX porno hub s protogen cum")
+                                            end
+                                        end
+                                    end
+                                end)
+
+                                -- Выполняем комбо атаку
+                                task.spawn(function()
+                                    performBossCombo()
+                                end)
+                                
+                                -- Проверяем урон
+                                if checkPlayerDamage() then
+                                    teleportToVoid()
+                                    -- Ждем респавна
+                                    while isWaitingForRespawn and getgenv().AutoFarmDekuMainAcc do
+                                        task.wait(0.1)
+                                    end
+                                    updateMaxHP() -- Обновляем HP после респавна
+                                end
+                                
+                                task.wait(0.1) -- Повторяем каждые 0.1 секунды
+                            else
+                                break -- Deku пропал
+                            end
+                        end
                         
                         -- Проверяем появился ли OA's Grace (Deku умер)
                         if checkDekuDeath() then
