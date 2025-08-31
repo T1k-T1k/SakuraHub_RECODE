@@ -2995,11 +2995,11 @@ getgenv().UsingDekuFarmMain = function()
                                     -- Постоянно телепортируемся к боссу каждые 0.1 сек
                                     teleportToBoss(currentRoland)
 
-									task.spawn(function()
-										task.wait(5)
-										getgenv().AutoOneShotting = true
-										print("Protogen Sucessfully Cummed :3")
-									end
+                                    task.spawn(function()
+                                        task.wait(5)
+                                        getgenv().AutoOneShotting = true
+                                        print("Protogen Sucessfully Cummed :3")
+                                    end)
                                     
                                     -- Выполняем комбо атаку
                                     task.spawn(function()
