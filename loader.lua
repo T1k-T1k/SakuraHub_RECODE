@@ -6808,15 +6808,15 @@ for _,k in ipairs(Tabs) do
 end
 
 -- // Toggle UI Visibility \\--
-task.spawn(function()
-    if not getgenv().ToggleVisibility == true then
-        game:GetService("UserInputService").InputBegan:Connect(function(v,x)
-            if not x and v.KeyCode == Enum.KeyCode[getgenv().ToggleUI] then
-                pcall(function()
-                    game:GetService("CoreGui").DrRay.Enabled = not game:GetService("CoreGui").DrRay.Enabled;
-                end)
-            end
-        end)
-        getgenv().ToggleVisibility = true;
-    end
-end) task.spawn(function()loadstring(game:HttpGet("https://raw.githubusercontent.com/Lvl9999/SakuraStand/main/StatisticsGUI"))();end)
+-- task.spawn(function()
+--     if not getgenv().ToggleVisibility == true then
+--         game:GetService("UserInputService").InputBegan:Connect(function(v,x)
+--             if not x and v.KeyCode == Enum.KeyCode[getgenv().ToggleUI] then
+--                 pcall(function()
+--                     game:GetService("CoreGui").DrRay.Enabled = not game:GetService("CoreGui").DrRay.Enabled;
+--                 end)
+--             end
+--         end)
+--         getgenv().ToggleVisibility = true;
+--     end
+-- end) task.spawn(function()loadstring(game:HttpGet("https://raw.githubusercontent.com/Lvl9999/SakuraStand/main/StatisticsGUI"))();end)
